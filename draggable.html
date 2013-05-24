@@ -10,10 +10,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->      
+    <![endif]-->
 
     <script src="javascripts/zepto.min.js"></script>
-    <script src="javascripts/zepto.draggable.js"></script>
+    <script src="javascripts/zepto-dnd.js"></script>
   </head>
   <body>
     <div class="wrapper">
@@ -23,7 +23,6 @@
 
         <p class="view"><a href="https://github.com/rkusa/zepto-dnd">View the Project on GitHub <small>rkusa/zepto-dnd</small></a></p>
 
-
         <ul>
           <li><a href="https://github.com/rkusa/zepto-dnd/zipball/master">Download <strong>ZIP File</strong></a></li>
           <li><a href="https://github.com/rkusa/zepto-dnd/tarball/master">Download <strong>TAR Ball</strong></a></li>
@@ -32,7 +31,7 @@
       </header>
       <section>
         <h2>Options</h2>
-        
+
         <h2>cancel</h2>
         <dl>
           <dt>Type</dt>
@@ -61,7 +60,7 @@
         </dl>
         <p>Allows the draggable to be dropped onto the specified sortables. If this option is used, a draggable can be dropped onto a sortable list and then becomes part of it.</p>
         <h4>Example</h4>
-        
+
         <h2>disabled</h2>
         <dl>
           <dt>Type</dt>
@@ -79,7 +78,7 @@
             $('#example-disabled').draggable({ disabled: true })
           })
         </script>
-        
+
         <h2>handle</h2>
         <dl>
           <dt>Type</dt>
@@ -98,7 +97,7 @@
             $('#example-handle').draggable({ handle: '.title' })
           })
         </script>
-        
+
         <h2>Methods</h2>
         <h2>destroy()</h2>
         <p>Removes the draggable functionality completely.</p>
@@ -112,7 +111,7 @@ $('#example-destroy').draggable('destroy')</code></pre>
             $('#example-destroy').draggable('destroy')
           })
         </script>
-        
+
         <h2>disable()</h2>
         <p>Disables the draggable.</p>
         <pre><code>$('#example-disable').draggable('disable')</code></pre>
@@ -124,7 +123,7 @@ $('#example-destroy').draggable('destroy')</code></pre>
             $('.example-disable').draggable('disable')
           })
         </script>
-        
+
         <h2>enable()</h2>
         <p>Enables the draggable.</p>
         <pre><code>$('#example-enable').draggable('enable')</code></pre>
@@ -135,24 +134,32 @@ $('#example-destroy').draggable('destroy')</code></pre>
             $('#example-enable').draggable('enable')
           })
         </script>
-        
+
         <h2>option()</h2>
         <p>Gets an object containing key/value pairs representing the current draggable options hash.</p>
         <pre style="width:100%"><code>var options = $('#example-option').draggable('option')</code></pre>
-        
+
         <h2>option(optionName)</h2>
         <p>Gets the value currently associated with the specified <code>optionName</code>.</p>
         <pre style="width:100%"><code>var isDisabled = $('#example-option').draggable('option', 'disabled')</code></pre>
-        
+
         <h2>option(optionName, value)</h2>
         <p>Sets the value of the draggable option associated with the specified <code>optionName</code>.</p>
         <pre style="width:100%"><code>$('#example-option').draggable('option', 'disabled', true)</code></pre>
-        
+
         <h2>option(options)</h2>
         <p>Sets one or more options for the draggable.</p>
         <pre style="width:100%"><code>$('#example-option').draggable('option', { disabled: true })</code></pre>
+
+        <h2>Events</h2>
         
-  
+        <h2>create(event)</h2>
+        <p>Triggered when the droppable is created.</p>
+        
+        <h2>drag, dragstart, dragend</h2>
+        <p>These events are natively provided through the HTML5 Drag'n'Drop API.</p>
+        
+
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/rkusa">rkusa</a></p>
@@ -160,6 +167,6 @@ $('#example-destroy').draggable('destroy')</code></pre>
       </footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>
-    
+
   </body>
 </html>
