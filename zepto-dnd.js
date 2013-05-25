@@ -61,13 +61,13 @@
     .prop('draggable', false)
     
     this.element
-    .on('mouseenter', this.opts.cancel, this.disable)
-    .on('mouseleave', this.opts.cancel, this.enable)
+    .off('mouseenter', this.opts.cancel, this.disable)
+    .off('mouseleave', this.opts.cancel, this.enable)
     
     if (this.opts.handle) {
       this.element
-      .on('mouseenter', this.opts.handle, this.enable)
-      .on('mouseleave', this.opts.handle, this.disable)
+      .off('mouseenter', this.opts.handle, this.enable)
+      .off('mouseleave', this.opts.handle, this.disable)
     }
   }
   
@@ -214,12 +214,190 @@
     // placeholder = dragging = null
   }
   
+  var Sortable = function(element, opts) {
+    this.element = $(element)
+    this.opts    = opts
+    var tag = this.element.find(this.opts.items)[0].tagName
+    this.placeholder = $('<' + tag + ' class="' + this.opts.placeholder + '" />')
+    this.index = this.lastEntered = this.lastX = this.lastY = this.direction = null
+  }
+  
+  Sortable.prototype.create = function() {
+    this.element
+    .on('dragstart', this.opts.items, $.proxy(this.start, this))
+    .on('dragenter', this.opts.items, $.proxy(this.enter, this))
+    .on('dragover',  this.opts.items, $.proxy(this.over, this))
+    .on('dragend',   this.opts.items, $.proxy(this.end, this))
+    .on('drop',      this.opts.items, $.proxy(this.drop, this))
+    .children(this.opts.items).prop('draggable', true)
+    
+    this.element
+    .on('mouseenter', this.opts.cancel, $.proxy(this.disable, this))
+    .on('mouseleave', this.opts.cancel, $.proxy(this.enable, this))
+    
+    if (this.opts.handle) {
+      this.element
+      .on('mouseenter', this.opts.handle, $.proxy(this.enable, this))
+      .on('mouseleave', this.opts.handle, $.proxy(this.disable, this))
+    }
+    
+    this.element.trigger('create')
+  }
+  
+  Sortable.prototype.destroy = function() {
+    this.element
+    .off('dragstart', this.opts.items, this.start)
+    .off('dragenter', this.opts.items, this.enter)
+    .off('dragover',  this.opts.items, this.over)
+    .off('dragend',   this.opts.items, this.end)
+    .off('drop',      this.opts.items, this.drop)
+    .children(this.opts.items).prop('draggable', false)
+    
+    this.element
+    .off('mouseenter', this.opts.cancel, this.disable)
+    .off('mouseleave', this.opts.cancel, this.enable)
+    
+    if (this.opts.handle) {
+      this.element
+      .off('mouseenter', this.opts.handle, this.enable)
+      .off('mouseleave', this.opts.handle, this.disable)
+    }
+  }
+  
+  Sortable.prototype.enable = function() {
+    this.opts.disabled = false
+  }
+  
+  Sortable.prototype.disable = function() {
+    this.opts.disabled = true
+  }
+  
+  Sortable.prototype.start = function(e) {
+    if (this.opts.disabled) return false
+    
+    e.stopPropagation()
+    
+    e.dataTransfer.effectAllowed = 'move'
+    
+    // this.index = 
+    dragging.start(this, $(e.currentTarget)).addClass('dragging')
+    
+    if (this.opts.forcePlaceholderSize) {
+      this.placeholder.height(dragging.element.height())
+      this.placeholder.width(dragging.element.width())
+    }
+    
+    this.element.trigger('start', { item: dragging.element })
+  }
+  
+  Sortable.prototype.enter = function(e) {
+    var child = $(e.currentTarget)
+    e.preventDefault()
+    e.stopPropagation()
+    
+    // stop if event is fired on the placeholder
+    if (child[0] === this.placeholder[0]) return
+    
+    // check if we entered another element or if we changed the dragging direction
+    if (this.lastEntered === child) {
+      if ((this.direction === 'down' && (e.clientY < this.lastY || e.clientX < this.lastX))
+        || (this.direction === 'up' && (e.clientY > this.lastY || e.clientX > this.lastX)))
+        this.lastEntered = null
+      else
+        return
+    }
+    
+    this.placeholder.show()
+    
+    // if dragging an item that belongs to the current list, hide it while
+    // it is being dragged
+    // if (state.origin === id)
+      dragging.element.hide()
+    
+    // insert the placeholder according to the dragging direction
+    this.direction = this.placeholder.index() < child.index() ? 'down' : 'up'
+    child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
+    
+    this.element.trigger('sort', { item: dragging.element })
+    this.element.trigger('change', { item: dragging.element })
+    
+    this.lastEntered = this
+    this.lastX = e.clientX
+    this.lastY = e.clientY
+  }
+  
+  Sortable.prototype.over = function(e) {
+    // This event specifies where the dragged data can be dropped.
+    // Everywhere is fine:
+    e.preventDefault()
+    e.stopPropagation()
+  }
+  
+  Sortable.prototype.end = function(e) {
+    e.stopPropagation()
+    e.preventDefault()
+    
+    if (!dragging.element) return
+    
+    this.element.trigger('beforeStop', { item: dragging.element })
+    
+    // revert
+    dragging.element.removeClass('dragging').show()
+    this.placeholder.remove()
+    dragging.stop()
+    
+    this.element.trigger('stop')
+  }
+  
+  Sortable.prototype.drop = function(e) {
+    e.stopPropagation()
+    e.preventDefault()
+    
+    if (!dragging.element) return
+    dragging.element.removeClass('dragging')
+    
+    if (e.dataTransfer.effectAllowed === 'copy')
+      dragging.element = dragging.element.clone()
+      
+    dragging.element.insertBefore(this.placeholder).show()
+    this.placeholder.remove()
+    
+    this.element.trigger('update', { item: dragging.element })
+    
+    // if the dropped element belongs to another list, trigger the receive event
+    // var newIndex = dragging.element.index()
+    // if (state.origin !== id) {
+    //   that.trigger('receive', { item: dragging.element })
+    //   // the receive event maybe inserted an element manually
+    //   // if so, find it and make it draggable
+    //   $(container.children().get(newIndex)).prop('draggable', true)
+    // }
+    
+    // if the index changed, trigger the update event
+    // if (newIndex !== index)
+    //   that.trigger('update', { item: dragging.element, index: newIndex })
+    
+    this.element.trigger('beforeStop', { item: dragging.element })
+    
+    dragging.stop()
+    
+    this.element.trigger('stop')
+  }
+  
+  Sortable.prototype.toArray = function(opts) {
+    if (!opts) opts = {}
+    var attr = opts.attribute || 'id'
+    return this.element.find(this.opts.items).map(function() {
+      return $(this).prop(attr)
+    })
+  }
+  
   function generic(constructor, identifier, defaults) {
     return function(opts, name, value) {
       var result = []
       this.each(function() {
+        var instance = $(this).data(identifier)
         if (typeof opts === 'string') {
-          var instance = $(this).data(identifier)
           switch (opts) {
           case 'enable':  instance.enable();  break
           case 'disable': instance.disable(); break
@@ -239,9 +417,23 @@
             else
               result.push(instance.opts)
             break
+          case 'refresh':
+            if (identifier !== 'sortable') return
+            instance.destroy()
+            instance.create()
+            break
+          // case 'serialize':
+          //   if (identifier !== 'sortable') return
+          //   result.push(instance.serialize())
+          //   break
+          case 'toArray':
+            if (identifier !== 'sortable') return
+            result.push(instance.toArray(name))
+            break
           }
         } else {
-          var instance = new constructor($(this), $.extend({}, defaults, opts))
+          if (instance) throw new Error(identifier + ' already defined')
+          instance = new constructor($(this), $.extend({}, defaults, opts))
           instance.create()
           $(this).data(identifier, instance)
         }
@@ -270,5 +462,15 @@
     hoverClass: false,
     initialized: false,
     scope: 'default'
+  })
+  
+  $.fn.sortable = generic(Sortable, 'sortable', {
+    cancel: 'input, textarea, button, select, option',
+    disabled: false,
+    forcePlaceholderSize: false,
+    handle: false,
+    initialized: false,
+    items: 'li, div',
+    placeholder: 'placeholder'
   })
 }(Zepto || jQuery)
