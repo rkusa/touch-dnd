@@ -261,11 +261,11 @@ footer {
   background-color: #fff;
   display: inline-block;
   box-sizing: border-box;
+  vertical-align: top;
 }
 
 .droppable {
   border-color: #31b03d;
-  vertical-align: top;
   padding: 5px 2px;
 }
 

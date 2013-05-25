@@ -135,6 +135,26 @@
             $('#example-hoverClass').droppable({ hoverClass: 'drop-here' })
           })
         </script>
+        
+        <h2>scope</h2>
+        <dl>
+          <dt>Type</dt>
+          <dd>String</dd>
+          <dt>Default</dt>
+          <dd>"default"</dd>
+        </dl>
+        <p>Used to group sets of draggable and droppable items, in addition to the accept option. A draggable with the same scope value as a droppable will be accepted.</p>
+        <h4>Example</h4>
+        <pre><code>$('#example-scope').droppable({ scope: 'T' })</code></pre>
+        <div class="draggable"></div>
+        <div class="draggable" id="scoped">T</div>
+        <div class="droppable" id="example-scope"></div>
+        <script type="text/javascript">
+          $(function() {
+            $('#scoped').draggable({ scope: 'T' })
+            $('#example-scope').droppable({ scope: 'T' })
+          })
+        </script>
 
         <h2>Methods</h2>
         

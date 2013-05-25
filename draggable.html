@@ -97,6 +97,27 @@
             $('#example-handle').draggable({ handle: '.title' })
           })
         </script>
+        
+        <h2>scope</h2>
+        <dl>
+          <dt>Type</dt>
+          <dd>String</dd>
+          <dt>Default</dt>
+          <dd>"default"</dd>
+        </dl>
+        <p>Used to group sets of draggable and droppable items, in addition to the accept option. A draggable with the same scope value as a droppable will be accepted.</p>
+        <h4>Example</h4>
+        <pre style="width:100%;float:none"><code>$('#example-scope').draggable({ scope: 'T' })</code></pre>
+        <div class="draggable" id="unscoped-draggable"></div>
+        <div class="draggable" id="example-scope">T</div>
+        <div class="droppable" id="scoped" style="float:right"></div>
+        <script type="text/javascript">
+          $(function() {
+            $('#unscoped-draggable').draggable()
+            $('#example-scope').draggable({ scope: 'T' })
+            $('#scoped').droppable({ scope: 'T' })
+          })
+        </script>
 
         <h2>Methods</h2>
         <h2>destroy()</h2>
