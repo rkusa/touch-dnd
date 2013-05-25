@@ -324,11 +324,46 @@ pre {
   margin-right: 48px;
 }
 
-#droppable pre {
+#droppable pre, #sortable pre {
   width: 100%;
   float: none;
 }
 
 #droppable .droppable {
   float: right;
+}
+
+ul.list, ul.grid {
+  list-style-type: none;
+  padding: 0;
+  width: 162px;
+}
+
+ul.grid.wide {
+  width: 100%;
+  height: 50px;
+}
+
+ul.list li, ul.grid li {
+  border: 1px solid #DCDBDD;
+  margin: 2px;
+  padding: 2px 5px;
+  background-color: #F6F5F7;
+  box-sizing: border-box;
+  vertical-align: top;
+}
+
+ul.list li {
+  height: 28px;
+}
+
+ul.grid li {
+  float: left;
+  height: 50px;
+  width: 50px;
+}
+
+ul.list li.placeholder, ul.grid li.placeholder {
+  border-style: dashed;
+  background-color: transparent;
 }
