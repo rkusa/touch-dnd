@@ -1,0 +1,20 @@
+{
+  "name": "zepto-dnd",
+  "author": {
+    "name": "Markus Ast",
+    "email": "npm.m@rkusa.st"
+  },
+  "version": "0.1.0",
+  "homepage": "https://github.com/rkusa/zepto-dnd",
+  "devDependencies": {
+    "uglify-js": "1.3.x"
+  },
+  "bugs": "https://github.com/rkusa/zepto-dnd/issues",
+  "repository" : {
+    "type" : "git",
+    "url" : "git://github.com/rkusa/zepto-dnd.git"
+  },
+  "scripts": {
+    "minify": "./node_modules/.bin/uglifyjs -o zepto-dnd.min.js zepto-dnd.js"
+  }
+}

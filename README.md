@@ -2,10 +2,18 @@
 
 HTML5 Drag'n'Drop API based Draggable, Droppable and Sortable for [Zepto.js](https://github.com/madrobby/zepto) (and jQuery).
 
-**Status:** initial work in progress
+```json
+{
+  "name": "zepto-dnd",
+  "version": "0.1.0"
+}
+```
 
-##### Why?
-jQuery UI is way too heavyweight + I don't care about old browsers = HTML5 Drag'n'Drop API
+**Status:** not well tested yet  
+**Documentation:** [ma.rkusa.st/zepto-dnd](http://ma.rkusa.st/zepto-dnd)
+
+#### Why?
+I often use Draggables, Droppables and Sortables. Besides jQuery UI being way too heavyweight, I want the option to use Zepto. Additionally, I (most of the times) don't care about old/bad browsers. That's the reason why I wrote these native-HTML5-Drag'n'Drop-based Draggable, Droppable and Sortable. The result is sadly not as feature rich as the jQuery UI's counterparts (many - especially helper related - things are not possible using the DnD API) and also not as lightweight as planned. Latter will be improved eventually.
 
 ## MIT License
 Copyright (c) 2013 Markus Ast
