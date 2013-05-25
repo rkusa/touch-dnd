@@ -1,7 +1,7 @@
 !function($) {  
   var Dragging = function() {
     this.eventHandler = $('<div />')
-    this.element = null
+    this.origin = this.element = null
   }
   
   Dragging.prototype.on = function() {
@@ -14,14 +14,15 @@
     return this
   }
   
-  Dragging.prototype.start = function(el) {
+  Dragging.prototype.start = function(origin, el) {
+    this.origin = origin
     this.element = el
     this.eventHandler.trigger('start')
     return this.element
   }
   
   Dragging.prototype.stop = function() {
-    this.element = null
+    this.origin = this.element = null
     this.eventHandler.trigger('stop')
   }
   
@@ -83,7 +84,7 @@
     
     e.dataTransfer.effectAllowed = 'copy'
     
-    dragging.start(this.element).addClass('dragging')
+    dragging.start(this, this.element).addClass('dragging')
   }
   
   Draggable.prototype.end = function(e) {
@@ -119,8 +120,6 @@
   }
   
   Droppable.prototype.destroy = function() {
-    console.log('ASD')
-    console.log(this.element.length)
     this.element
     .off('dragover',  this.over)
     .off('dragenter', this.enter)
@@ -142,9 +141,15 @@
   }
   
   Droppable.prototype.activate = function(e) {
-    this.accept = this.opts.accept === '*'
-               || (typeof this.opts.accept === 'function' ? this.opts.accept(dragging.element)
-                                                          : dragging.element.is(this.opts.accept))
+    this.accept = false
+    var accept = this.opts.accept === '*'
+              || (typeof this.opts.accept === 'function' ? this.opts.accept(dragging.element)
+                                                         : dragging.element.is(this.opts.accept))
+    if (this.opts.scope !== 'default') {
+      this.accept = dragging.origin.opts.scope === this.opts.scope
+      if (!this.accept && this.opts.accept !== '*') this.accept = accept
+    } else this.accept = accept
+    
     if (!this.accept) return
     if (this.opts.activeClass)
       this.element.addClass(this.opts.activeClass)
@@ -254,12 +259,16 @@
     cursor: 'auto',
     disabled: false,
     handle: false,
-    initialized: false
+    initialized: false,
+    scope: 'default'
   })
   
   $.fn.droppable = generic(Droppable, 'droppable', {
     accept: '*',
+    activeClass: false,
     disabled: false,
-    initialized: false
+    hoverClass: false,
+    initialized: false,
+    scope: 'default'
   })
 }(Zepto || jQuery)
