@@ -82,6 +82,42 @@
           })
         </script>
         
+        <h2>connectWith</h2>
+        <dl>
+          <dt>Type</dt>
+          <dd>Selector</dd>
+          <dt>Default</dt>
+          <dd>false</dd>
+        </dl>
+        <p>A selector of other sortable elements that the items from this list should be connected to.</p>
+        <h4>Example</h4>
+        <pre><code>$('#lhs').sortable({ connectWith: '#rhs' })
+$('#rhs').sortable()</code></pre>
+        <div style="float:left;margin-right:20px">
+          <h4>List A</h4>
+          <ul class="list" id="lhs">
+            <li>A 1</li>
+            <li>A 2</li>
+            <li>A 3</li>
+            <li>A 4</li>
+          </ul>
+        </div>
+        <div style="float:left">
+          <h4>List B</h4>
+          <ul class="list" id="rhs">
+            <li>B 1</li>
+            <li>B 2</li>
+            <li>B 3</li>
+            <li>B 4</li>
+          </ul>
+        </div>
+        <script type="text/javascript">
+          $(function() {
+            $('#lhs').sortable({ connectWith: '#rhs' })
+            $('#rhs').sortable()
+          })
+        </script>
+        
         <h2>disabled</h2>
         <dl>
           <dt>Type</dt>
@@ -303,6 +339,13 @@ $('#example-refresh').sortable('refresh')</code></pre>
         
         <h2>create(event)</h2>
         <p>Triggered when the droppable is created.</p>
+        
+        <h2>receive(event, ui)</h2>
+        <p>This event is triggered when a connected sortable list has received an item from another list.</p>
+        <dl class="inline">
+          <dt>ui.item</dt>
+          <dd>the element being received</dd>
+        </dl>
         
         <h2>sort(event, ui)</h2>
         <p>This event is triggered during sorting.</p>

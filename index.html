@@ -11,6 +11,10 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <script src="javascripts/zepto.min.js"></script>
+    <!-- <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script> -->
+    <script src="javascripts/zepto-dnd.js"></script>
   </head>
   <body>
     <div class="wrapper">
@@ -27,11 +31,53 @@
         </ul>
       </header>
       <section>
-        <ul>
-          <li><a href="draggable.html">Draggable</a></li>
-          <li><a href="droppable.html">Droppable</a></li>
-          <li><a href="sortable.html">Sortable</a></li>
+        <h4><a href="sortable.html">Sortable</a></h4>
+        <div style="float:left;margin-right:20px">
+          <ul class="list" id="lhs">
+            <li>A 1</li>
+            <li>A 2</li>
+            <li>A 3</li>
+            <li>A 4</li>
+          </ul>
+        </div>
+        
+        <div style="float:left">
+          <ul class="list" id="rhs">
+            <li>B 1</li>
+            <li>B 2</li>
+            <li>B 3</li>
+            <li>B 4</li>
+          </ul>
+        </div>
+        
+        <div style="clear:both"></div>
+        
+        <h4><a href="draggable.html">Draggable</a></h4>
+        <ul class="grid wide">
+          <li class="draggable"></li>
+          <li class="draggable"></li>
+          <li class="draggable"></li>
+          <li class="draggable"></li>
+          <li class="draggable"></li>
+          <li class="draggable"></li>
+          <li class="draggable"></li>
         </ul>
+        
+        <h4><a href="droppable.html">Droppable</a></h4>
+        <div class="droppable"></div>
+        <div class="droppable"></div>
+        
+        <script type="text/javascript">
+          $(function() {
+            $('#lhs').sortable()
+            $('#rhs').sortable({ connectWith: '#lhs' })
+            .on('receive', function(e, ui) {
+              ui.item.removeClass('draggable')
+            })
+            $('.draggable').draggable({ connectToSortable: '#rhs' })
+            $('.droppable').droppable()
+          })
+        </script>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/rkusa">rkusa</a></p>
