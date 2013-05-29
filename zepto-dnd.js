@@ -522,7 +522,7 @@
             break
           }
         } else {
-          if (instance) throw new Error(identifier + ' already defined')
+          if (instance) return this // throw new Error(identifier + ' already defined')
           instance = new constructor($(this), $.extend({}, defaults, opts))
           instance.create()
           $(this).data(identifier, instance)
