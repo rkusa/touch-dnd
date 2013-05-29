@@ -489,6 +489,8 @@
       this.each(function() {
         var instance = $(this).data(identifier)
         if (typeof opts === 'string') {
+          if (typeof instance === 'undefined')
+            throw new Error(identifier + ' not defined')
           switch (opts) {
           case 'enable':  instance.enable();  break
           case 'disable': instance.disable(); break
