@@ -112,7 +112,12 @@
   Draggable.prototype.start = function(e) {
     if (this.opts.disabled) return false
     
-    e.originalEvent.dataTransfer.effectAllowed = 'copy'
+    // zepto <> jquery compatibility
+    if (e.originalEvent) e = e.originalEvent
+    
+    e.dataTransfer.effectAllowed = 'copy'
+    // FF fix: set some data ....
+    e.dataTransfer.setData('a', 42)
     
     dragging.start(this, this.el).addClass('dragging')
   }
@@ -214,6 +219,8 @@
     
     e.stopPropagation()
     
+    e.dataTransfer.dropEffect = 'copy'
+    
     if (this.accept)
       e.preventDefault() // allow drop
   }
@@ -236,7 +243,10 @@
     
     dragging.el.removeClass('dragging')
     
-    if (e.originalEvent.dataTransfer.effectAllowed === 'copy')
+    // zepto <> jquery compatibility
+    if (e.originalEvent) e = e.originalEvent
+    
+    if (e.dataTransfer.effectAllowed === 'copy')
       dragging.el = dragging.el.clone()
 
     $(this.el).append(dragging.el.show())
@@ -350,6 +360,8 @@
     e.stopPropagation()
     
     e.originalEvent.dataTransfer.effectAllowed = 'move'
+    // FF fix: set some data ....
+    e.originalEvent.dataTransfer.setData('a', 42)
     
     dragging.start(this, $(e.target)).addClass('dragging')
     this.index = dragging.el.index()
