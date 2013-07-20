@@ -11,10 +11,6 @@
         if (placeholder === val) return
         if (placeholder) placeholder.remove()
         placeholder = val
-        if (val && this.el.height() > 0 && this.origin.opts.forcePlaceholderSize) {
-          placeholder.height(this.el.height())
-          placeholder.width(this.el.width())
-        }
       }
     })
   }
@@ -82,7 +78,10 @@
       .on('mouseleave', this.opts.handle, $.proxy(this.disable, this))
     }
     
-    this.el.trigger('create')
+    var self = this
+    setTimeout(function() {
+      self.el.trigger('create', self)
+    })
   }
   
   Draggable.prototype.destroy = function() {
@@ -113,7 +112,12 @@
   Draggable.prototype.start = function(e) {
     if (this.opts.disabled) return false
     
+    // zepto <> jquery compatibility
+    if (e.originalEvent) e = e.originalEvent
+    
     e.dataTransfer.effectAllowed = 'copy'
+    // FF fix: set some data ....
+    e.dataTransfer.setData('a', 42)
     
     dragging.start(this, this.el).addClass('dragging')
   }
@@ -147,7 +151,10 @@
     .on('start', $.proxy(this.activate, this))
     .on('stop',  $.proxy(this.reset, this))
     
-    this.el.trigger('create')
+    var self = this
+    setTimeout(function() {
+      self.el.trigger('create', self)
+    })
   }
   
   Droppable.prototype.destroy = function() {
@@ -191,6 +198,7 @@
   Droppable.prototype.reset = function(e) {
     if (!this.accept) return
     if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
+    if (this.opts.hoverClass)  this.el.removeClass(this.opts.hoverClass)
     
     this.el.trigger('deactivate', dragging.el)
   }
@@ -210,6 +218,8 @@
     if (this.opts.disabled) return
     
     e.stopPropagation()
+    
+    e.dataTransfer.dropEffect = 'copy'
     
     if (this.accept)
       e.preventDefault() // allow drop
@@ -233,22 +243,31 @@
     
     dragging.el.removeClass('dragging')
     
+    // zepto <> jquery compatibility
+    if (e.originalEvent) e = e.originalEvent
+    
     if (e.dataTransfer.effectAllowed === 'copy')
       dragging.el = dragging.el.clone()
 
     $(this.el).append(dragging.el.show())
       
-    // that.trigger('receive', { item: dragging })
+    this.el.trigger('receive', { item: dragging.el })
 
     dragging.stop()
   }
   
   var Sortable = function(element, opts) {
-    this.id      = nextId++
-    this.el = $(element)
-    this.opts    = opts
+    this.id   = nextId++
+    this.el   = element
+    this.opts = opts
     
-    var tag = this.el.find(this.opts.items)[0].tagName
+    var tag
+    try {
+      tag = this.el.find(this.opts.items)[0].tagName
+    } catch(e) {
+      tag = /^ul|ol$/i.test(this.el.tagName) ? 'li' : 'div'
+    }
+    
     this.placeholder = $('<' + tag + ' class="' + this.opts.placeholder + '" />')
     
     this.accept = this.index = this.lastEntered = null
@@ -292,7 +311,10 @@
     dragging
     .on('start', $.proxy(this.activate, this))
     
-    this.el.trigger('create', this)
+    var self = this
+    setTimeout(function() {
+      self.el.trigger('create', self)
+    })
   }
   
   Sortable.prototype.destroy = function() {
@@ -302,7 +324,7 @@
     .off('dragover',  this.opts.items, this.over)
     .off('dragend',   this.opts.items, this.end)
     .off('drop',      this.opts.items, this.drop)
-    .children(this.opts.items).prop('draggable', false)
+    .find(this.opts.items).prop('draggable', false)
     
     this.el
     .off('mouseenter', this.opts.cancel, this.disable)
@@ -338,8 +360,10 @@
     e.stopPropagation()
     
     e.originalEvent.dataTransfer.effectAllowed = 'move'
+    // FF fix: set some data ....
+    e.originalEvent.dataTransfer.setData('a', 42)
     
-    dragging.start(this, $(e.currentTarget)).addClass('dragging')
+    dragging.start(this, $(e.target)).addClass('dragging')
     this.index = dragging.el.index()
     
     if (this.opts.forcePlaceholderSize) {
@@ -357,9 +381,15 @@
     if (!this.accept) return
     
     // stop if event is fired on the placeholder
-    var child = $(e.currentTarget) 
-    if (child[0] === this.placeholder[0]) return
+    var child = e.currentTarget
+    if (child === this.placeholder[0]) return
     
+    if (this.opts.forcePlaceholderSize) {
+      this.placeholder.height(dragging.el.height())
+      // this.placeholder.width(dragging.el.width())
+    }
+    
+    e = e.originalEvent
     // check if we entered another element or if we changed the dragging direction
     if (this.lastEntered === child) {
       if ((this.direction === 'down' && (e.clientY < this.lastY || e.clientX < this.lastX))
@@ -368,6 +398,9 @@
       else
         return
     }
+    this.lastEntered = child
+    this.lastX = e.clientX
+    this.lastY = e.clientY
     
     dragging.placeholder = this.placeholder.show()
     
@@ -377,14 +410,10 @@
       dragging.el.hide()
     
     // insert the placeholder according to the dragging direction
-    this.direction = this.placeholder.index() < child.index() ? 'down' : 'up'
-    child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
+    this.direction = this.placeholder.index() < $(child).index() ? 'down' : 'up'
+    $(child)[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
     
     this.el.trigger('sort', { item: dragging.el })
-    
-    this.lastEntered = this
-    this.lastX = e.clientX
-    this.lastY = e.clientY
   }
   
   Sortable.prototype.over = function(e) {
@@ -433,6 +462,7 @@
       //   dragging.origin.destroy()
       
       this.el.trigger('receive', { item: dragging.el })
+      this.el.trigger('update', { item: dragging.el, index: newIndex })
       
       // the receive event maybe inserted an element manually
       // if so, find it and make it draggable
@@ -446,7 +476,11 @@
     this.el.trigger('change', { item: dragging.el })
     
     this.el.trigger('beforeStop', { item: dragging.el })
-    dragging.origin.index = null
+    if (dragging.origin instanceof Sortable) {
+      dragging.origin.index = null
+      dragging.origin.el.trigger('stop')
+    }
+    
     dragging.stop()
     
     this.el.trigger('stop')
@@ -454,10 +488,11 @@
   
   Sortable.prototype.toArray = function(opts) {
     if (!opts) opts = {}
-    var attr = opts.attribute || 'id'
-    return this.el.find(this.opts.items).map(function() {
-      return $(this).prop(attr)
+    var attr = opts.attribute || 'id', attrs = []
+    this.el.find(this.opts.items).each(function() {
+      attrs.push($(this).prop(attr))
     })
+    return attrs
   }
   
   function generic(constructor, identifier, defaults) {
@@ -466,6 +501,8 @@
       this.each(function() {
         var instance = $(this).data(identifier)
         if (typeof opts === 'string') {
+          if (typeof instance === 'undefined')
+            throw new Error(identifier + ' not defined')
           switch (opts) {
           case 'enable':  instance.enable();  break
           case 'disable': instance.disable(); break
@@ -499,7 +536,7 @@
             break
           }
         } else {
-          if (instance) throw new Error(identifier + ' already defined')
+          if (instance) return this // throw new Error(identifier + ' already defined')
           instance = new constructor($(this), $.extend({}, defaults, opts))
           instance.create()
           $(this).data(identifier, instance)
