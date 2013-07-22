@@ -11,9 +11,12 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-
-    <script src="javascripts/zepto.min.js"></script>
-    <!-- <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script> -->
+      
+    <script>
+      document.write('<script src="javascripts/' + 
+      ('__proto__' in {} ? 'zepto' : 'jquery') +
+      '.min.js"><\/script>')
+    </script>
     <script src="javascripts/zepto-dnd.js"></script>
   </head>
   <body>
