@@ -37,7 +37,7 @@
     this.eventHandler.trigger('stop')
   }
   
-  var dragging = new Dragging()
+  var dragging = $.dragging = parent.$.dragging || new Dragging()
   
   var Draggable = function(element, opts) {
     this.id       = nextId++
@@ -48,8 +48,13 @@
     this.connectWith = []
     var self = this
     if (this.opts.connectToSortable) {
-      $(this.opts.connectToSortable).each(function() {
-        var el = $(this)
+      var target = $(this.opts.connectToSortable)
+        , context = window
+      if (target[0].ownerDocument !== document) {
+        context = target[0].ownerDocument.defaultView
+      }
+      context.$(this.opts.connectToSortable).each(function() {
+        var el = context.$(this)
         var instance = el.data('sortable')
         if (instance) instance.connectWith.push(self.id)
         else {
@@ -281,8 +286,13 @@
     this.connectWith = []
     var self = this
     if (this.opts.connectWith) {
-      $(this.opts.connectWith).each(function() {
-        var el = $(this)
+      var target = $(this.opts.connectWith)
+        , context = window
+      if (target[0].ownerDocument !== document) {
+        context = target[0].ownerDocument.defaultView
+      }
+      context.$(this.opts.connectWith).each(function() {
+        var el = context.$(this)
         var instance = el.data('sortable')
         if (instance) instance.connectWith.push(self.id)
         else {
