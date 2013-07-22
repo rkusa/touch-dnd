@@ -116,8 +116,10 @@
     if (e.originalEvent) e = e.originalEvent
     
     e.dataTransfer.effectAllowed = 'copy'
-    // FF fix: set some data ....
-    e.dataTransfer.setData('a', 42)
+    try { // IE fix
+      // FF fix: set some data ....
+      e.dataTransfer.setData('text/plain', '42')
+    } catch(e) {}
     
     dragging.start(this, this.el).addClass('dragging')
   }
@@ -218,6 +220,9 @@
     if (this.opts.disabled) return
     
     e.stopPropagation()
+    
+    // zepto <> jquery compatibility
+    if (e.originalEvent) e = e.originalEvent
     
     e.dataTransfer.dropEffect = 'copy'
     
@@ -360,8 +365,10 @@
     e.stopPropagation()
     
     e.originalEvent.dataTransfer.effectAllowed = 'move'
-    // FF fix: set some data ....
-    e.originalEvent.dataTransfer.setData('a', 42)
+    try { // IE fix
+      // FF fix: set some data ....
+      e.originalEvent.dataTransfer.setData('text/plain', '42')
+    } catch(e) {}
     
     dragging.start(this, $(e.target)).addClass('dragging')
     this.index = dragging.el.index()
