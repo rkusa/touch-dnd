@@ -439,6 +439,11 @@
     // Everywhere is fine:
     e.preventDefault()
     e.stopPropagation()
+    
+    // zepto <> jquery compatibility
+    if (e.originalEvent) e = e.originalEvent
+    
+    e.dataTransfer.dropEffect = 'copy'
   }
   
   Sortable.prototype.end = function(e) {
