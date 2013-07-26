@@ -5,7 +5,7 @@ HTML5 Drag'n'Drop API based Draggable, Droppable and Sortable for [Zepto.js](htt
 ```json
 {
   "name": "zepto-dnd",
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
 ```
 

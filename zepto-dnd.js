@@ -443,7 +443,8 @@
     // zepto <> jquery compatibility
     if (e.originalEvent) e = e.originalEvent
     
-    e.dataTransfer.dropEffect = 'copy'
+    if (e.dataTransfer.effectAllowed === 'copy')
+      e.dataTransfer.dropEffect = 'copy'
   }
   
   Sortable.prototype.end = function(e) {
