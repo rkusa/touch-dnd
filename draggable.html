@@ -1,226 +1,184 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>zepto-dnd by rkusa</title>
+---
+layout: layout
+---
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-      
-    <script>
-      document.write('<script src="javascripts/' + 
-      ('__proto__' in {} ? 'zepto' : 'jquery') +
-      '.min.js"><\/script>')
-    </script>
-    <script src="javascripts/zepto-dnd.js"></script>
-  </head>
-  <body>
-    <div class="wrapper">
-      <header>
-        <h1>zepto-dnd</h1>
-        <p>HTML5 Drag'n'Drop API based Draggable, Droppable and Sortable for Zepto.js (and jQuery)</p>
+<h1>Draggable</h1>
 
-        <p class="view"><a href="https://github.com/rkusa/zepto-dnd">View the Project on GitHub <small>rkusa/zepto-dnd</small></a></p>
+<h2>Options</h2>
 
-        <ul>
-          <li><a href="https://github.com/rkusa/zepto-dnd/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/rkusa/zepto-dnd/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/rkusa/zepto-dnd">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h2>Options</h2>
+<h2>cancel</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Selector</dd>
+  <dt>Default</dt>
+  <dd>input, textarea, button, select, option</dd>
+</dl>
+<p>Prevents dragging from starting on specified elements.</p>
+<h4>Example</h4>
+{% highlight js %}$('#example-cancel').draggable({ cancel: '.title' }){% endhighlight %}
+<div class="draggable" id="example-cancel">
+  <span class="title">Title</span>
+</div>
+<script type="text/javascript">
+  $(function() {
+    $('#example-cancel').draggable({ cancel: '.title' })
+  })
+</script>
 
-        <h2>cancel</h2>
-        <dl>
-          <dt>Type</dt>
-          <dd>Selector</dd>
-          <dt>Default</dt>
-          <dd>input, textarea, button, select, option</dd>
-        </dl>
-        <p>Prevents dragging from starting on specified elements.</p>
-        <h4>Example</h4>
-        <pre><code>$('#example-cancel').draggable({ cancel: '.title' })</code></pre>
-        <div class="draggable" id="example-cancel">
-          <span class="title">Title</span>
-        </div>
-        <script type="text/javascript">
-          $(function() {
-            $('#example-cancel').draggable({ cancel: '.title' })
-          })
-        </script>
-
-        <h2>connectToSortable</h2>
-        <dl>
-          <dt>Type</dt>
-          <dd>Selector</dd>
-          <dt>Default</dt>
-          <dd>false</dd>
-        </dl>
-        <p>Allows the draggable to be dropped onto the specified sortables. If this option is used, a draggable can be dropped onto a sortable list and then becomes part of it.</p>
-        <h4>Example</h4>
-        <pre style="width:100%;float:none"><code>$('#list').sortable()
+<h2>connectToSortable</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Selector</dd>
+  <dt>Default</dt>
+  <dd>false</dd>
+</dl>
+<p>Allows the draggable to be dropped onto the specified sortables. If this option is used, a draggable can be dropped onto a sortable list and then becomes part of it.</p>
+<h4>Example</h4>
+{% highlight js %}$('#list').sortable()
 .on('receive', function(e, ui) {
-  ui.item.removeClass('draggable')
+ui.item.removeClass('draggable')
 })
 $('#example-sortable .draggable').draggable({
-  connectToSortable: '#list'
-})</code></pre>
-        <ul class="grid wide" id="list">
-          <li><span class="title">Item 1</span></li>
-          <li><span class="title">Item 2</span></li>
-          <li><span class="title">Item 3</span></li>
-          <li><span class="title">Item 4</span></li>
-          <li><span class="title">Item 5</span></li>
-          <li><span class="title">Item 6</span></li>
-        </ul>
-        <ul class="grid wide" id="example-sortable">
-          <li class="draggable">D</li>
-          <li class="draggable">D</li>
-          <li class="draggable">D</li>
-        </ul>
-        <script type="text/javascript">
-          $(function() {
-            $('#list').sortable()
-            .on('receive', function(e, ui) {
-              ui.item.removeClass('draggable')
-            })
-            $('#example-sortable .draggable').draggable({ connectToSortable: '#list' })
-          })
-        </script>
+connectToSortable: '#list'
+}){% endhighlight %}
+<ul class="grid wide" id="list">
+  <li><span class="title">Item 1</span></li>
+  <li><span class="title">Item 2</span></li>
+  <li><span class="title">Item 3</span></li>
+  <li><span class="title">Item 4</span></li>
+  <li><span class="title">Item 5</span></li>
+  <li><span class="title">Item 6</span></li>
+</ul>
+<ul class="grid wide" id="example-sortable">
+  <li class="draggable">D</li>
+  <li class="draggable">D</li>
+  <li class="draggable">D</li>
+</ul>
+<script type="text/javascript">
+  $(function() {
+    $('#list').sortable()
+    .on('receive', function(e, ui) {
+      ui.item.removeClass('draggable')
+    })
+    $('#example-sortable .draggable').draggable({ connectToSortable: '#list' })
+  })
+</script>
 
-        <h2>disabled</h2>
-        <dl>
-          <dt>Type</dt>
-          <dd>Boolean</dd>
-          <dt>Default</dt>
-          <dd>false</dd>
-        </dl>
-        <p>Disables the draggable if set to <code>true</code>.</p>
-        <h4>Example</h4>
-        <pre><code>$('#example-disabled').draggable({ disabled: true })</code></pre>
-        <div class="draggable" id="example-disabled">
-        </div>
-        <script type="text/javascript">
-          $(function() {
-            $('#example-disabled').draggable({ disabled: true })
-          })
-        </script>
+<h2>disabled</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Boolean</dd>
+  <dt>Default</dt>
+  <dd>false</dd>
+</dl>
+<p>Disables the draggable if set to <code>true</code>.</p>
+<h4>Example</h4>
+{% highlight js %}$('#example-disabled').draggable({ disabled: true }){% endhighlight %}
+<div class="draggable" id="example-disabled">
+</div>
+<script type="text/javascript">
+  $(function() {
+    $('#example-disabled').draggable({ disabled: true })
+  })
+</script>
 
-        <h2>handle</h2>
-        <dl>
-          <dt>Type</dt>
-          <dd>Selector</dd>
-          <dt>Default</dt>
-          <dd>false</dd>
-        </dl>
-        <p>If specified, restricts dragging from starting to the specified element(s). Only elements that descend from the draggable element are permitted.</p>
-        <h4>Example</h4>
-        <pre><code>$('#example-handle').draggable({ handle: '.title' })</code></pre>
-        <div class="draggable" id="example-handle">
-          <span class="title">Title</span>
-        </div>
-        <script type="text/javascript">
-          $(function() {
-            $('#example-handle').draggable({ handle: '.title' })
-          })
-        </script>
-        
-        <h2>scope</h2>
-        <dl>
-          <dt>Type</dt>
-          <dd>String</dd>
-          <dt>Default</dt>
-          <dd>"default"</dd>
-        </dl>
-        <p>Used to group sets of draggable and droppable items, in addition to the accept option. A draggable with the same scope value as a droppable will be accepted.</p>
-        <h4>Example</h4>
-        <pre style="width:100%;float:none"><code>$('#example-scope').draggable({ scope: 'T' })</code></pre>
-        <div class="draggable" id="unscoped-draggable"></div>
-        <div class="draggable" id="example-scope">T</div>
-        <div class="droppable" id="scoped" style="float:right"></div>
-        <script type="text/javascript">
-          $(function() {
-            $('#unscoped-draggable').draggable()
-            $('#example-scope').draggable({ scope: 'T' })
-            $('#scoped').droppable({ scope: 'T' })
-          })
-        </script>
+<h2>handle</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Selector</dd>
+  <dt>Default</dt>
+  <dd>false</dd>
+</dl>
+<p>If specified, restricts dragging from starting to the specified element(s). Only elements that descend from the draggable element are permitted.</p>
+<h4>Example</h4>
+{% highlight js %}$('#example-handle').draggable({ handle: '.title' }){% endhighlight %}
+<div class="draggable" id="example-handle">
+  <span class="title">Title</span>
+</div>
+<script type="text/javascript">
+  $(function() {
+    $('#example-handle').draggable({ handle: '.title' })
+  })
+</script>
 
-        <h2>Methods</h2>
-        <h2>destroy()</h2>
-        <p>Removes the draggable functionality completely.</p>
-        <pre><code>$('#example-destroy').draggable()
-$('#example-destroy').draggable('destroy')</code></pre>
-        <div class="draggable" id="example-destroy">
-        </div>
-        <script type="text/javascript">
-          $(function() {
-            $('#example-destroy').draggable()
-            $('#example-destroy').draggable('destroy')
-          })
-        </script>
+<h2>scope</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>String</dd>
+  <dt>Default</dt>
+  <dd>"default"</dd>
+</dl>
+<p>Used to group sets of draggable and droppable items, in addition to the accept option. A draggable with the same scope value as a droppable will be accepted.</p>
+<h4>Example</h4>
+{% highlight js %}$('#example-scope').draggable({ scope: 'T' }){% endhighlight %}
+<div class="draggable" id="unscoped-draggable"></div>
+<div class="draggable" id="example-scope">T</div>
+<div class="droppable" id="scoped" style="float:right"></div>
+<script type="text/javascript">
+  $(function() {
+    $('#unscoped-draggable').draggable()
+    $('#example-scope').draggable({ scope: 'T' })
+    $('#scoped').droppable({ scope: 'T' })
+  })
+</script>
 
-        <h2>disable()</h2>
-        <p>Disables the draggable.</p>
-        <pre><code>$('#example-disable').draggable('disable')</code></pre>
-        <div class="draggable example-disable" id="example-disable">
-        </div>
-        <script type="text/javascript">
-          $(function() {
-            $('.example-disable').draggable()
-            $('.example-disable').draggable('disable')
-          })
-        </script>
+<h2>Methods</h2>
+<h2>destroy()</h2>
+<p>Removes the draggable functionality completely.</p>
+{% highlight js %}$('#example-destroy').draggable()
+$('#example-destroy').draggable('destroy'){% endhighlight %}
+<div class="draggable" id="example-destroy">
+</div>
+<script type="text/javascript">
+  $(function() {
+    $('#example-destroy').draggable()
+    $('#example-destroy').draggable('destroy')
+  })
+</script>
 
-        <h2>enable()</h2>
-        <p>Enables the draggable.</p>
-        <pre><code>$('#example-enable').draggable('enable')</code></pre>
-        <div class="draggable example-disable" id="example-enable">
-        </div>
-        <script type="text/javascript">
-          $(function() {
-            $('#example-enable').draggable('enable')
-          })
-        </script>
+<h2>disable()</h2>
+<p>Disables the draggable.</p>
+{% highlight js %}$('#example-disable').draggable('disable'){% endhighlight %}
+<div class="draggable example-disable" id="example-disable">
+</div>
+<script type="text/javascript">
+  $(function() {
+    $('.example-disable').draggable()
+    $('.example-disable').draggable('disable')
+  })
+</script>
 
-        <h2>option()</h2>
-        <p>Gets an object containing key/value pairs representing the current draggable options hash.</p>
-        <pre style="width:100%"><code>var options = $('#example-option').draggable('option')</code></pre>
+<h2>enable()</h2>
+<p>Enables the draggable.</p>
+{% highlight js %}$('#example-enable').draggable('enable'){% endhighlight %}
+<div class="draggable example-disable" id="example-enable">
+</div>
+<script type="text/javascript">
+  $(function() {
+    $('#example-enable').draggable('enable')
+  })
+</script>
 
-        <h2>option(optionName)</h2>
-        <p>Gets the value currently associated with the specified <code>optionName</code>.</p>
-        <pre style="width:100%"><code>var isDisabled = $('#example-option').draggable('option', 'disabled')</code></pre>
+<h2>option()</h2>
+<p>Gets an object containing key/value pairs representing the current draggable options hash.</p>
+{% highlight js %}var options = $('#example-option').draggable('option'){% endhighlight %}
 
-        <h2>option(optionName, value)</h2>
-        <p>Sets the value of the draggable option associated with the specified <code>optionName</code>.</p>
-        <pre style="width:100%"><code>$('#example-option').draggable('option', 'disabled', true)</code></pre>
+<h2>option(optionName)</h2>
+<p>Gets the value currently associated with the specified <code>optionName</code>.</p>
+{% highlight js %}var isDisabled = $('#example-option').draggable('option', 'disabled'){% endhighlight %}
 
-        <h2>option(options)</h2>
-        <p>Sets one or more options for the draggable.</p>
-        <pre style="width:100%"><code>$('#example-option').draggable('option', { disabled: true })</code></pre>
+<h2>option(optionName, value)</h2>
+<p>Sets the value of the draggable option associated with the specified <code>optionName</code>.</p>
+{% highlight js %}$('#example-option').draggable('option', 'disabled', true){% endhighlight %}
 
-        <h2>Events</h2>
-        
-        <h2>create(event)</h2>
-        <p>Triggered when the droppable is created.</p>
-        
-        <h2>drag, dragstart, dragend</h2>
-        <p>These events are natively provided through the HTML5 Drag'n'Drop API.</p>
-        
+<h2>option(options)</h2>
+<p>Sets one or more options for the draggable.</p>
+{% highlight js %}$('#example-option').draggable('option', { disabled: true }){% endhighlight %}
 
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/rkusa">rkusa</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
+<h2>Events</h2>
 
-  </body>
-</html>
+<h2>create(event)</h2>
+<p>Triggered when the droppable is created.</p>
+
+<h2>drag, dragstart, dragend</h2>
+<p>These events are natively provided through the HTML5 Drag'n'Drop API.</p>

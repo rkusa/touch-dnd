@@ -317,18 +317,11 @@ h4 {
   margin-top: 20px;
 }
 
-pre {
-  float: left;
-  width: 400px;
+/*pre {
   box-sizing: border-box;
   margin-right: 48px;
 }
-
-#droppable pre, #sortable pre {
-  width: 100%;
-  float: none;
-}
-
+*/
 #droppable .droppable {
   float: right;
 }

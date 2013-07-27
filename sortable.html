@@ -1,395 +1,351 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>zepto-dnd by rkusa</title>
+---
+layout: layout
+---
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+<h1>Sortable</h1>
 
-    <script>
-      document.write('<script src="javascripts/' + 
-      ('__proto__' in {} ? 'zepto' : 'jquery') +
-      '.min.js"><\/script>')
-    </script>
-    <script src="javascripts/zepto-dnd.js"></script>
-  </head>
-  <body>
-    <div class="wrapper">
-      <header>
-        <h1>zepto-dnd</h1>
-        <p>HTML5 Drag'n'Drop API based Draggable, Droppable and Sortable for Zepto.js (and jQuery)</p>
+<ul class="list" id="example1">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+  <li>Item 4</li>
+</ul>
 
-        <p class="view"><a href="https://github.com/rkusa/zepto-dnd">View the Project on GitHub <small>rkusa/zepto-dnd</small></a></p>
+<ul class="grid" id="example2">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+  <li>Item 4</li>
+  <li>Item 5</li>
+  <li>Item 6</li>
+</ul>
 
-        <ul>
-          <li><a href="https://github.com/rkusa/zepto-dnd/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/rkusa/zepto-dnd/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/rkusa/zepto-dnd">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section id="sortable">
-        <h1>Sortable</h1>
-        
-        <ul class="list" id="example1">
-          <li>Item 1</li>
-          <li>Item 2</li>
-          <li>Item 3</li>
-          <li>Item 4</li>
-        </ul>
-        
-        <ul class="grid" id="example2">
-          <li>Item 1</li>
-          <li>Item 2</li>
-          <li>Item 3</li>
-          <li>Item 4</li>
-          <li>Item 5</li>
-          <li>Item 6</li>
-        </ul>
-        
-        <script type="text/javascript">
-          $(function() {
-            $('#example1').sortable({})
-            $('#example2').sortable({})
-          })
-        </script>
-        
-        
-        <h2>Options</h2>
-        
-        <h2>cancel</h2>
-        <dl>
-          <dt>Type</dt>
-          <dd>Selector</dd>
-          <dt>Default</dt>
-          <dd>input, textarea, button, select, option</dd>
-        </dl>
-        <p>Prevents sorting if you start on elements matching the selector.</p>
-        <h4>Example</h4>
-        <pre><code>$('#example-cancel').sortable({ cancel: '.title' })</code></pre>
-        <ul class="grid wide" id="example-cancel">
-          <li><span class="title">Item 1</span></li>
-          <li><span class="title">Item 2</span></li>
-          <li><span class="title">Item 3</span></li>
-          <li><span class="title">Item 4</span></li>
-          <li><span class="title">Item 5</span></li>
-          <li><span class="title">Item 6</span></li>
-        </ul>
-        <script type="text/javascript">
-          $(function() {
-            $('#example-cancel').sortable({ cancel: '.title' })
-          })
-        </script>
-        
-        <h2>connectWith</h2>
-        <dl>
-          <dt>Type</dt>
-          <dd>Selector</dd>
-          <dt>Default</dt>
-          <dd>false</dd>
-        </dl>
-        <p>A selector of other sortable elements that the items from this list should be connected to.</p>
-        <h4>Example</h4>
-        <pre><code>$('#lhs').sortable({ connectWith: '#rhs' })
-$('#rhs').sortable()</code></pre>
-        <div style="float:left;margin-right:20px">
-          <h4>List A</h4>
-          <ul class="list" id="lhs">
-            <li>A 1</li>
-            <li>A 2</li>
-            <li>A 3</li>
-            <li>A 4</li>
-          </ul>
-        </div>
-        <div style="float:left">
-          <h4>List B</h4>
-          <ul class="list" id="rhs">
-            <li>B 1</li>
-            <li>B 2</li>
-            <li>B 3</li>
-            <li>B 4</li>
-          </ul>
-        </div>
-        <script type="text/javascript">
-          $(function() {
-            $('#lhs').sortable({ connectWith: '#rhs' })
-            $('#rhs').sortable()
-          })
-        </script>
-        
-        <h2>disabled</h2>
-        <dl>
-          <dt>Type</dt>
-          <dd>Boolean</dd>
-          <dt>Default</dt>
-          <dd>false</dd>
-        </dl>
-        <p>Disables the sortable if set to <code>true</code>.</p>
-        <h4>Example</h4>
-        <pre><code>$('#example-disabled').sortable({ disabled: true })</code></pre>
-        <ul class="grid wide" id="example-disabled">
-          <li>Item 1</li>
-          <li>Item 2</li>
-          <li>Item 3</li>
-          <li>Item 4</li>
-          <li>Item 5</li>
-          <li>Item 6</li>
-        </ul>
-        <script type="text/javascript">
-          $(function() {
-            $('#example-disabled').sortable({ disabled: true })
-          })
-        </script>
-        
-        <h2>forcePlaceholderSize</h2>
-        <dl>
-          <dt>Type</dt>
-          <dd>Boolean</dd>
-          <dt>Default</dt>
-          <dd>false</dd>
-        </dl>
-        <p>If <code>true</code>, forces the helper to have a size.</p>
-        <h4>Example</h4>
-        <pre><code>$('#example-forcePlaceholderSize').sortable({ 
-  forcePlaceholderSize: true
-})</code></pre>
-        <ul class="grid wide" id="example-forcePlaceholderSize">
-          <li style="width:100px">Item 1</li>
-          <li style="width:75px">Item 2</li>
-          <li>Item 3</li>
-          <li>Item 4</li>
-          <li>Item 5</li>
-          <li>Item 6</li>
-        </ul>
-        <script type="text/javascript">
-          $(function() {
-            $('#example-forcePlaceholderSize').sortable({ forcePlaceholderSize: true })
-          })
-        </script>
-        
-        <h2>handle</h2>
-        <dl>
-          <dt>Type</dt>
-          <dd>Selector</dd>
-          <dt>Default</dt>
-          <dd>false</dd>
-        </dl>
-        <p>Restricts sort start click to the specified element.</p>
-        <h4>Example</h4>
-        <pre><code>$('#example-handle').sortable({ handle: '.title' })</code></pre>
-        <ul class="grid wide" id="example-handle">
-          <li><span class="title">Item 1</span></li>
-          <li><span class="title">Item 2</span></li>
-          <li><span class="title">Item 3</span></li>
-          <li><span class="title">Item 4</span></li>
-          <li><span class="title">Item 5</span></li>
-          <li><span class="title">Item 6</span></li>
-        </ul>
-        <script type="text/javascript">
-          $(function() {
-            $('#example-handle').sortable({ handle: '.title' })
-          })
-        </script>
-        
-        <h2>items</h2>
-        <dl>
-          <dt>Type</dt>
-          <dd>Selector</dd>
-          <dt>Default</dt>
-          <dd>'li, div'</dd>
-        </dl>
-        <p>Specifies which items inside the element should be sortable.</p>
-        <h4>Example</h4>
-        <pre><code>$('#example-items').sortable({ items: 'li.task' })</code></pre>
-        <blockquote>jQuery's default is '> *', but it is currently not possible to use this children selector for event delegation in Zepto.</blockquote>
+<script type="text/javascript">
+  $(function() {
+    $('#example1').sortable({})
+    $('#example2').sortable({})
+  })
+</script>
 
-        <h2>placeholder</h2>
-        <dl>
-          <dt>Type</dt>
-          <dd>Selector</dd>
-          <dt>Default</dt>
-          <dd>'placeholder'</dd>
-        </dl>
-        <p>A class name that gets applied to the otherwise white space.</p>
-        <h4>Example</h4>
-        <pre><code>$('#example-placeholder').sortable({ placeholder: 'dummy' })</code></pre>
-        
-        <h2>Methods</h2>
-        <h2>destroy()</h2>
-        <p>Removes the draggable functionality completely.</p>
-        <pre><code>$('#example-destroy').sortable()
-$('#example-destroy').sortable('destroy')</code></pre>
-        <ul class="grid wide" id="example-destroy">
-          <li>Item 1</li>
-          <li>Item 2</li>
-          <li>Item 3</li>
-          <li>Item 4</li>
-          <li>Item 5</li>
-          <li>Item 6</li>
-        </ul>
-        
-        <script type="text/javascript">
-          $(function() {
-            $('#example-destroy').sortable()
-            $('#example-destroy').sortable('destroy')
-          })
-        </script>
 
-        <h2>disable()</h2>
-        <p>Disables the draggable.</p>
-        <pre><code>$('#example-disable').sortable('disable')</code></pre>
-        <ul class="grid wide example-disable" id="example-disable">
-          <li>Item 1</li>
-          <li>Item 2</li>
-          <li>Item 3</li>
-          <li>Item 4</li>
-          <li>Item 5</li>
-          <li>Item 6</li>
-        </ul>
-        <script type="text/javascript">
-          $(function() {
-            $('.example-disable').sortable()
-            $('.example-disable').sortable('disable')
-          })
-        </script>
+<h2>Options</h2>
 
-        <h2>enable()</h2>
-        <p>Enables the draggable.</p>
-        <pre><code>$('#example-enable').sortable('enable')</code></pre>
-        <ul class="grid wide example-disable" id="example-enable">
-          <li>Item 1</li>
-          <li>Item 2</li>
-          <li>Item 3</li>
-          <li>Item 4</li>
-          <li>Item 5</li>
-          <li>Item 6</li>
-        </ul>
-        <script type="text/javascript">
-          $(function() {
-            $('#example-enable').sortable('enable')
-          })
-        </script>
+<h2>cancel</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Selector</dd>
+  <dt>Default</dt>
+  <dd>input, textarea, button, select, option</dd>
+</dl>
+<p>Prevents sorting if you start on elements matching the selector.</p>
+<h4>Example</h4>
+{% highlight js %}$('#example-cancel').sortable({ cancel: '.title' }){% endhighlight %}
+<ul class="grid wide" id="example-cancel">
+  <li><span class="title">Item 1</span></li>
+  <li><span class="title">Item 2</span></li>
+  <li><span class="title">Item 3</span></li>
+  <li><span class="title">Item 4</span></li>
+  <li><span class="title">Item 5</span></li>
+  <li><span class="title">Item 6</span></li>
+</ul>
+<script type="text/javascript">
+  $(function() {
+    $('#example-cancel').sortable({ cancel: '.title' })
+  })
+</script>
 
-        <h2>option()</h2>
-        <p>Gets an object containing key/value pairs representing the current draggable options hash.</p>
-        <pre style="width:100%"><code>var options = $('#example-option').sortable('option')</code></pre>
+<h2>connectWith</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Selector</dd>
+  <dt>Default</dt>
+  <dd>false</dd>
+</dl>
+<p>A selector of other sortable elements that the items from this list should be connected to.</p>
+<h4>Example</h4>
+{% highlight js %}$('#lhs').sortable({ connectWith: '#rhs' })
+$('#rhs').sortable(){% endhighlight %}
+<div style="float:left;margin-right:20px">
+  <h4>List A</h4>
+  <ul class="list" id="lhs">
+    <li>A 1</li>
+    <li>A 2</li>
+    <li>A 3</li>
+    <li>A 4</li>
+  </ul>
+</div>
+<div style="float:left">
+  <h4>List B</h4>
+  <ul class="list" id="rhs">
+    <li>B 1</li>
+    <li>B 2</li>
+    <li>B 3</li>
+    <li>B 4</li>
+  </ul>
+</div>
+<script type="text/javascript">
+  $(function() {
+    $('#lhs').sortable({ connectWith: '#rhs' })
+    $('#rhs').sortable()
+  })
+</script>
 
-        <h2>option(optionName)</h2>
-        <p>Gets the value currently associated with the specified <code>optionName</code>.</p>
-        <pre style="width:100%"><code>var isDisabled = $('#example-option').sortable('option', 'disabled')</code></pre>
+<h2>disabled</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Boolean</dd>
+  <dt>Default</dt>
+  <dd>false</dd>
+</dl>
+<p>Disables the sortable if set to <code>true</code>.</p>
+<h4>Example</h4>
+{% highlight js %}$('#example-disabled').sortable({ disabled: true }){% endhighlight %}
+<ul class="grid wide" id="example-disabled">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+  <li>Item 4</li>
+  <li>Item 5</li>
+  <li>Item 6</li>
+</ul>
+<script type="text/javascript">
+  $(function() {
+    $('#example-disabled').sortable({ disabled: true })
+  })
+</script>
 
-        <h2>option(optionName, value)</h2>
-        <p>Sets the value of the sortable option associated with the specified <code>optionName</code>.</p>
-        <pre style="width:100%"><code>$('#example-option').sortable('option', 'disabled', true)</code></pre>
+<h2>forcePlaceholderSize</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Boolean</dd>
+  <dt>Default</dt>
+  <dd>false</dd>
+</dl>
+<p>If <code>true</code>, forces the helper to have a size.</p>
+<h4>Example</h4>
+{% highlight js %}$('#example-forcePlaceholderSize').sortable({ 
+forcePlaceholderSize: true
+}){% endhighlight %}
+<ul class="grid wide" id="example-forcePlaceholderSize">
+  <li style="width:100px">Item 1</li>
+  <li style="width:75px">Item 2</li>
+  <li>Item 3</li>
+  <li>Item 4</li>
+  <li>Item 5</li>
+  <li>Item 6</li>
+</ul>
+<script type="text/javascript">
+  $(function() {
+    $('#example-forcePlaceholderSize').sortable({ forcePlaceholderSize: true })
+  })
+</script>
 
-        <h2>option(options)</h2>
-        <p>Sets one or more options for the sortable.</p>
-        <pre style="width:100%"><code>$('#example-option').sortable('option', { disabled: true })</code></pre>
+<h2>handle</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Selector</dd>
+  <dt>Default</dt>
+  <dd>false</dd>
+</dl>
+<p>Restricts sort start click to the specified element.</p>
+<h4>Example</h4>
+{% highlight js %}$('#example-handle').sortable({ handle: '.title' }){% endhighlight %}
+<ul class="grid wide" id="example-handle">
+  <li><span class="title">Item 1</span></li>
+  <li><span class="title">Item 2</span></li>
+  <li><span class="title">Item 3</span></li>
+  <li><span class="title">Item 4</span></li>
+  <li><span class="title">Item 5</span></li>
+  <li><span class="title">Item 6</span></li>
+</ul>
+<script type="text/javascript">
+  $(function() {
+    $('#example-handle').sortable({ handle: '.title' })
+  })
+</script>
 
-        <h2>refresh()</h2>
-        <p>Refresh the sortable items. Triggers the reloading of all sortable items, causing new items to be recognized.</p>
-        <pre><code>$('#example-refresh').sortable()
+<h2>items</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Selector</dd>
+  <dt>Default</dt>
+  <dd>'li, div'</dd>
+</dl>
+<p>Specifies which items inside the element should be sortable.</p>
+<h4>Example</h4>
+{% highlight js %}$('#example-items').sortable({ items: 'li.task' }){% endhighlight %}
+<blockquote>jQuery's default is '> *', but it is currently not possible to use this children selector for event delegation in Zepto.</blockquote>
+
+<h2>placeholder</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Selector</dd>
+  <dt>Default</dt>
+  <dd>'placeholder'</dd>
+</dl>
+<p>A class name that gets applied to the otherwise white space.</p>
+<h4>Example</h4>
+{% highlight js %}$('#example-placeholder').sortable({ placeholder: 'dummy' }){% endhighlight %}
+
+<h2>Methods</h2>
+<h2>destroy()</h2>
+<p>Removes the draggable functionality completely.</p>
+{% highlight js %}$('#example-destroy').sortable()
+$('#example-destroy').sortable('destroy'){% endhighlight %}
+<ul class="grid wide" id="example-destroy">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+  <li>Item 4</li>
+  <li>Item 5</li>
+  <li>Item 6</li>
+</ul>
+
+<script type="text/javascript">
+  $(function() {
+    $('#example-destroy').sortable()
+    $('#example-destroy').sortable('destroy')
+  })
+</script>
+
+<h2>disable()</h2>
+<p>Disables the draggable.</p>
+{% highlight js %}$('#example-disable').sortable('disable'){% endhighlight %}
+<ul class="grid wide example-disable" id="example-disable">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+  <li>Item 4</li>
+  <li>Item 5</li>
+  <li>Item 6</li>
+</ul>
+<script type="text/javascript">
+  $(function() {
+    $('.example-disable').sortable()
+    $('.example-disable').sortable('disable')
+  })
+</script>
+
+<h2>enable()</h2>
+<p>Enables the draggable.</p>
+{% highlight js %}$('#example-enable').sortable('enable'){% endhighlight %}
+<ul class="grid wide example-disable" id="example-enable">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+  <li>Item 4</li>
+  <li>Item 5</li>
+  <li>Item 6</li>
+</ul>
+<script type="text/javascript">
+  $(function() {
+    $('#example-enable').sortable('enable')
+  })
+</script>
+
+<h2>option()</h2>
+<p>Gets an object containing key/value pairs representing the current draggable options hash.</p>
+{% highlight javascript %}var options = $('#example-option').sortable('option'){% endhighlight %}
+
+<h2>option(optionName)</h2>
+<p>Gets the value currently associated with the specified <code>optionName</code>.</p>
+{% highlight javascript %}var isDisabled = $('#example-option').sortable('option', 'disabled'){% endhighlight %}
+
+<h2>option(optionName, value)</h2>
+<p>Sets the value of the sortable option associated with the specified <code>optionName</code>.</p>
+{% highlight javascript %}$('#example-option').sortable('option', 'disabled', true){% endhighlight %}
+
+<h2>option(options)</h2>
+<p>Sets one or more options for the sortable.</p>
+{% highlight javascript %}$('#example-option').sortable('option', { disabled: true }){% endhighlight %}
+
+<h2>refresh()</h2>
+<p>Refresh the sortable items. Triggers the reloading of all sortable items, causing new items to be recognized.</p>
+{% highlight js %}$('#example-refresh').sortable()
 ![4, 5, 6].forEach(function(i) {
-  $('#example-refresh').append('&lt;li&gt; Item ' + i + '&lt;/li&gt;')
+$('#example-refresh').append('&lt;li&gt; Item ' + i + '&lt;/li&gt;')
 })
-$('#example-refresh').sortable('refresh')</code></pre>
-        <ul class="grid wide" id="example-refresh">
-          <li>Item 1</li>
-          <li>Item 2</li>
-          <li>Item 3</li>
-        </ul>
-        <script type="text/javascript">
-          $(function() {
-            $('#example-refresh').sortable()
-            ![4, 5, 6].forEach(function(i) {
-              $('#example-refresh').append('<li> Item ' + i + '</li>')
-            })
-            $('#example-refresh').sortable('refresh')
-          })
-        </script>
-        
-        <h2>toArray()</h2>
-        <p>Serializes the sortable's item ids into a form/ajax submittable string. Calling this method produces a hash that can be appended to any url to easily submit a new item order back to the server.</p>
-        <p>It works by default by looking at the id of each item in the format <code>"setname_number"</code>, and it spits out a hash like <code>"setname[]=number&amp;setname[]=number"</code>.</p>
-        <h3>Options</h3>
-        <dl class="inline">
-          <dt>attribute</dt>
-          <dd>The name of the attribute to use for the values. (Default: 'id')</dd>
-        </dl>
-        <pre style="width:100%"><code>var arr = $('#example-toArray').sortable('toArray', {
-  attribute: 'data-foobar'
-})</code></pre>
-        
-        <h2>Events</h2>
-        
-        <h2>beforeStop(event, ui)</h2>
-        <p>This event is triggered when sorting stops, but when the placeholder/helper is still available.</p>
-        <dl class="inline">
-          <dt>ui.item</dt>
-          <dd>the element being dragged</dd>
-        </dl>
-        
-        <h2>change(event, ui)</h2>
-        <p>This event is triggered during sorting, but only when the DOM position has changed.</p>
-        <dl class="inline">
-          <dt>ui.item</dt>
-          <dd>the element being dragged</dd>
-        </dl>
-        
-        <h2>create(event)</h2>
-        <p>Triggered when the droppable is created.</p>
-        
-        <h2>receive(event, ui)</h2>
-        <p>This event is triggered when a connected sortable list has received an item from another list.</p>
-        <dl class="inline">
-          <dt>ui.item</dt>
-          <dd>the element being received</dd>
-        </dl>
-        
-        <h2>sort(event, ui)</h2>
-        <p>This event is triggered during sorting.</p>
-        <dl class="inline">
-          <dt>ui.item</dt>
-          <dd>the element being dragged</dd>
-        </dl>
-        
-        <h2>start(event, ui)</h2>
-        <p>This event is triggered when sorting starts.</p>
-        <dl class="inline">
-          <dt>ui.item</dt>
-          <dd>the element being dragged</dd>
-        </dl>
-        
-        <h2>stop(event, ui)</h2>
-        <p>This event is triggered when sorting has stopped.</p>
-        <dl class="inline">
-          <dt>ui.item</dt>
-          <dd>the element being dragged</dd>
-        </dl>
-        
-        <h2>update(event, ui)</h2>
-        <p>This event is triggered when the user stopped sorting and the DOM position has changed.</p>
-        <dl class="inline">
-          <dt>ui.item</dt>
-          <dd>the element being dragged</dd>
-        </dl>
-        
-        <h2>drag, dragover, dragenter, dragleave, dragstart, dragend</h2>
-        <p>These events are natively provided through the HTML5 Drag'n'Drop API.</p>
-        
+$('#example-refresh').sortable('refresh'){% endhighlight %}
+<ul class="grid wide" id="example-refresh">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+</ul>
+<script type="text/javascript">
+  $(function() {
+    $('#example-refresh').sortable()
+    ![4, 5, 6].forEach(function(i) {
+      $('#example-refresh').append('<li> Item ' + i + '</li>')
+    })
+    $('#example-refresh').sortable('refresh')
+  })
+</script>
 
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/rkusa">rkusa</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
+<h2>toArray()</h2>
+<p>Serializes the sortable's item ids into a form/ajax submittable string. Calling this method produces a hash that can be appended to any url to easily submit a new item order back to the server.</p>
+<p>It works by default by looking at the id of each item in the format <code>"setname_number"</code>, and it spits out a hash like <code>"setname[]=number&amp;setname[]=number"</code>.</p>
+<h3>Options</h3>
+<dl class="inline">
+  <dt>attribute</dt>
+  <dd>The name of the attribute to use for the values. (Default: 'id')</dd>
+</dl>
+{% highlight javascript %}var arr = $('#example-toArray').sortable('toArray', {
+attribute: 'data-foobar'
+}){% endhighlight %}
 
-  </body>
-</html>
+<h2>Events</h2>
+
+<h2>beforeStop(event, ui)</h2>
+<p>This event is triggered when sorting stops, but when the placeholder/helper is still available.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being dragged</dd>
+</dl>
+
+<h2>change(event, ui)</h2>
+<p>This event is triggered during sorting, but only when the DOM position has changed.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being dragged</dd>
+</dl>
+
+<h2>create(event)</h2>
+<p>Triggered when the droppable is created.</p>
+
+<h2>receive(event, ui)</h2>
+<p>This event is triggered when a connected sortable list has received an item from another list.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being received</dd>
+</dl>
+
+<h2>sort(event, ui)</h2>
+<p>This event is triggered during sorting.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being dragged</dd>
+</dl>
+
+<h2>start(event, ui)</h2>
+<p>This event is triggered when sorting starts.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being dragged</dd>
+</dl>
+
+<h2>stop(event, ui)</h2>
+<p>This event is triggered when sorting has stopped.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being dragged</dd>
+</dl>
+
+<h2>update(event, ui)</h2>
+<p>This event is triggered when the user stopped sorting and the DOM position has changed.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being dragged</dd>
+</dl>
+
+<h2>drag, dragover, dragenter, dragleave, dragstart, dragend</h2>
+<p>These events are natively provided through the HTML5 Drag'n'Drop API.</p>

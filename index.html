@@ -1,93 +1,79 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>zepto-dnd by rkusa</title>
+---
+layout: layout
+---
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-      
-    <script>
-      document.write('<script src="javascripts/' + 
-      ('__proto__' in {} ? 'zepto' : 'jquery') +
-      '.min.js"><\/script>')
-    </script>
-    <script src="javascripts/zepto-dnd.js"></script>
-  </head>
-  <body>
-    <div class="wrapper">
-      <header>
-        <h1>zepto-dnd</h1>
-        <p>HTML5 Drag'n'Drop API based Draggable, Droppable and Sortable for Zepto.js (and jQuery)</p>
+<h4><a href="sortable.html">Sortable</a></h4>
+<div style="float:left;margin-right:20px">
+  <ul class="list" id="lhs">
+    <li>A 1</li>
+    <li>A 2</li>
+    <li>A 3</li>
+    <li>A 4</li>
+  </ul>
+</div>
 
-        <p class="view"><a href="https://github.com/rkusa/zepto-dnd">View the Project on GitHub <small>rkusa/zepto-dnd</small></a></p>
+<div style="float:left">
+  <ul class="list" id="rhs">
+    <li>B 1</li>
+    <li>B 2</li>
+    <li>B 3</li>
+    <li>B 4</li>
+  </ul>
+</div>
 
-        <ul>
-          <li><a href="https://github.com/rkusa/zepto-dnd/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/rkusa/zepto-dnd/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/rkusa/zepto-dnd">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h4><a href="sortable.html">Sortable</a></h4>
-        <div style="float:left;margin-right:20px">
-          <ul class="list" id="lhs">
-            <li>A 1</li>
-            <li>A 2</li>
-            <li>A 3</li>
-            <li>A 4</li>
-          </ul>
-        </div>
-        
-        <div style="float:left">
-          <ul class="list" id="rhs">
-            <li>B 1</li>
-            <li>B 2</li>
-            <li>B 3</li>
-            <li>B 4</li>
-          </ul>
-        </div>
-        
-        <div style="clear:both"></div>
-        
-        <h4><a href="draggable.html">Draggable</a></h4>
-        <ul class="grid wide">
-          <li class="draggable"></li>
-          <li class="draggable"></li>
-          <li class="draggable"></li>
-          <li class="draggable"></li>
-          <li class="draggable"></li>
-          <li class="draggable"></li>
-          <li class="draggable"></li>
-        </ul>
-        
-        <h4><a href="droppable.html">Droppable</a></h4>
-        <div class="droppable"></div>
-        <div class="droppable"></div>
-        
-        <script type="text/javascript">
-          $(function() {
-            $('#lhs').sortable()
-            $('#rhs').sortable({ connectWith: '#lhs' })
-            .on('receive', function(e, ui) {
-              ui.item.removeClass('draggable')
-            })
-            $('.draggable').draggable({ connectToSortable: '#rhs' })
-            $('.droppable').droppable()
-          })
-        </script>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/rkusa">rkusa</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
-  </body>
-</html>
+<div style="clear:both"></div>
+
+<h4><a href="draggable.html">Draggable</a></h4>
+<ul class="grid wide">
+  <li class="draggable"></li>
+  <li class="draggable"></li>
+  <li class="draggable"></li>
+  <li class="draggable"></li>
+  <li class="draggable"></li>
+  <li class="draggable"></li>
+  <li class="draggable"></li>
+</ul>
+
+<h4><a href="droppable.html">Droppable</a></h4>
+<div class="droppable"></div>
+<div class="droppable"></div>
+
+<script type="text/javascript">
+  $(function() {
+    $('#lhs').sortable()
+    $('#rhs').sortable({ connectWith: '#lhs' })
+    .on('receive', function(e, ui) {
+      ui.item.removeClass('draggable')
+    })
+    $('.draggable').draggable({ connectToSortable: '#rhs' })
+    $('.droppable').droppable()
+  })
+</script>
+
+<p style="clear:both"></p>
+
+{% highlight html %}
+<script type="text/javascript">
+  $(function() {
+    $('#lhs').sortable()
+    $('#rhs').sortable({ connectWith: '#lhs' })
+    .on('receive', function(e, ui) {
+      ui.item.removeClass('draggable')
+    })
+    $('.draggable').draggable({ connectToSortable: '#rhs' })
+    $('.droppable').droppable()
+  })
+</script>
+{% endhighlight %}
+
+<p></p>
+
+<p><b>If you need to support Internet Explorer, you can fall back on jQuery.</b> Note that conditional comments are no longer supported starting on IE 10, therefor Zepto's documentation recommends the following document.write approach:</p>
+
+{% highlight html %}
+<script>
+document.write('<script src=' +
+('__proto__' in {} ? 'zepto' : 'jquery') +
+'.js><\/script>')
+</script>
+{% endhighlight %}
