@@ -39,6 +39,43 @@
   
   var dragging = $.dragging = parent.$.dragging || new Dragging()
   
+  // from https://github.com/rkusa/jquery-observe
+  var Observer = function(target, selector, callback) {
+    var self = this
+    this.target = target
+    this.selector = selector
+    this.callback = callback
+    this.observer = new MutationObserver(function(mutations) {
+      self.disconnect()
+      
+      mutations.forEach(function(mutation) {
+        Array.prototype.slice.call(mutation.addedNodes).forEach(function(node) {
+          if ($(node).is(selector)) self.callback.call(node)
+          $(selector, node).each(function() {
+            self.callback.call(this)
+          })
+        })
+      })
+
+      self.observe()
+    })
+    
+    // call callback for existing elements
+    $(selector, target).each(function() {
+      self.callback.call(this)
+    })
+    
+    this.observe()
+  }
+  
+  Observer.prototype.disconnect = function() {
+    this.observer.disconnect()
+  }
+  
+  Observer.prototype.observe = function() {
+    this.observer.observe(this.target[0], { childList: true, subtree: true })
+  }
+  
   var Draggable = function(element, opts) {
     this.id       = nextId++
     this.el  = $(element)
@@ -330,6 +367,10 @@
     setTimeout(function() {
       self.el.trigger('create', self)
     })
+    
+    this.observer = new Observer(this.el, this.opts.items, function() {
+      $(this).prop('draggable', true)
+    })
   }
   
   Sortable.prototype.destroy = function() {
@@ -354,6 +395,8 @@
     // Todo: Fix Zepto Bug
     // dragging
     // .off('start', this.activate)
+    
+    this.observer.disconnect()
   }
   
   Sortable.prototype.enable = function() {
@@ -547,7 +590,7 @@
             break
           case 'refresh':
             if (identifier !== 'sortable') return
-            instance.element.find(instance.opts.items).prop('draggable', true)
+            instance.el.find(instance.opts.items).prop('draggable', true)
             break
           // case 'serialize':
           //   if (identifier !== 'sortable') return
