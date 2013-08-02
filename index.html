@@ -40,13 +40,13 @@ layout: layout
 
 <script type="text/javascript">
   $(function() {
-    $('#lhs').sortable()
+    $('#lhs').sortable({ connectWith: '.droppable' })
     $('#rhs').sortable({ connectWith: '#lhs' })
     .on('receive', function(e, ui) {
       ui.item.removeClass('draggable')
     })
     $('.draggable').draggable({ connectToSortable: '#rhs' })
-    $('.droppable').droppable()
+    $('.droppable').droppable({ activeClass: 'active', hoverClass: 'drop-here' })
   })
 </script>
 

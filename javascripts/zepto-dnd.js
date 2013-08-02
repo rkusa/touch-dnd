@@ -39,6 +39,43 @@
   
   var dragging = $.dragging = parent.$.dragging || new Dragging()
   
+  // from https://github.com/rkusa/jquery-observe
+  var Observer = function(target, selector, callback) {
+    var self = this
+    this.target = target
+    this.selector = selector
+    this.callback = callback
+    this.observer = new MutationObserver(function(mutations) {
+      self.disconnect()
+      
+      mutations.forEach(function(mutation) {
+        Array.prototype.slice.call(mutation.addedNodes).forEach(function(node) {
+          if ($(node).is(selector)) self.callback.call(node)
+          $(selector, node).each(function() {
+            self.callback.call(this)
+          })
+        })
+      })
+
+      self.observe()
+    })
+    
+    // call callback for existing elements
+    $(selector, target).each(function() {
+      self.callback.call(this)
+    })
+    
+    this.observe()
+  }
+  
+  Observer.prototype.disconnect = function() {
+    this.observer.disconnect()
+  }
+  
+  Observer.prototype.observe = function() {
+    this.observer.observe(this.target[0], { childList: true, subtree: true })
+  }
+  
   var Draggable = function(element, opts) {
     this.id       = nextId++
     this.el  = $(element)
@@ -141,10 +178,11 @@
   }
   
   var Droppable = function(element, opts) {
-    this.id      = nextId++
-    this.el = $(element)
-    this.opts    = opts
-    this.accept  = false
+    this.id          = nextId++
+    this.el          = $(element)
+    this.opts        = opts
+    this.accept      = false
+    this.connectWith = []
   }
   
   Droppable.prototype.create = function() {
@@ -186,14 +224,16 @@
   }
   
   Droppable.prototype.activate = function(e) {
-    this.accept = false
-    var accept = this.opts.accept === '*'
-              || (typeof this.opts.accept === 'function' ? this.opts.accept(dragging.el)
-                                                         : dragging.el.is(this.opts.accept))
-    if (this.opts.scope !== 'default') {
-      this.accept = dragging.origin.opts.scope === this.opts.scope
-      if (!this.accept && this.opts.accept !== '*') this.accept = accept
-    } else this.accept = accept
+    this.accept = this.connectWith.indexOf(dragging.origin.id) !== -1
+    if (!this.accept) {
+      var accept = this.opts.accept === '*'
+                || (typeof this.opts.accept === 'function' ? this.opts.accept(dragging.el)
+                                                           : dragging.el.is(this.opts.accept))
+      if (this.opts.scope !== 'default') {
+        this.accept = dragging.origin.opts.scope === this.opts.scope
+        if (!this.accept && this.opts.accept !== '*') this.accept = accept
+      } else this.accept = accept
+    }
     
     if (!this.accept) return
     if (this.opts.activeClass)
@@ -229,7 +269,7 @@
     // zepto <> jquery compatibility
     if (e.originalEvent) e = e.originalEvent
     
-    e.dataTransfer.dropEffect = 'copy'
+    e.dataTransfer.dropEffect = 'copyMove'
     
     if (this.accept)
       e.preventDefault() // allow drop
@@ -293,7 +333,7 @@
       }
       context.$(this.opts.connectWith).each(function() {
         var el = context.$(this)
-        var instance = el.data('sortable')
+        var instance = el.data('sortable') || el.data('droppable')
         if (instance) instance.connectWith.push(self.id)
         else {
           el.one('create', function(e, instance) {
@@ -330,6 +370,10 @@
     setTimeout(function() {
       self.el.trigger('create', self)
     })
+    
+    this.observer = new Observer(this.el, this.opts.items, function() {
+      $(this).prop('draggable', true)
+    })
   }
   
   Sortable.prototype.destroy = function() {
@@ -354,6 +398,8 @@
     // Todo: Fix Zepto Bug
     // dragging
     // .off('start', this.activate)
+    
+    this.observer.disconnect()
   }
   
   Sortable.prototype.enable = function() {
@@ -547,7 +593,7 @@
             break
           case 'refresh':
             if (identifier !== 'sortable') return
-            instance.element.find(instance.opts.items).prop('draggable', true)
+            instance.el.find(instance.opts.items).prop('draggable', true)
             break
           // case 'serialize':
           //   if (identifier !== 'sortable') return
