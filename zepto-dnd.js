@@ -178,10 +178,11 @@
   }
   
   var Droppable = function(element, opts) {
-    this.id      = nextId++
-    this.el = $(element)
-    this.opts    = opts
-    this.accept  = false
+    this.id          = nextId++
+    this.el          = $(element)
+    this.opts        = opts
+    this.accept      = false
+    this.connectWith = []
   }
   
   Droppable.prototype.create = function() {
@@ -223,14 +224,16 @@
   }
   
   Droppable.prototype.activate = function(e) {
-    this.accept = false
-    var accept = this.opts.accept === '*'
-              || (typeof this.opts.accept === 'function' ? this.opts.accept(dragging.el)
-                                                         : dragging.el.is(this.opts.accept))
-    if (this.opts.scope !== 'default') {
-      this.accept = dragging.origin.opts.scope === this.opts.scope
-      if (!this.accept && this.opts.accept !== '*') this.accept = accept
-    } else this.accept = accept
+    this.accept = this.connectWith.indexOf(dragging.origin.id) !== -1
+    if (!this.accept) {
+      var accept = this.opts.accept === '*'
+                || (typeof this.opts.accept === 'function' ? this.opts.accept(dragging.el)
+                                                           : dragging.el.is(this.opts.accept))
+      if (this.opts.scope !== 'default') {
+        this.accept = dragging.origin.opts.scope === this.opts.scope
+        if (!this.accept && this.opts.accept !== '*') this.accept = accept
+      } else this.accept = accept
+    }
     
     if (!this.accept) return
     if (this.opts.activeClass)
@@ -266,7 +269,7 @@
     // zepto <> jquery compatibility
     if (e.originalEvent) e = e.originalEvent
     
-    e.dataTransfer.dropEffect = 'copy'
+    e.dataTransfer.dropEffect = 'copyMove'
     
     if (this.accept)
       e.preventDefault() // allow drop
@@ -330,7 +333,7 @@
       }
       context.$(this.opts.connectWith).each(function() {
         var el = context.$(this)
-        var instance = el.data('sortable')
+        var instance = el.data('sortable') || el.data('droppable')
         if (instance) instance.connectWith.push(self.id)
         else {
           el.one('create', function(e, instance) {
