@@ -1,6 +1,6 @@
 # zepto-dnd
 
-HTML5 Drag'n'Drop API based Draggable, Droppable and Sortable for [Zepto.js](https://github.com/madrobby/zepto) (and jQuery).
+HTML5 Drag'n'Drop API based Draggable, Droppable and Sortable for [Zepto.js](https://github.com/madrobby/zepto) (and jQuery). For Zepto, you have to include its `data` module.
 
 ```json
 {
