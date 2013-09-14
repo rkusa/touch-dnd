@@ -40,6 +40,7 @@
   var dragging = $.dragging = parent.$.dragging || new Dragging()
   
   // from https://github.com/rkusa/jquery-observe
+  var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver
   var Observer = function(target, selector, callback) {
     var self = this
     this.target = target
