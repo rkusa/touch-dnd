@@ -327,8 +327,7 @@
     this.placeholder = $('<' + tag + ' class="' + this.opts.placeholder + '" />')
     
     this.accept = this.index = this.lastEntered = null
-    this.lastX = this.lastY = this.direction = null
-    
+    this.lastX  = this.lastY = this.direction = null
     this.connectWith = []
     var self = this
     if (this.opts.connectWith) {
@@ -360,6 +359,10 @@
     .find(this.opts.items).prop('draggable', true)
     
     this.el
+    .on('dragenter',  $.proxy(this.enter, this))
+    .on('dragover',   $.proxy(this.over, this))
+    .on('dragend',    $.proxy(this.end, this))
+    .on('drop',       $.proxy(this.drop, this))
     .on('mouseenter', this.opts.cancel, $.proxy(this.disable, this))
     .on('mouseleave', this.opts.cancel, $.proxy(this.enable, this))
     
@@ -392,6 +395,10 @@
     .find(this.opts.items).prop('draggable', false)
     
     this.el
+    .off('dragenter',  this.enter)
+    .off('dragover',   this.over)
+    .off('dragend',    this.end)
+    .off('drop',       this.drop)
     .off('mouseenter', this.opts.cancel, this.disable)
     .off('mouseleave', this.opts.cancel, this.enable)
     
@@ -417,8 +424,9 @@
   }
   
   Sortable.prototype.activate = function(e) {
-    this.accept = dragging.origin.id === this.id
-               || ~this.connectWith.indexOf(dragging.origin.id)
+    this.accept  = dragging.origin.id === this.id
+                   || ~this.connectWith.indexOf(dragging.origin.id)
+    this.isEmpty = this.el.find(this.opts.items).length === 0
   }
   
   Sortable.prototype.start = function(e) {
@@ -450,38 +458,47 @@
     if (!this.accept) return
     
     // stop if event is fired on the placeholder
-    var child = e.currentTarget
+    var child = e.currentTarget, isContainer = child === this.el[0]
     if (child === this.placeholder[0]) return
-    
+
+    // the container fallback is only necessary for empty sortables
+    if (isContainer && !this.isEmpty) return
+
     if (this.opts.forcePlaceholderSize) {
       this.placeholder.height(dragging.el.height())
       // this.placeholder.width(dragging.el.width())
     }
-    
-    e = e.originalEvent
-    // check if we entered another element or if we changed the dragging direction
-    if (this.lastEntered === child) {
-      if ((this.direction === 'down' && (e.clientY < this.lastY || e.clientX < this.lastX))
-        || (this.direction === 'up' && (e.clientY > this.lastY || e.clientX > this.lastX)))
-        this.lastEntered = null
-      else
-        return
+
+    if (!isContainer) {
+      e = e.originalEvent
+      // check if we entered another element or if we changed the dragging direction
+      if (this.lastEntered === child) {
+        if ((this.direction === 'down' && (e.clientY < this.lastY || e.clientX < this.lastX))
+          || (this.direction === 'up' && (e.clientY > this.lastY || e.clientX > this.lastX)))
+          this.lastEntered = null
+        else
+          return
+      }
+      this.lastEntered = child
+      this.lastX = e.clientX
+      this.lastY = e.clientY
     }
-    this.lastEntered = child
-    this.lastX = e.clientX
-    this.lastY = e.clientY
-    
+
     dragging.placeholder = this.placeholder.show()
     
     // if dragging an item that belongs to the current list, hide it while
     // it is being dragged
     if (this.index !== null)
       dragging.el.hide()
-    
-    // insert the placeholder according to the dragging direction
-    this.direction = this.placeholder.index() < $(child).index() ? 'down' : 'up'
-    $(child)[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
-    
+
+    if (!isContainer) {
+      // insert the placeholder according to the dragging direction
+      this.direction = this.placeholder.index() < $(child).index() ? 'down' : 'up'
+      $(child)[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
+    } else {
+      this.el.append(this.placeholder)
+    }
+
     this.el.trigger('sort', { item: dragging.el })
   }
   
@@ -521,8 +538,10 @@
     
     if (!dragging.el) return
     dragging.el.removeClass('dragging')
-    
-    if (e.originalEvent.dataTransfer.effectAllowed === 'copy')
+
+
+    e = e.originalEvent || e
+    if (e.dataTransfer.effectAllowed === 'copy')
       dragging.el = dragging.el.clone()
     
     dragging.el.insertBefore(this.placeholder).show()
@@ -588,7 +607,7 @@
           case 'option':
             // set
             if (value !== undefined)
-              instance.opts[name] = value  
+              instance.opts[name] = value
             else if (typeof name === 'object')
               instance.opts = $.extend(instance.opts, name)
             // get
