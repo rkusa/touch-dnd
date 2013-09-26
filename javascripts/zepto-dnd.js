@@ -630,7 +630,10 @@
             break
           }
         } else {
-          if (instance) return this // throw new Error(identifier + ' already defined')
+          if (instance) {
+            $.extend(instance.opts, opts) // merge options
+            return this
+          }
           instance = new constructor($(this), $.extend({}, defaults, opts))
           instance.create()
           $(this).data(identifier, instance)
