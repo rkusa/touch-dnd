@@ -452,10 +452,10 @@
   }
   
   Sortable.prototype.enter = function(e) {
+    if (!this.accept || this.opts.disabled) return
+    
     e.preventDefault()
     e.stopPropagation()
-    
-    if (!this.accept) return
     
     // stop if event is fired on the placeholder
     var child = e.currentTarget, isContainer = child === this.el[0]
@@ -503,7 +503,8 @@
   }
   
   Sortable.prototype.over = function(e) {
-    if (!this.accept) return
+    if (!this.accept || this.opts.disabled) return
+    
     // This event specifies where the dragged data can be dropped.
     // Everywhere is fine:
     e.preventDefault()
