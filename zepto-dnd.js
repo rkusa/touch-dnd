@@ -261,7 +261,9 @@
     
     e.stopPropagation()
     
-    // dragging.placeholder = null
+    // hide placeholder, if set (e.g. enter the droppable after
+    // entering a sortable)
+    if (dragging.placeholder) dragging.placeholder.hide()
     
     if (this.opts.hoverClass && this.accept)
       this.el.addClass(this.opts.hoverClass)
