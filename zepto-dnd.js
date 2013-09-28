@@ -233,7 +233,7 @@
     this.accept = this.connectWith.indexOf(dragging.origin.id) !== -1
     if (!this.accept) {
       var accept = this.opts.accept === '*'
-                || (typeof this.opts.accept === 'function' ? this.opts.accept(dragging.el)
+                || (typeof this.opts.accept === 'function' ? this.opts.accept.call(this.el[0], dragging.el)
                                                            : dragging.el.is(this.opts.accept))
       if (this.opts.scope !== 'default') {
         this.accept = dragging.origin.opts.scope === this.opts.scope
