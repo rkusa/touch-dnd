@@ -233,7 +233,7 @@
     this.accept = this.connectWith.indexOf(dragging.origin.id) !== -1
     if (!this.accept) {
       var accept = this.opts.accept === '*'
-                || (typeof this.opts.accept === 'function' ? this.opts.accept(dragging.el)
+                || (typeof this.opts.accept === 'function' ? this.opts.accept.call(this.el[0], dragging.el)
                                                            : dragging.el.is(this.opts.accept))
       if (this.opts.scope !== 'default') {
         this.accept = dragging.origin.opts.scope === this.opts.scope
@@ -261,7 +261,9 @@
     
     e.stopPropagation()
     
-    // dragging.placeholder = null
+    // hide placeholder, if set (e.g. enter the droppable after
+    // entering a sortable)
+    if (dragging.placeholder) dragging.placeholder.hide()
     
     if (this.opts.hoverClass && this.accept)
       this.el.addClass(this.opts.hoverClass)
@@ -425,8 +427,14 @@
   
   Sortable.prototype.activate = function(e) {
     this.accept  = dragging.origin.id === this.id
-                   || ~this.connectWith.indexOf(dragging.origin.id)
+                   || !!~this.connectWith.indexOf(dragging.origin.id)
     this.isEmpty = this.el.find(this.opts.items).length === 0
+
+    if (!this.accept) return
+
+    this.accept = this.opts.accept === '*'
+                || (typeof this.opts.accept === 'function' ? this.opts.accept.call(this.el[0], dragging.el)
+                                                           : dragging.el.is(this.opts.accept))
   }
   
   Sortable.prototype.start = function(e) {
@@ -452,10 +460,10 @@
   }
   
   Sortable.prototype.enter = function(e) {
+    if (!this.accept || this.opts.disabled) return
+    
     e.preventDefault()
     e.stopPropagation()
-    
-    if (!this.accept) return
     
     // stop if event is fired on the placeholder
     var child = e.currentTarget, isContainer = child === this.el[0]
@@ -503,7 +511,8 @@
   }
   
   Sortable.prototype.over = function(e) {
-    if (!this.accept) return
+    if (!this.accept || this.opts.disabled) return
+    
     // This event specifies where the dragged data can be dropped.
     // Everywhere is fine:
     e.preventDefault()
@@ -667,6 +676,7 @@
   })
   
   $.fn.sortable = generic(Sortable, 'sortable', {
+    accept: '*',
     cancel: 'input, textarea, button, select, option',
     connectWith: false,
     disabled: false,
