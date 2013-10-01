@@ -427,8 +427,14 @@
   
   Sortable.prototype.activate = function(e) {
     this.accept  = dragging.origin.id === this.id
-                   || ~this.connectWith.indexOf(dragging.origin.id)
+                   || !!~this.connectWith.indexOf(dragging.origin.id)
     this.isEmpty = this.el.find(this.opts.items).length === 0
+
+    if (!this.accept) return
+
+    this.accept = this.opts.accept === '*'
+                || (typeof this.opts.accept === 'function' ? this.opts.accept.call(this.el[0], dragging.el)
+                                                           : dragging.el.is(this.opts.accept))
   }
   
   Sortable.prototype.start = function(e) {
@@ -670,6 +676,7 @@
   })
   
   $.fn.sortable = generic(Sortable, 'sortable', {
+    accept: '*',
     cancel: 'input, textarea, button, select, option',
     connectWith: false,
     disabled: false,
