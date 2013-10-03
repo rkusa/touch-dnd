@@ -340,6 +340,7 @@
       }
       context.$(this.opts.connectWith).each(function() {
         var el = context.$(this)
+        if (el[0] === self.el[0]) return
         var instance = el.data('sortable') || el.data('droppable')
         if (instance) instance.connectWith.push(self.id)
         else {
@@ -470,7 +471,8 @@
     if (child === this.placeholder[0]) return
 
     // the container fallback is only necessary for empty sortables
-    if (isContainer && !this.isEmpty) return
+    if (isContainer && !this.isEmpty && this.placeholder.parent().length)
+      return
 
     if (this.opts.forcePlaceholderSize) {
       this.placeholder.height(dragging.el.height())
@@ -547,7 +549,6 @@
     
     if (!dragging.el) return
     dragging.el.removeClass('dragging')
-
 
     e = e.originalEvent || e
     if (e.dataTransfer.effectAllowed === 'copy')
