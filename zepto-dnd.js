@@ -41,34 +41,38 @@
   
   // from https://github.com/rkusa/jquery-observe
   var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver
-  var Observer = function(target, selector, callback) {
-    var self = this
+  var Observer = function(target, selector, onAdded, onRemoved) {
+    var self    = this
     this.target = target
-    this.selector = selector
-    this.callback = callback
+    
+    var childsOnly = selector[0] === '>'
+      , search = childsOnly ? selector.substr(1) : selector
+      
+    function apply(nodes, callback) {
+      Array.prototype.slice.call(nodes).forEach(function(node) {
+        if (childsOnly && self.target[0] !== $(node).parent()[0]) return
+        if ($(node).is(search)) callback.call(node)
+        if (childsOnly) return
+        $(selector, node).each(function() {
+          callback.call(this)
+        })
+      })
+    }
+    
     this.observer = new MutationObserver(function(mutations) {
       self.disconnect()
       
-      var childsOnly = self.selector[0] === '>'
-        , search = childsOnly ? self.selector.substr(1) : self.selector
-      
       mutations.forEach(function(mutation) {
-        Array.prototype.slice.call(mutation.addedNodes).forEach(function(node) {
-          if (childsOnly && self.target[0] !== $(node).parent()[0]) return
-          if ($(node).is(search)) self.callback.call(node)
-          if (childsOnly) return
-          $(selector, node).each(function() {
-            self.callback.call(this)
-          })
-        })
+        if (onAdded)   apply(mutation.addedNodes,   onAdded)
+        if (onRemoved) apply(mutation.removedNodes, onRemoved)
       })
 
       self.observe()
     })
     
-    // call callback for existing elements
+    // call onAdded for existing elements
     $(selector, target).each(function() {
-      self.callback.call(this)
+      onAdded.call(this)
     })
     
     this.observe()
@@ -385,6 +389,11 @@
     
     this.observer = new Observer(this.el, this.opts.items, function() {
       $(this).prop('draggable', true)
+    }, function() {
+      var item = $(this)
+      self.el.trigger('sort',   { item: item })
+      self.el.trigger('update', { item: item, index: -1 })
+      self.el.trigger('change', { item: item })
     })
   }
   
