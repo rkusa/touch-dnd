@@ -381,6 +381,7 @@
     
     dragging
     .on('start', $.proxy(this.activate, this))
+    .on('stop',  $.proxy(this.reset, this))
     
     var self = this
     setTimeout(function() {
@@ -423,6 +424,7 @@
     // Todo: Fix Zepto Bug
     // dragging
     // .off('start', this.activate)
+    // .off('stop',  this.reset)
     
     this.observer.disconnect()
   }
@@ -445,6 +447,19 @@
     this.accept = this.opts.accept === '*'
                 || (typeof this.opts.accept === 'function' ? this.opts.accept.call(this.el[0], dragging.el)
                                                            : dragging.el.is(this.opts.accept))
+    if (!this.accept) return
+    
+    if (this.opts.activeClass)
+      this.el.addClass(this.opts.activeClass)
+    
+    this.el.trigger('activate', dragging.el)
+  }
+  
+  Sortable.prototype.reset = function(e) {
+    if (!this.accept) return
+    if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
+    
+    this.el.trigger('deactivate', dragging.el)
   }
   
   Sortable.prototype.start = function(e) {
@@ -687,6 +702,7 @@
   
   $.fn.sortable = generic(Sortable, 'sortable', {
     accept: '*',
+    activeClass: false,
     cancel: 'input, textarea, button, select, option',
     connectWith: false,
     disabled: false,
