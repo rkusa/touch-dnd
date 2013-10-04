@@ -337,6 +337,10 @@ ul.grid.wide {
   height: 50px;
 }
 
+ul.grid.active {
+  background-color: #abe2a5;
+}
+
 ul.list li, ul.grid li {
   border: 1px solid #DCDBDD;
   margin: 2px;

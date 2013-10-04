@@ -41,34 +41,38 @@
   
   // from https://github.com/rkusa/jquery-observe
   var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver
-  var Observer = function(target, selector, callback) {
-    var self = this
+  var Observer = function(target, selector, onAdded, onRemoved) {
+    var self    = this
     this.target = target
-    this.selector = selector
-    this.callback = callback
+    
+    var childsOnly = selector[0] === '>'
+      , search = childsOnly ? selector.substr(1) : selector
+      
+    function apply(nodes, callback) {
+      Array.prototype.slice.call(nodes).forEach(function(node) {
+        if (childsOnly && self.target[0] !== $(node).parent()[0]) return
+        if ($(node).is(search)) callback.call(node)
+        if (childsOnly) return
+        $(selector, node).each(function() {
+          callback.call(this)
+        })
+      })
+    }
+    
     this.observer = new MutationObserver(function(mutations) {
       self.disconnect()
       
-      var childsOnly = self.selector[0] === '>'
-        , search = childsOnly ? self.selector.substr(1) : self.selector
-      
       mutations.forEach(function(mutation) {
-        Array.prototype.slice.call(mutation.addedNodes).forEach(function(node) {
-          if (childsOnly && self.target[0] !== $(node).parent()[0]) return
-          if ($(node).is(search)) self.callback.call(node)
-          if (childsOnly) return
-          $(selector, node).each(function() {
-            self.callback.call(this)
-          })
-        })
+        if (onAdded)   apply(mutation.addedNodes,   onAdded)
+        if (onRemoved) apply(mutation.removedNodes, onRemoved)
       })
 
       self.observe()
     })
     
-    // call callback for existing elements
+    // call onAdded for existing elements
     $(selector, target).each(function() {
-      self.callback.call(this)
+      onAdded.call(this)
     })
     
     this.observe()
@@ -340,6 +344,7 @@
       }
       context.$(this.opts.connectWith).each(function() {
         var el = context.$(this)
+        if (el[0] === self.el[0]) return
         var instance = el.data('sortable') || el.data('droppable')
         if (instance) instance.connectWith.push(self.id)
         else {
@@ -376,6 +381,7 @@
     
     dragging
     .on('start', $.proxy(this.activate, this))
+    .on('stop',  $.proxy(this.reset, this))
     
     var self = this
     setTimeout(function() {
@@ -384,6 +390,11 @@
     
     this.observer = new Observer(this.el, this.opts.items, function() {
       $(this).prop('draggable', true)
+    }, function() {
+      var item = $(this)
+      self.el.trigger('sort',   { item: item })
+      self.el.trigger('update', { item: item, index: -1 })
+      self.el.trigger('change', { item: item })
     })
   }
   
@@ -413,6 +424,7 @@
     // Todo: Fix Zepto Bug
     // dragging
     // .off('start', this.activate)
+    // .off('stop',  this.reset)
     
     this.observer.disconnect()
   }
@@ -435,6 +447,19 @@
     this.accept = this.opts.accept === '*'
                 || (typeof this.opts.accept === 'function' ? this.opts.accept.call(this.el[0], dragging.el)
                                                            : dragging.el.is(this.opts.accept))
+    if (!this.accept) return
+    
+    if (this.opts.activeClass)
+      this.el.addClass(this.opts.activeClass)
+    
+    this.el.trigger('activate', dragging.el)
+  }
+  
+  Sortable.prototype.reset = function(e) {
+    if (!this.accept) return
+    if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
+    
+    this.el.trigger('deactivate', dragging.el)
   }
   
   Sortable.prototype.start = function(e) {
@@ -470,7 +495,8 @@
     if (child === this.placeholder[0]) return
 
     // the container fallback is only necessary for empty sortables
-    if (isContainer && !this.isEmpty) return
+    if (isContainer && !this.isEmpty && this.placeholder.parent().length)
+      return
 
     if (this.opts.forcePlaceholderSize) {
       this.placeholder.height(dragging.el.height())
@@ -547,7 +573,6 @@
     
     if (!dragging.el) return
     dragging.el.removeClass('dragging')
-
 
     e = e.originalEvent || e
     if (e.dataTransfer.effectAllowed === 'copy')
@@ -677,6 +702,7 @@
   
   $.fn.sortable = generic(Sortable, 'sortable', {
     accept: '*',
+    activeClass: false,
     cancel: 'input, textarea, button, select, option',
     connectWith: false,
     disabled: false,
