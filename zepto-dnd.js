@@ -28,13 +28,13 @@
   Dragging.prototype.start = function(origin, el) {
     this.origin = origin
     this.el = el
-    this.eventHandler.trigger('start')
+    this.eventHandler.trigger('dragging:start')
     return this.el
   }
   
   Dragging.prototype.stop = function() {
     this.origin = this.el = this.placeholder = null
-    this.eventHandler.trigger('stop')
+    this.eventHandler.trigger('dragging:stop')
   }
   
   var dragging = $.dragging = parent.$.dragging || new Dragging()
@@ -132,7 +132,7 @@
     
     var self = this
     setTimeout(function() {
-      self.el.trigger('create', self)
+      self.el.trigger('draggable:create', self)
     })
   }
   
@@ -203,12 +203,12 @@
     .on('drop',      $.proxy(this.drop, this))
     
     dragging
-    .on('start', $.proxy(this.activate, this))
-    .on('stop',  $.proxy(this.reset, this))
+    .on('dragging:start', $.proxy(this.activate, this))
+    .on('dragging:stop',  $.proxy(this.reset, this))
     
     var self = this
     setTimeout(function() {
-      self.el.trigger('create', self)
+      self.el.trigger('droppable:create', self)
     })
   }
   
@@ -221,8 +221,8 @@
     
     // Todo: Fix Zepto Bug
     // dragging
-    // .off('start', this.activate)
-    // .off('stop',  this.reset)
+    // .off('dragging:start', this.activate)
+    // .off('dragging:stop',  this.reset)
   }
   
   Droppable.prototype.enable = function() {
@@ -249,7 +249,7 @@
     if (this.opts.activeClass)
       this.el.addClass(this.opts.activeClass)
     
-    this.el.trigger('activate', dragging.el)
+    this.el.trigger('droppable:activate', dragging.el)
   }
   
   Droppable.prototype.reset = function(e) {
@@ -257,7 +257,7 @@
     if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
     if (this.opts.hoverClass)  this.el.removeClass(this.opts.hoverClass)
     
-    this.el.trigger('deactivate', dragging.el)
+    this.el.trigger('droppable:deactivate', dragging.el)
   }
   
   Droppable.prototype.enter = function(e) {
@@ -313,7 +313,7 @@
 
     $(this.el).append(dragging.el.show())
       
-    this.el.trigger('receive', { item: dragging.el })
+    this.el.trigger('droppable:receive', { item: dragging.el })
 
     dragging.stop()
   }
@@ -380,21 +380,21 @@
     }
     
     dragging
-    .on('start', $.proxy(this.activate, this))
-    .on('stop',  $.proxy(this.reset, this))
+    .on('dragging:start', $.proxy(this.activate, this))
+    .on('dragging:stop',  $.proxy(this.reset, this))
     
     var self = this
     setTimeout(function() {
-      self.el.trigger('create', self)
+      self.el.trigger('sortable:create', self)
     })
     
     this.observer = new Observer(this.el, this.opts.items, function() {
       $(this).prop('draggable', true)
     }, function() {
       var item = $(this)
-      self.el.trigger('sort',   { item: item })
-      self.el.trigger('update', { item: item, index: -1 })
-      self.el.trigger('change', { item: item })
+      self.el.trigger('sortable:sort',   { item: item })
+      self.el.trigger('sortable:update', { item: item, index: -1 })
+      self.el.trigger('sortable:change', { item: item })
     })
   }
   
@@ -423,8 +423,8 @@
     
     // Todo: Fix Zepto Bug
     // dragging
-    // .off('start', this.activate)
-    // .off('stop',  this.reset)
+    // .off('dragging:start', this.activate)
+    // .off('dragging:stop',  this.reset)
     
     this.observer.disconnect()
   }
@@ -452,14 +452,14 @@
     if (this.opts.activeClass)
       this.el.addClass(this.opts.activeClass)
     
-    this.el.trigger('activate', dragging.el)
+    this.el.trigger('sortable:activate', dragging.el)
   }
   
   Sortable.prototype.reset = function(e) {
     if (!this.accept) return
     if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
     
-    this.el.trigger('deactivate', dragging.el)
+    this.el.trigger('sortable:deactivate', dragging.el)
   }
   
   Sortable.prototype.start = function(e) {
@@ -481,7 +481,7 @@
       this.placeholder.width(dragging.el.width())
     }
     
-    this.el.trigger('start', { item: dragging.el })
+    this.el.trigger('dragging:start', { item: dragging.el })
   }
   
   Sortable.prototype.enter = function(e) {
@@ -533,7 +533,7 @@
       this.el.append(this.placeholder)
     }
 
-    this.el.trigger('sort', { item: dragging.el })
+    this.el.trigger('sortable:sort', { item: dragging.el })
   }
   
   Sortable.prototype.over = function(e) {
@@ -557,14 +557,14 @@
 
     if (!dragging.el) return
     
-    this.el.trigger('beforeStop', { item: dragging.el })
+    this.el.trigger('sortable:beforeStop', { item: dragging.el })
     
     // revert
     dragging.el.removeClass('dragging').show()
     dragging.stop()
     
     this.index = null
-    this.el.trigger('stop')
+    this.el.trigger('dragging:stop')
   }
   
   Sortable.prototype.drop = function(e) {
@@ -589,8 +589,8 @@
       // if (dragging.origin instanceof Draggable)
       //   dragging.origin.destroy()
       
-      this.el.trigger('receive', { item: dragging.el })
-      this.el.trigger('update', { item: dragging.el, index: newIndex })
+      this.el.trigger('sortable:receive', { item: dragging.el })
+      this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
       
       // the receive event maybe inserted an element manually
       // if so, find it and make it draggable
@@ -598,20 +598,20 @@
     }
     // if the index changed, trigger the update event
     else if (newIndex !== this.index) {
-      this.el.trigger('update', { item: dragging.el, index: newIndex })
+      this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
     
-    this.el.trigger('change', { item: dragging.el })
+    this.el.trigger('sortable:change', { item: dragging.el })
     
-    this.el.trigger('beforeStop', { item: dragging.el })
+    this.el.trigger('sortable:beforeStop', { item: dragging.el })
     if (dragging.origin instanceof Sortable) {
       dragging.origin.index = null
-      dragging.origin.el.trigger('stop')
+      dragging.origin.el.trigger('dragging:stop')
     }
     
     dragging.stop()
     
-    this.el.trigger('stop')
+    this.el.trigger('dragging:stop')
   }
   
   Sortable.prototype.toArray = function(opts) {
