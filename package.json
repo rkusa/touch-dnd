@@ -4,7 +4,7 @@
     "name": "Markus Ast",
     "email": "npm.m@rkusa.st"
   },
-  "version": "0.2.2",
+  "version": "1.0.0",
   "homepage": "https://github.com/rkusa/zepto-dnd",
   "devDependencies": {
     "uglify-js": "2.x.x"

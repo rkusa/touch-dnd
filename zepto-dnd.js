@@ -111,7 +111,7 @@
       var instance = el.data('sortable') || el.data('droppable')
       if (instance) instance.connectedWith.push(self.id)
       else {
-        el.one('create', function(e, instance) {
+        el.one('sortable:create droppable:create', function(e, instance) {
           instance.connectedWith.push(self.id)
         })
       }
@@ -527,7 +527,7 @@
     
     e.preventDefault() // allow drop
     e.stopPropagation()
-    
+
     e = e.originalEvent || e // zepto <> jquery compatibility
     if (e.dataTransfer.effectAllowed === 'copy')
       e.dataTransfer.dropEffect = 'copy'
@@ -631,10 +631,6 @@
               result.push(instance.opts[name])
             else
               result.push(instance.opts)
-            break
-          case 'refresh':
-            if (identifier !== 'sortable') return
-            instance.el.find(instance.opts.items).prop('draggable', true)
             break
           // case 'serialize':
           //   if (identifier !== 'sortable') return
