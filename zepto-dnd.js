@@ -169,9 +169,7 @@
   Draggable.prototype.start = function(e) {
     if (this.opts.disabled) return false
     
-    // zepto <> jquery compatibility
-    if (e.originalEvent) e = e.originalEvent
-    
+    e = e.originalEvent || e // zepto <> jquery compatibility
     e.dataTransfer.effectAllowed = 'copy'
     try { // IE fix
       // FF fix: set some data ....
@@ -279,17 +277,13 @@
   }
   
   Droppable.prototype.over = function(e) {
-    if (this.opts.disabled) return
+    if (!this.accept || this.opts.disabled) return
     
+    e.preventDefault() // allow drop
     e.stopPropagation()
     
-    // zepto <> jquery compatibility
-    if (e.originalEvent) e = e.originalEvent
-    
+    e = e.originalEvent || e // zepto <> jquery compatibility
     e.dataTransfer.dropEffect = 'copyMove'
-    
-    if (this.accept)
-      e.preventDefault() // allow drop
   }
   
   Droppable.prototype.leave = function(e) {
@@ -458,10 +452,11 @@
     
     e.stopPropagation()
     
-    e.originalEvent.dataTransfer.effectAllowed = 'move'
+    e = e.originalEvent || e // zepto <> jquery compatibility
+    e.dataTransfer.effectAllowed = 'move'
     try { // IE fix
       // FF fix: set some data ....
-      e.originalEvent.dataTransfer.setData('text/plain', '42')
+      e.dataTransfer.setData('text/plain', '42')
     } catch(e) {}
     
     dragging.start(this, $(e.target)).addClass('dragging')
@@ -530,14 +525,10 @@
   Sortable.prototype.over = function(e) {
     if (!this.accept || this.opts.disabled) return
     
-    // This event specifies where the dragged data can be dropped.
-    // Everywhere is fine:
-    e.preventDefault()
+    e.preventDefault() // allow drop
     e.stopPropagation()
     
-    // zepto <> jquery compatibility
-    if (e.originalEvent) e = e.originalEvent
-    
+    e = e.originalEvent || e // zepto <> jquery compatibility
     if (e.dataTransfer.effectAllowed === 'copy')
       e.dataTransfer.dropEffect = 'copy'
   }
