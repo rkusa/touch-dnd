@@ -92,25 +92,30 @@
     this.opts     = opts
     this.cancel   = opts.handle !== false
     
-    this.connectWith = []
-    var self = this
-    if (this.opts.connectToSortable) {
-      var target = $(this.opts.connectToSortable)
-        , context = window
-      if (target[0].ownerDocument !== document) {
-        context = target[0].ownerDocument.defaultView
-      }
-      context.$(this.opts.connectToSortable).each(function() {
-        var el = context.$(this)
-        var instance = el.data('sortable')
-        if (instance) instance.connectWith.push(self.id)
-        else {
-          el.one('create', function(e, instance) {
-            instance.connectWith.push(self.id)
-          })
-        }
-      })
+    this.connectedWith = []
+    if (this.opts.connectWith) {
+      this.connectWith(this.opts.connectWith)
     }
+  }
+
+  Draggable.prototype.connectWith = function(connectWith) {
+    var self = this
+      , target = $(connectWith)
+      , context = window
+    if (target[0].ownerDocument !== document) {
+      context = target[0].ownerDocument.defaultView
+    }
+    context.$(connectWith).each(function() {
+      var el = context.$(this)
+      if (el[0] === self.el[0]) return
+      var instance = el.data('sortable') || el.data('droppable')
+      if (instance) instance.connectedWith.push(self.id)
+      else {
+        el.one('create', function(e, instance) {
+          instance.connectedWith.push(self.id)
+        })
+      }
+    })
   }
   
   Draggable.prototype.create = function() {
@@ -188,11 +193,11 @@
   }
   
   var Droppable = function(element, opts) {
-    this.id          = nextId++
-    this.el          = $(element)
-    this.opts        = opts
-    this.accept      = false
-    this.connectWith = []
+    this.id            = nextId++
+    this.el            = $(element)
+    this.opts          = opts
+    this.accept        = false
+    this.connectedWith = []
   }
   
   Droppable.prototype.create = function() {
@@ -234,7 +239,7 @@
   }
   
   Droppable.prototype.activate = function(e) {
-    this.accept = this.connectWith.indexOf(dragging.origin.id) !== -1
+    this.accept = this.connectedWith.indexOf(dragging.origin.id) !== -1
     if (!this.accept) {
       var accept = this.opts.accept === '*'
                 || (typeof this.opts.accept === 'function' ? this.opts.accept.call(this.el[0], dragging.el)
@@ -334,27 +339,13 @@
     
     this.accept = this.index = this.lastEntered = null
     this.lastX  = this.lastY = this.direction = null
-    this.connectWith = []
-    var self = this
+    this.connectedWith = []
     if (this.opts.connectWith) {
-      var target = $(this.opts.connectWith)
-        , context = window
-      if (target[0].ownerDocument !== document) {
-        context = target[0].ownerDocument.defaultView
-      }
-      context.$(this.opts.connectWith).each(function() {
-        var el = context.$(this)
-        if (el[0] === self.el[0]) return
-        var instance = el.data('sortable') || el.data('droppable')
-        if (instance) instance.connectWith.push(self.id)
-        else {
-          el.one('create', function(e, instance) {
-            instance.connectWith.push(self.id)
-          })
-        }
-      })
+      this.connectWith(this.opts.connectWith)
     }
   }
+
+  Sortable.prototype.connectWith = Draggable.prototype.connectWith
   
   Sortable.prototype.create = function() {
     this.el
@@ -439,7 +430,7 @@
   
   Sortable.prototype.activate = function(e) {
     this.accept  = dragging.origin.id === this.id
-                   || !!~this.connectWith.indexOf(dragging.origin.id)
+                   || !!~this.connectedWith.indexOf(dragging.origin.id)
     this.isEmpty = this.el.find(this.opts.items).length === 0
 
     if (!this.accept) return
@@ -683,7 +674,7 @@
   
   $.fn.draggable = generic(Draggable, 'draggable', {
     cancel: 'input, textarea, button, select, option',
-    connectToSortable: false,
+    connectedWith: false,
     cursor: 'auto',
     disabled: false,
     handle: false,
