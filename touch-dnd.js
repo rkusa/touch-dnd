@@ -392,12 +392,6 @@
     .on('dragging:enter', $.proxy(this.enter, this))
     .on('dragging:drop',  $.proxy(this.drop, this))
     
-    if (this.opts.handle) {
-      this.el
-      .on('mouseenter', this.opts.handle, $.proxy(this.enable, this))
-      .on('mouseleave', this.opts.handle, $.proxy(this.disable, this))
-    }
-    
     dragging
     .on('dragging:start', $.proxy(this.activate, this))
     .on('dragging:stop',  $.proxy(this.reset, this))
@@ -425,12 +419,6 @@
     this.el
     .off('dragging:enter', this.enter)
     .off('dragging:drop',  this.drop)
-    
-    if (this.opts.handle) {
-      this.el
-      .off('mouseenter', this.opts.handle, this.enable)
-      .off('mouseleave', this.opts.handle, this.disable)
-    }
     
     // Todo: Fix Zepto Bug
     // dragging
@@ -488,6 +476,18 @@
         if (target.is(this.opts.cancel)) return false
         target = target.parent()
       }
+    }
+
+    if (this.opts.handle) {
+      var target = $(e.target), isHandle = false
+      while (target[0] !== this.el[0]) {
+        if (target.is(this.opts.handle)) {
+          isHandle = true
+          break
+        }
+        target = target.parent()
+      }
+      if (!isHandle) return false
     }
     
     // use e.currentTarget instead of e.target because we want the target
