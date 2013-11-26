@@ -27,7 +27,7 @@
   var Dragging = function() {
     this.eventHandler = $('<div />')
     this.parent = this.el = null
-    this.origin = { x: 0, y: 0, transition: null, translate: null }
+    this.origin = { x: 0, y: 0, transition: null, translate: null, offset: { x: 0, y: 0 } }
 
     var placeholder
     Object.defineProperty(this, 'placeholder', {
@@ -57,6 +57,9 @@
     this.origin.y = e.pageY
     this.origin.transform  = vendorify('transform', this.el[0])
     this.origin.transition = vendorify('transition', this.el[0])
+    var rect = this.el[0].getBoundingClientRect()
+    this.origin.offset.x = rect.left - this.origin.x
+    this.origin.offset.y = rect.top - this.origin.y
     // the draged element is going to stick right under the cursor
     // setting the css property `pointer-events` to `none` will let
     // the pointer events fire on the elements underneath the helper
@@ -518,6 +521,7 @@
 
     if (!this.placeholder.parent().length) {
       this.el.append(dragging.placeholder = this.placeholder.hide())
+      dragging.el.css('margin-bottom', dragging.el.height() * -1)
     }
 
     // if dragging an item that belongs to the current list, hide it while
@@ -531,14 +535,14 @@
       // insert the placeholder according to the dragging direction
       this.direction = this.placeholder.show().index() < child.index() ? 'down' : 'up'
       child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
-      if (child.index() <= this.index) {
-        dragging.el.css('margin-top', dragging.el.height() * -1)
-        dragging.el.css('margin-bottom', '')
-      }
-      else {
-        dragging.el.css('margin-bottom', dragging.el.height() * -1)
-        dragging.el.css('margin-top', '')
-      }
+
+      translate(dragging.el[0], 0, 0)
+      var rect = dragging.el[0].getBoundingClientRect()
+      dragging.origin.x = rect.left - dragging.origin.offset.x
+      dragging.origin.y = rect.top  - dragging.origin.offset.y
+      var deltaX = e.pageX - dragging.origin.x
+        , deltaY = e.pageY - dragging.origin.y
+      translate(dragging.el[0], deltaX, deltaY)
     } else {
       this.el.append(this.placeholder)
     }
@@ -555,7 +559,6 @@
     this.el.trigger('sortable:beforeStop', { item: dragging.el })
     
     // revert
-    dragging.el.css('margin-top', '')
     dragging.el.css('margin-bottom', '')
     $(document).off('mouseup touchend', this.end)
     dragging.stop()
@@ -604,7 +607,6 @@
     }
     
     // revert
-    dragging.el.css('margin-top', '')
     dragging.el.css('margin-bottom', '')
     $(document).off('mouseup touchend', this.end)
     dragging.stop(false)
