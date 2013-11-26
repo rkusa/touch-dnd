@@ -505,6 +505,7 @@
     // stop if event is fired on the placeholder
     var child = e.currentTarget, isContainer = child === this.el[0]
     if (child === this.placeholder[0]) return
+    child = $(child)
 
     // the container fallback is only necessary for empty sortables
     if (isContainer && !this.isEmpty && this.placeholder.parent().length)
@@ -515,21 +516,10 @@
       // this.placeholder.width(dragging.el.width())
     }
 
-    if (!isContainer) {
-      // check if we entered another element or if we changed the dragging direction
-      if (this.lastEntered === child) {
-        if ((this.direction === 'down' && (y < this.lastY || x < this.lastX))
-          || (this.direction === 'up' && (y > this.lastY || x > this.lastX)))
-          this.lastEntered = null
-        else
-          return
-      }
-      this.lastEntered = child
-      this.lastX = x
-      this.lastY = y
+    if (!this.placeholder.parent().length) {
+      this.el.append(dragging.placeholder = this.placeholder.hide())
     }
 
-    dragging.placeholder = this.placeholder.show()
     // if dragging an item that belongs to the current list, hide it while
     // it is being dragged
     if (this.index !== null) {
@@ -539,8 +529,16 @@
 
     if (!isContainer) {
       // insert the placeholder according to the dragging direction
-      this.direction = this.placeholder.index() < $(child).index() ? 'down' : 'up'
-      $(child)[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
+      this.direction = this.placeholder.show().index() < child.index() ? 'down' : 'up'
+      child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
+      if (child.index() <= this.index) {
+        dragging.el.css('margin-top', dragging.el.height() * -1)
+        dragging.el.css('margin-bottom', '')
+      }
+      else {
+        dragging.el.css('margin-bottom', dragging.el.height() * -1)
+        dragging.el.css('margin-top', '')
+      }
     } else {
       this.el.append(this.placeholder)
     }
@@ -557,7 +555,8 @@
     this.el.trigger('sortable:beforeStop', { item: dragging.el })
     
     // revert
-    dragging.el.removeClass('dragging').show()
+    dragging.el.css('margin-top', '')
+    dragging.el.css('margin-bottom', '')
     $(document).off('mouseup touchend', this.end)
     dragging.stop()
     
@@ -604,7 +603,11 @@
       dragging.parent.el.trigger('dragging:stop')
     }
     
-    dragging.stop()
+    // revert
+    dragging.el.css('margin-top', '')
+    dragging.el.css('margin-bottom', '')
+    $(document).off('mouseup touchend', this.end)
+    dragging.stop(false)
     
     this.el.trigger('dragging:stop')
   }
