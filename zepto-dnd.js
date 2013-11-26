@@ -1,8 +1,33 @@
 !function($) {
+  function translate(el, x, y) {
+    vendorify('transform', el, 'translate(' + x + 'px, ' + y + 'px)')
+  }
+
+  function transition(el, val) {
+    vendorify('transition', el, val)
+  }
+
+  function vendorify(property, el, val) {
+    property = property.toLowerCase()
+    var titleCased = property.charAt(0).toUpperCase() + property.substr(1)
+    var vendorPrefixes = ['webkit', 'Moz', 'ms', 'O']
+    var properties = vendorPrefixes.map(function(prefix) {
+      return prefix + titleCased
+    }).concat('transform')
+    for (var i = 0, len = properties.length; i < len; ++i) {
+      if (properties[i] in el.style) {
+        if (val !== undefined) el.style[properties[i]] = val
+        else return el.style[properties[i]]
+        break
+      }
+    }
+  }
+
   var nextId = 0
   var Dragging = function() {
     this.eventHandler = $('<div />')
-    this.origin = this.el = null
+    this.parent = this.el = null
+    this.origin = { x: 0, y: 0, transition: null, translate: null }
 
     var placeholder
     Object.defineProperty(this, 'placeholder', {
@@ -25,16 +50,55 @@
     return this
   }
   
-  Dragging.prototype.start = function(origin, el) {
-    this.origin = origin
+  Dragging.prototype.start = function(parent, el, e) {
+    this.parent = parent
     this.el = el
+    this.origin.x = e.pageX
+    this.origin.y = e.pageY
+    this.origin.transform  = vendorify('transform', this.el[0])
+    this.origin.transition = vendorify('transition', this.el[0])
+    // the draged element is going to stick right under the cursor
+    // setting the css property `pointer-events` to `none` will let
+    // the pointer events fire on the elements underneath the helper
+    this.el[0].style.pointerEvents = 'none'
+    $(document).on('mousemove touchmove', $.proxy(this.move, this))
+    transition(this.el[0], '')
     this.eventHandler.trigger('dragging:start')
     return this.el
   }
   
-  Dragging.prototype.stop = function() {
-    this.origin = this.el = this.placeholder = null
+  Dragging.prototype.stop = function(revert) {
+    if (this.last) {
+      var last = this.last
+      this.last = null
+      $(last).trigger('dragging:drop')
+    }
+    if (!this.el) return
+    if (revert === undefined) revert = true
+    if (revert) {
+      transition(this.el[0], 'all 0.5s ease-in-out 0s')
+      setTimeout(vendorify.bind(null, 'transition', this.el[0], this.origin.transition), 500)
+    }
+    vendorify('transform', this.el[0], this.origin.transform || 'translate(0, 0)')
+    this.el[0].style.pointerEvents = 'auto'
+    $(document).off('mousemove touchmove', this.move)
+    this.parent = this.el = this.placeholder = null
     this.eventHandler.trigger('dragging:stop')
+  }
+
+  Dragging.prototype.move = function(e) {
+    if (!this.el) return
+    var clientX = e.clientX || event.touches[0].clientX
+      , clientY = e.clientY || event.touches[0].clientY
+    var over = document.elementFromPoint(clientX, clientY)
+    if (over !== this.last) {
+      $(over).trigger('dragging:enter', clientX, clientY)
+      $(this.last).trigger('dragging:leave', clientX, clientY)
+    }
+    this.last = over
+    var deltaX = e.pageX - this.origin.x
+      , deltaY = e.pageY - this.origin.y
+    translate(this.el[0], deltaX, deltaY)
   }
   
   var dragging = $.dragging = parent.$.dragging || new Dragging()
@@ -87,10 +151,10 @@
   }
   
   var Draggable = function(element, opts) {
-    this.id       = nextId++
-    this.el  = $(element)
-    this.opts     = opts
-    this.cancel   = opts.handle !== false
+    this.id     = nextId++
+    this.el     = $(element)
+    this.opts   = opts
+    this.cancel = opts.handle !== false
     
     this.connectedWith = []
     if (this.opts.connectWith) {
@@ -120,9 +184,7 @@
   
   Draggable.prototype.create = function() {
     this.el
-    .on('dragstart', $.proxy(this.start, this))
-    .on('dragend',   $.proxy(this.end, this))
-    .prop('draggable', true)
+    .on('mousedown touchstart', $.proxy(this.start, this))
 
     // Prevents dragging from starting on specified elements.
     this.el
@@ -143,9 +205,7 @@
   
   Draggable.prototype.destroy = function() {
     this.el
-    .off('dragstart', this.start)
-    .off('dragend',   this.end)
-    .prop('draggable', false)
+    .off('mousedown touchstart', this.start)
     
     this.el
     .off('mouseenter', this.opts.cancel, this.disable)
@@ -170,23 +230,18 @@
     if (this.opts.disabled) return false
     
     e = e.originalEvent || e // zepto <> jquery compatibility
-    e.dataTransfer.effectAllowed = 'copy'
-    try { // IE fix
-      // FF fix: set some data ....
-      e.dataTransfer.setData('text/plain', '42')
-    } catch(e) {}
+    e.preventDefault() // prevent text selection
     
-    dragging.start(this, this.el).addClass('dragging')
+    dragging.start(this, this.el, e)
+    $(document).on('mouseup touchend', $.proxy(this.end, this))
   }
   
   Draggable.prototype.end = function(e) {
-    e.stopPropagation()
-    e.preventDefault()
-    
-    if (!dragging.el) return
+    // e.stopPropagation()
+    // e.preventDefault()
     
     // revert
-    this.el.removeClass('dragging')
+    $(document).off('mouseup touchend', this.end)
     dragging.stop()
   }
   
@@ -200,11 +255,10 @@
   
   Droppable.prototype.create = function() {
     this.el
-    .on('dragover',  $.proxy(this.over, this))
-    .on('dragenter', $.proxy(this.enter, this))
-    .on('dragleave', $.proxy(this.leave, this))
-    .on('drop',      $.proxy(this.drop, this))
-    
+    .on('dragging:enter', $.proxy(this.enter, this))
+    .on('dragging:leave', $.proxy(this.leave, this))
+    .on('dragging:drop',  $.proxy(this.drop, this))
+
     dragging
     .on('dragging:start', $.proxy(this.activate, this))
     .on('dragging:stop',  $.proxy(this.reset, this))
@@ -217,10 +271,9 @@
   
   Droppable.prototype.destroy = function() {
     this.el
-    .off('dragover',  this.over)
-    .off('dragenter', this.enter)
-    .off('dragleave', this.leave)
-    .off('drop',      this.drop)
+    .off('dragging:enter', this.enter)
+    .off('dragging:leave', this.leave)
+    .off('dragging:drop',  this.drop)
     
     // Todo: Fix Zepto Bug
     // dragging
@@ -237,13 +290,13 @@
   }
   
   Droppable.prototype.activate = function(e) {
-    this.accept = this.connectedWith.indexOf(dragging.origin.id) !== -1
+    this.accept = this.connectedWith.indexOf(dragging.parent.id) !== -1
     if (!this.accept) {
       var accept = this.opts.accept === '*'
                 || (typeof this.opts.accept === 'function' ? this.opts.accept.call(this.el[0], dragging.el)
                                                            : dragging.el.is(this.opts.accept))
       if (this.opts.scope !== 'default') {
-        this.accept = dragging.origin.opts.scope === this.opts.scope
+        this.accept = dragging.parent.opts.scope === this.opts.scope
         if (!this.accept && this.opts.accept !== '*') this.accept = accept
       } else this.accept = accept
     }
@@ -272,18 +325,10 @@
     // entering a sortable)
     if (dragging.placeholder) dragging.placeholder.hide()
     
-    if (this.opts.hoverClass && this.accept)
+    if (!this.accept) return
+
+    if (this.opts.hoverClass)
       this.el.addClass(this.opts.hoverClass)
-  }
-  
-  Droppable.prototype.over = function(e) {
-    if (!this.accept || this.opts.disabled) return
-    
-    e.preventDefault() // allow drop
-    e.stopPropagation()
-    
-    e = e.originalEvent || e // zepto <> jquery compatibility
-    e.dataTransfer.dropEffect = 'copyMove'
   }
   
   Droppable.prototype.leave = function(e) {
@@ -298,23 +343,16 @@
     if (this.opts.disabled) return false
     
     e.stopPropagation() // stops the browser from redirecting.
-    // e.preventDefault()
     
     if (!dragging.el) return
     
-    dragging.el.removeClass('dragging')
-    
     // zepto <> jquery compatibility
-    if (e.originalEvent) e = e.originalEvent
+    var el = dragging.el
+    dragging.stop(false)
+
+    $(this.el).append(el.clone())
     
-    if (e.dataTransfer.effectAllowed === 'copy')
-      dragging.el = dragging.el.clone()
-
-    $(this.el).append(dragging.el.show())
-      
-    this.el.trigger('droppable:receive', { item: dragging.el })
-
-    dragging.stop()
+    this.el.trigger('droppable:receive', { item: el })
   }
   
   var Sortable = function(element, opts) {
@@ -343,18 +381,14 @@
   
   Sortable.prototype.create = function() {
     this.el
-    .on('dragstart', this.opts.items, $.proxy(this.start, this))
-    .on('dragenter', this.opts.items, $.proxy(this.enter, this))
-    .on('dragover',  this.opts.items, $.proxy(this.over, this))
-    .on('dragend',   this.opts.items, $.proxy(this.end, this))
-    .on('drop',      this.opts.items, $.proxy(this.drop, this))
+    .on('mousedown touchstart', this.opts.items, $.proxy(this.start, this))
+    .on('dragging:enter', this.opts.items, $.proxy(this.enter, this))
+    .on('dragging:drop',      this.opts.items, $.proxy(this.drop, this))
     .find(this.opts.items).prop('draggable', true)
     
     this.el
-    .on('dragenter',  $.proxy(this.enter, this))
-    .on('dragover',   $.proxy(this.over, this))
-    .on('dragend',    $.proxy(this.end, this))
-    .on('drop',       $.proxy(this.drop, this))
+    .on('dragging:enter',  $.proxy(this.enter, this))
+    .on('dragging:drop',       $.proxy(this.drop, this))
     .on('mouseenter', this.opts.cancel, $.proxy(this.disable, this))
     .on('mouseleave', this.opts.cancel, $.proxy(this.enable, this))
     
@@ -385,18 +419,14 @@
   
   Sortable.prototype.destroy = function() {
     this.el
-    .off('dragstart', this.opts.items, this.start)
-    .off('dragenter', this.opts.items, this.enter)
-    .off('dragover',  this.opts.items, this.over)
-    .off('dragend',   this.opts.items, this.end)
-    .off('drop',      this.opts.items, this.drop)
+    .off('mousedown touchstart', this.opts.items, this.start)
+    .off('dragging:enter', this.opts.items, this.enter)
+    .off('dragging:drop',      this.opts.items, this.drop)
     .find(this.opts.items).prop('draggable', false)
     
     this.el
-    .off('dragenter',  this.enter)
-    .off('dragover',   this.over)
-    .off('dragend',    this.end)
-    .off('drop',       this.drop)
+    .off('dragging:enter',  this.enter)
+    .off('dragging:drop',       this.drop)
     .off('mouseenter', this.opts.cancel, this.disable)
     .off('mouseleave', this.opts.cancel, this.enable)
     
@@ -423,8 +453,8 @@
   }
   
   Sortable.prototype.activate = function(e) {
-    this.accept  = dragging.origin.id === this.id
-                   || !!~this.connectedWith.indexOf(dragging.origin.id)
+    this.accept  = dragging.parent.id === this.id
+                   || !!~this.connectedWith.indexOf(dragging.parent.id)
     this.isEmpty = this.el.find(this.opts.items).length === 0
 
     if (!this.accept) return
@@ -451,15 +481,11 @@
     if (this.opts.disabled) return false
     
     e.stopPropagation()
+    e.preventDefault() // prevent text selection
     
-    e = e.originalEvent || e // zepto <> jquery compatibility
-    e.dataTransfer.effectAllowed = 'move'
-    try { // IE fix
-      // FF fix: set some data ....
-      e.dataTransfer.setData('text/plain', '42')
-    } catch(e) {}
-    
-    dragging.start(this, $(e.target)).addClass('dragging')
+    dragging.start(this, $(e.target), e)
+    $(document).on('mouseup touchend', $.proxy(this.end, this))
+
     this.index = dragging.el.index()
     
     if (this.opts.forcePlaceholderSize) {
@@ -470,7 +496,7 @@
     this.el.trigger('dragging:start', { item: dragging.el })
   }
   
-  Sortable.prototype.enter = function(e) {
+  Sortable.prototype.enter = function(e, x, y) {
     if (!this.accept || this.opts.disabled) return
     
     e.preventDefault()
@@ -490,26 +516,26 @@
     }
 
     if (!isContainer) {
-      e = e.originalEvent
       // check if we entered another element or if we changed the dragging direction
       if (this.lastEntered === child) {
-        if ((this.direction === 'down' && (e.clientY < this.lastY || e.clientX < this.lastX))
-          || (this.direction === 'up' && (e.clientY > this.lastY || e.clientX > this.lastX)))
+        if ((this.direction === 'down' && (y < this.lastY || x < this.lastX))
+          || (this.direction === 'up' && (y > this.lastY || x > this.lastX)))
           this.lastEntered = null
         else
           return
       }
       this.lastEntered = child
-      this.lastX = e.clientX
-      this.lastY = e.clientY
+      this.lastX = x
+      this.lastY = y
     }
 
     dragging.placeholder = this.placeholder.show()
-    
     // if dragging an item that belongs to the current list, hide it while
     // it is being dragged
-    if (this.index !== null)
-      dragging.el.hide()
+    if (this.index !== null) {
+      // TODO
+      // dragging.el.hide()
+    }
 
     if (!isContainer) {
       // insert the placeholder according to the dragging direction
@@ -522,17 +548,6 @@
     this.el.trigger('sortable:sort', { item: dragging.el })
   }
   
-  Sortable.prototype.over = function(e) {
-    if (!this.accept || this.opts.disabled) return
-    
-    e.preventDefault() // allow drop
-    e.stopPropagation()
-
-    e = e.originalEvent || e // zepto <> jquery compatibility
-    if (e.dataTransfer.effectAllowed === 'copy')
-      e.dataTransfer.dropEffect = 'copy'
-  }
-  
   Sortable.prototype.end = function(e) {
     e.stopPropagation()
     e.preventDefault()
@@ -543,6 +558,7 @@
     
     // revert
     dragging.el.removeClass('dragging').show()
+    $(document).off('mouseup touchend', this.end)
     dragging.stop()
     
     this.index = null
@@ -554,11 +570,8 @@
     e.preventDefault()
     
     if (!dragging.el) return
-    dragging.el.removeClass('dragging')
-
-    e = e.originalEvent || e
-    if (e.dataTransfer.effectAllowed === 'copy')
-      dragging.el = dragging.el.clone()
+    
+    // dragging.el = dragging.el.clone()
     
     dragging.el.insertBefore(this.placeholder).show()
     
@@ -568,8 +581,8 @@
     // if the dropped element belongs to another list, trigger the receive event
     var newIndex = dragging.el.index()
     if (this.index === null) { // dropped element belongs to another list
-      // if (dragging.origin instanceof Draggable)
-      //   dragging.origin.destroy()
+      // if (dragging.parent instanceof Draggable)
+      //   dragging.parent.destroy()
       
       this.el.trigger('sortable:receive', { item: dragging.el })
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
@@ -586,9 +599,9 @@
     this.el.trigger('sortable:change', { item: dragging.el })
     
     this.el.trigger('sortable:beforeStop', { item: dragging.el })
-    if (dragging.origin instanceof Sortable) {
-      dragging.origin.index = null
-      dragging.origin.el.trigger('dragging:stop')
+    if (dragging.parent instanceof Sortable) {
+      dragging.parent.index = null
+      dragging.parent.el.trigger('dragging:stop')
     }
     
     dragging.stop()
