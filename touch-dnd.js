@@ -568,6 +568,8 @@
   }
   
   Sortable.prototype.drop = function(e) {
+    if (!this.accept || this.opts.disabled) return
+
     e.stopPropagation()
     e.preventDefault()
     
