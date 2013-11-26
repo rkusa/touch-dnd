@@ -7,6 +7,7 @@ Advanced touch-compatible Drag'n'Drop library providing Draggable, Droppable and
   "version": "0.1.0" }
 ```
 
+**Status:** Tested with current version of Chrome, Safari (Mac & iOS), Opera Next, Firefox and IE  
 **Documentation:** [ma.rkusa.st/touch-dnd](http://ma.rkusa.st/touch-dnd)
 
 #### Why?
