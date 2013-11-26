@@ -186,19 +186,7 @@
   }
   
   Draggable.prototype.create = function() {
-    this.el
-    .on('mousedown touchstart', $.proxy(this.start, this))
-
-    // Prevents dragging from starting on specified elements.
-    this.el
-    .on('mouseenter', this.opts.cancel, $.proxy(this.disable, this))
-    .on('mouseleave', this.opts.cancel, $.proxy(this.enable, this))
-    
-    if (this.opts.handle) {
-      this.el
-      .on('mouseenter', this.opts.handle, $.proxy(this.enable, this))
-      .on('mouseleave', this.opts.handle, $.proxy(this.disable, this))
-    }
+    this.el.on('mousedown touchstart', $.proxy(this.start, this))
     
     var self = this
     setTimeout(function() {
@@ -207,18 +195,7 @@
   }
   
   Draggable.prototype.destroy = function() {
-    this.el
-    .off('mousedown touchstart', this.start)
-    
-    this.el
-    .off('mouseenter', this.opts.cancel, this.disable)
-    .off('mouseleave', this.opts.cancel, this.enable)
-    
-    if (this.opts.handle) {
-      this.el
-      .off('mouseenter', this.opts.handle, this.enable)
-      .off('mouseleave', this.opts.handle, this.disable)
-    }
+    this.el.off('mousedown touchstart', this.start)
   }
   
   Draggable.prototype.enable = function() {
@@ -234,6 +211,26 @@
     
     e = e.originalEvent || e // zepto <> jquery compatibility
     e.preventDefault() // prevent text selection
+
+    if (this.opts.cancel) {
+      var target = $(e.target)
+      while (target[0] !== this.el[0]) {
+        if (target.is(this.opts.cancel)) return false
+        target = target.parent()
+      }
+    }
+
+    if (this.opts.handle) {
+      var target = $(e.target), isHandle = false
+      while (target[0] !== this.el[0]) {
+        if (target.is(this.opts.handle)) {
+          isHandle = true
+          break
+        }
+        target = target.parent()
+      }
+      if (!isHandle) return false
+    }
     
     dragging.start(this, this.el, e)
     $(document).on('mouseup touchend', $.proxy(this.end, this))
