@@ -481,6 +481,14 @@
     
     e.stopPropagation()
     e.preventDefault() // prevent text selection
+
+    if (this.opts.cancel) {
+      var target = $(e.target)
+      while (target[0] !== this.el[0]) {
+        if (target.is(this.opts.cancel)) return false
+        target = target.parent()
+      }
+    }
     
     // use e.currentTarget instead of e.target because we want the target
     // the event is bound to, not the target (child) the event is triggered from
