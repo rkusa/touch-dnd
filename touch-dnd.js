@@ -385,15 +385,12 @@
   Sortable.prototype.create = function() {
     this.el
     .on('mousedown touchstart', this.opts.items, $.proxy(this.start, this))
-    .on('dragging:enter', this.opts.items, $.proxy(this.enter, this))
-    .on('dragging:drop',      this.opts.items, $.proxy(this.drop, this))
-    .find(this.opts.items).prop('draggable', true)
+    .on('dragging:enter',       this.opts.items, $.proxy(this.enter, this))
+    .on('dragging:drop',        this.opts.items, $.proxy(this.drop, this))
     
     this.el
-    .on('dragging:enter',  $.proxy(this.enter, this))
-    .on('dragging:drop',       $.proxy(this.drop, this))
-    .on('mouseenter', this.opts.cancel, $.proxy(this.disable, this))
-    .on('mouseleave', this.opts.cancel, $.proxy(this.enable, this))
+    .on('dragging:enter', $.proxy(this.enter, this))
+    .on('dragging:drop',  $.proxy(this.drop, this))
     
     if (this.opts.handle) {
       this.el
@@ -411,7 +408,6 @@
     })
     
     this.observer = new Observer(this.el, this.opts.items, function() {
-      $(this).prop('draggable', true)
     }, function() {
       var item = $(this)
       self.el.trigger('sortable:sort',   { item: item })
@@ -423,15 +419,12 @@
   Sortable.prototype.destroy = function() {
     this.el
     .off('mousedown touchstart', this.opts.items, this.start)
-    .off('dragging:enter', this.opts.items, this.enter)
-    .off('dragging:drop',      this.opts.items, this.drop)
-    .find(this.opts.items).prop('draggable', false)
+    .off('dragging:enter',       this.opts.items, this.enter)
+    .off('dragging:drop',        this.opts.items, this.drop)
     
     this.el
-    .off('dragging:enter',  this.enter)
-    .off('dragging:drop',       this.drop)
-    .off('mouseenter', this.opts.cancel, this.disable)
-    .off('mouseleave', this.opts.cancel, this.enable)
+    .off('dragging:enter', this.enter)
+    .off('dragging:drop',  this.drop)
     
     if (this.opts.handle) {
       this.el
@@ -462,9 +455,12 @@
 
     if (!this.accept) return
 
-    this.accept = this.opts.accept === '*'
-                || (typeof this.opts.accept === 'function' ? this.opts.accept.call(this.el[0], dragging.el)
-                                                           : dragging.el.is(this.opts.accept))
+    this.accept = dragging.parent.id === this.id
+      || this.opts.accept === '*'
+      || (typeof this.opts.accept === 'function'
+        ? this.opts.accept.call(this.el[0], dragging.el)
+        : dragging.el.is(this.opts.accept))
+
     if (!this.accept) return
     
     if (this.opts.activeClass)
@@ -588,10 +584,6 @@
       
       this.el.trigger('sortable:receive', { item: dragging.el })
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
-      
-      // the receive event maybe inserted an element manually
-      // if so, find it and make it draggable
-      $(this.el.find(this.opts.items).get(newIndex)).prop('draggable', true)
     }
     // if the index changed, trigger the update event
     else if (newIndex !== this.index) {
@@ -679,7 +671,7 @@
   
   $.fn.draggable = generic(Draggable, 'draggable', {
     cancel: 'input, textarea, button, select, option',
-    connectedWith: false,
+    connectWith: false,
     cursor: 'auto',
     disabled: false,
     handle: false,
