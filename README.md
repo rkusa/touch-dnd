@@ -1,26 +1,23 @@
-# zepto-dnd
+# touch-dnd
 
-HTML5 Drag'n'Drop API based Draggable, Droppable and Sortable for [Zepto.js](https://github.com/madrobby/zepto) (and jQuery). For Zepto, you have to include its `data` module.
+Advanced touch-compatible Drag'n'Drop library providing Draggable, Droppable and Sortable for Zepto.js and jQuery (for Zepto, you have to include its `data` module).
 
 ```json
 { "name": "touch-dnd",
   "version": "0.1.0" }
 ```
 
-**Documentation:** [ma.rkusa.st/zepto-dnd](http://ma.rkusa.st/zepto-dnd)
+**Documentation:** [ma.rkusa.st/touch-dnd](http://ma.rkusa.st/touch-dnd)
 
 #### Why?
-I often use Draggables, Droppables and Sortables. Besides jQuery UI being way too heavyweight, I want the option to use Zepto. Additionally, I (most of the times) don't care about old/bad browsers. That's the reason why I wrote these native-HTML5-Drag'n'Drop-based Draggable, Droppable and Sortable. The result is sadly not as feature rich as the jQuery UI's counterparts (many - especially helper related - things are not possible using the DnD API).
 
-**If you need to support Internet Explorer, you can fall back on jQuery.** Note that conditional comments are no longer supported starting on IE 10, therefor Zepto's documentation recommends the following document.write approach:
+This library is a derivative of [zepto-dnd](https://github.com/rkusa/zepto-dnd), which reached the limits of the native HTML5 Drag'n'Drop API, especially in terms of dragging helper accessibility and - most important - in terms of compatiblity with touch devices.
 
-```html
-<script>
-document.write('<script src=' +
-('__proto__' in {} ? 'zepto' : 'jquery') +
-'.js><\/script>')
-</script>
-```
+#### Goals
+
+* **touch compatibility**
+* utilize CSS3 [`transform`](http://www.w3schools.com/cssref/css3_pr_transform.asp) property to move draggables around
+* Zepto.js compatibility
 
 ## MIT License
 Copyright (c) 2013 Markus Ast

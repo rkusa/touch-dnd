@@ -5,7 +5,7 @@
     "email": "npm.m@rkusa.st"
   },
   "version": "0.1.0",
-  "homepage": "https://github.com/rkusa/touch-dnd",
+  "homepage": "http://ma.rkusa.st/touch-dnd/",
   "devDependencies": {
     "uglify-js": "2.x.x"
   },
