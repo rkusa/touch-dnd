@@ -482,7 +482,9 @@
     e.stopPropagation()
     e.preventDefault() // prevent text selection
     
-    dragging.start(this, $(e.target), e)
+    // use e.currentTarget instead of e.target because we want the target
+    // the event is bound to, not the target (child) the event is triggered from
+    dragging.start(this, $(e.currentTarget), e)
     $(document).on('mouseup touchend', $.proxy(this.end, this))
 
     this.index = dragging.el.index()
