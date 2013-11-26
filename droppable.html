@@ -186,7 +186,7 @@ $('#example-destroy').droppable('destroy'){% endhighlight %}
 
 <h2>Events</h2>
 
-<h2>activate(event, ui)</h2>
+<h2>droppable:activate(event, ui)</h2>
 <p>Triggered when an accepted draggable starts dragging.</p>
 <dl class="inline">
   <dt>ui.item</dt>
@@ -194,7 +194,7 @@ $('#example-destroy').droppable('destroy'){% endhighlight %}
 </dl>
 <h4>Example</h4>
 {% highlight js %}$('#example-activate').droppable({ accept: '.c' })
-.on('activate', function(e, ui) {
+.on('droppable:activate', function(e, ui) {
 alert(42)
 }){% endhighlight %}
 <div class="draggable c">c</div>
@@ -203,16 +203,16 @@ alert(42)
 <script type="text/javascript">
   $(function() {
     $('#example-activate').droppable({ accept: '.c' })
-    .on('activate', function(e, ui) {
+    .on('droppable:activate', function(e, ui) {
       alert(42)
     })
   })
 </script>
 
-<h2>create(event)</h2>
+<h2>droppable:create(event)</h2>
 <p>Triggered when the droppable is created.</p>
 
-<h2>deactivate(event, ui)</h2>
+<h2>droppable:deactivate(event, ui)</h2>
 <p>Triggered when an accepted draggable stops dragging.</p>
 <dl class="inline">
   <dt>ui.item</dt>
@@ -220,7 +220,7 @@ alert(42)
 </dl>
 <h4>Example</h4>
 {% highlight js %}$('#example-deactivate').droppable({ accept: '.e' })
-.on('deactivate', function(e, ui) {
+.on('droppable:deactivate', function(e, ui) {
 alert(42)
 }){% endhighlight %}
 <div class="draggable e">e</div>
@@ -229,7 +229,7 @@ alert(42)
 <script type="text/javascript">
   $(function() {
     $('#example-deactivate').droppable({ accept: '.e' })
-    .on('deactivate', function(e, ui) {
+    .on('droppable:deactivate', function(e, ui) {
       alert(42)
     })
   })

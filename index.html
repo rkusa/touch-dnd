@@ -45,7 +45,7 @@ layout: layout
     .on('receive', function(e, ui) {
       ui.item.removeClass('draggable')
     })
-    $('.draggable').draggable({ connectToSortable: '#rhs' })
+    $('.draggable').draggable({ connectWith: '#rhs' })
     $('.droppable').droppable({ activeClass: 'active', hoverClass: 'drop-here' })
   })
 </script>
@@ -55,13 +55,13 @@ layout: layout
 {% highlight html %}
 <script type="text/javascript">
   $(function() {
-    $('#lhs').sortable()
+    $('#lhs').sortable({ connectWith: '.droppable' })
     $('#rhs').sortable({ connectWith: '#lhs' })
     .on('receive', function(e, ui) {
       ui.item.removeClass('draggable')
     })
-    $('.draggable').draggable({ connectToSortable: '#rhs' })
-    $('.droppable').droppable()
+    $('.draggable').draggable({ connectWith: '#rhs' })
+    $('.droppable').droppable({ activeClass: 'active', hoverClass: 'drop-here' })
   })
 </script>
 {% endhighlight %}

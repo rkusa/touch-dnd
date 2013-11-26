@@ -50,7 +50,7 @@ layout: layout
 .on('receive', function(e, ui) {
   ui.item.removeClass('draggable')
 })
-$('#example-accept-selector .draggable').draggable({ connectToSortable: '#list-accept-selector' }){% endhighlight %}
+$('#example-accept-selector .draggable').draggable({ connectWith: '#list-accept-selector' }){% endhighlight %}
 <ul class="grid wide" id="list-accept-selector">
   <li><span class="title">Item 1</span></li>
   <li><span class="title">Item 2</span></li>
@@ -70,7 +70,7 @@ $('#example-accept-selector .draggable').draggable({ connectToSortable: '#list-a
     .on('receive', function(e, ui) {
       ui.item.removeClass('draggable')
     })
-    $('#example-accept-selector .draggable').draggable({ connectToSortable: '#list-accept-selector' })
+    $('#example-accept-selector .draggable').draggable({ connectWith: '#list-accept-selector' })
   })
 </script>
 <h4>Function Example</h4>
@@ -78,7 +78,7 @@ $('#example-accept-selector .draggable').draggable({ connectToSortable: '#list-a
 .on('receive', function(e, ui) {
   ui.item.removeClass('draggable')
 })
-$('#example-accept-function .draggable').draggable({ connectToSortable: '#list-accept-function' }){% endhighlight %}
+$('#example-accept-function .draggable').draggable({ connectWith: '#list-accept-function' }){% endhighlight %}
 <ul class="grid wide" id="list-accept-function">
   <li><span class="title">Item 1</span></li>
   <li><span class="title">Item 2</span></li>
@@ -98,7 +98,7 @@ $('#example-accept-function .draggable').draggable({ connectToSortable: '#list-a
     .on('receive', function(e, ui) {
       ui.item.removeClass('draggable')
     })
-    $('#example-accept-function .draggable').draggable({ connectToSortable: '#list-accept-function' })
+    $('#example-accept-function .draggable').draggable({ connectWith: '#list-accept-function' })
   })
 </script>
 
@@ -128,7 +128,7 @@ $('#example-accept-function .draggable').draggable({ connectToSortable: '#list-a
 <script type="text/javascript">
   $(function() {
     $('#example-activeClass').sortable({ activeClass: 'active' })
-    $('#example-activeClass-draggable .draggable').draggable({ connectToSortable: '#example-activeClass' })
+    $('#example-activeClass-draggable .draggable').draggable({ connectWith: '#example-activeClass' })
   })
 </script>
 
@@ -361,27 +361,8 @@ $('#example-destroy').sortable('destroy'){% endhighlight %}
 <p>Sets one or more options for the sortable.</p>
 {% highlight javascript %}$('#example-option').sortable('option', { disabled: true }){% endhighlight %}
 
-<h2>refresh()</h2>
-<p>Refresh the sortable items. Triggers the reloading of all sortable items, causing new items to be recognized.</p>
-{% highlight js %}$('#example-refresh').sortable()
-![4, 5, 6].forEach(function(i) {
-$('#example-refresh').append('&lt;li&gt; Item ' + i + '&lt;/li&gt;')
-})
-$('#example-refresh').sortable('refresh'){% endhighlight %}
-<ul class="grid wide" id="example-refresh">
-  <li>Item 1</li>
-  <li>Item 2</li>
-  <li>Item 3</li>
-</ul>
-<script type="text/javascript">
-  $(function() {
-    $('#example-refresh').sortable()
-    ![4, 5, 6].forEach(function(i) {
-      $('#example-refresh').append('<li> Item ' + i + '</li>')
-    })
-    $('#example-refresh').sortable('refresh')
-  })
-</script>
+<h2><del>refresh()</del></h2>
+<p>New items ar recognized automatically.</p>
 
 <h2>toArray()</h2>
 <p>Serializes the sortable's item ids into a form/ajax submittable string. Calling this method produces a hash that can be appended to any url to easily submit a new item order back to the server.</p>
@@ -397,66 +378,66 @@ attribute: 'data-foobar'
 
 <h2>Events</h2>
 
-<h2>activate(event, ui)</h2>
+<h2>sortable:activate(event, ui)</h2>
 <p>Triggered when an accepted draggable starts dragging.</p>
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
 </dl>
 
-<h2>beforeStop(event, ui)</h2>
+<h2>sortable:beforeStop(event, ui)</h2>
 <p>This event is triggered when sorting stops, but when the placeholder/helper is still available.</p>
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
 </dl>
 
-<h2>change(event, ui)</h2>
+<h2>sortable:change(event, ui)</h2>
 <p>This event is triggered during sorting, but only when the DOM position has changed.</p>
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
 </dl>
 
-<h2>create(event)</h2>
+<h2>sortable:create(event)</h2>
 <p>Triggered when the droppable is created.</p>
 
-<h2>deactivate(event, ui)</h2>
+<h2>sortable:deactivate(event, ui)</h2>
 <p>Triggered when an accepted draggable stops dragging.</p>
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
 </dl>
 
-<h2>receive(event, ui)</h2>
+<h2>sortable:receive(event, ui)</h2>
 <p>This event is triggered when a connected sortable list has received an item from another list.</p>
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being received</dd>
 </dl>
 
-<h2>sort(event, ui)</h2>
+<h2>sortable:sort(event, ui)</h2>
 <p>This event is triggered during sorting.</p>
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
 </dl>
 
-<h2>start(event, ui)</h2>
+<h2>sortable:start(event, ui)</h2>
 <p>This event is triggered when sorting starts.</p>
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
 </dl>
 
-<h2>stop(event, ui)</h2>
+<h2>sortable:stop(event, ui)</h2>
 <p>This event is triggered when sorting has stopped.</p>
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
 </dl>
 
-<h2>update(event, ui)</h2>
+<h2>sortable:update(event, ui)</h2>
 <p>This event is triggered when the user stopped sorting and the DOM position has changed.</p>
 <dl class="inline">
   <dt>ui.item</dt>

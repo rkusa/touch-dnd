@@ -25,7 +25,7 @@ layout: layout
   })
 </script>
 
-<h2>connectToSortable</h2>
+<h2>connectWith</h2>
 <dl>
   <dt>Type</dt>
   <dd>Selector</dd>
@@ -39,7 +39,7 @@ layout: layout
 ui.item.removeClass('draggable')
 })
 $('#example-sortable .draggable').draggable({
-connectToSortable: '#list'
+connectWith: '#list'
 }){% endhighlight %}
 <ul class="grid wide" id="list">
   <li><span class="title">Item 1</span></li>
@@ -60,7 +60,7 @@ connectToSortable: '#list'
     .on('receive', function(e, ui) {
       ui.item.removeClass('draggable')
     })
-    $('#example-sortable .draggable').draggable({ connectToSortable: '#list' })
+    $('#example-sortable .draggable').draggable({ connectWith: '#list' })
   })
 </script>
 
@@ -177,7 +177,7 @@ $('#example-destroy').draggable('destroy'){% endhighlight %}
 
 <h2>Events</h2>
 
-<h2>create(event)</h2>
+<h2>draggable:create(event)</h2>
 <p>Triggered when the droppable is created.</p>
 
 <h2>drag, dragstart, dragend</h2>
