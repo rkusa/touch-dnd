@@ -524,8 +524,7 @@
 
     if (!this.placeholder.parent().length) {
       this.el.append(dragging.placeholder = this.placeholder.hide())
-      dragging.el.css('margin-bottom', dragging.el.height() * -1)
-      dragging.el.css('margin-right', dragging.el.width() * -1)
+      this.el.append(dragging.el)
     }
 
     // if dragging an item that belongs to the current list, hide it while
@@ -563,13 +562,14 @@
     this.el.trigger('sortable:beforeStop', { item: dragging.el })
     
     // revert
-    dragging.el.css('margin-bottom', '')
-    dragging.el.css('margin-right', '')
+    dragging.el.insertBefore(this.el.find(this.opts.items).get(this.index))
     $(document).off('mouseup touchend', this.end)
-    dragging.stop()
+    setTimeout(function() {
+      dragging.stop()
+      this.el.trigger('dragging:stop')
+    })
     
     this.index = null
-    this.el.trigger('dragging:stop')
   }
   
   Sortable.prototype.drop = function(e) {
@@ -610,8 +610,6 @@
     }
     
     // revert
-    dragging.el.css('margin-bottom', '')
-    dragging.el.css('margin-right', '')
     $(document).off('mouseup touchend', this.end)
     dragging.stop(false)
     
