@@ -520,6 +520,7 @@
     if (!this.placeholder.parent().length) {
       this.el.append(dragging.placeholder = this.placeholder.hide())
       dragging.el.css('margin-bottom', dragging.el.height() * -1)
+      dragging.el.css('margin-right', dragging.el.width() * -1)
     }
 
     // if dragging an item that belongs to the current list, hide it while
@@ -558,6 +559,7 @@
     
     // revert
     dragging.el.css('margin-bottom', '')
+    dragging.el.css('margin-right', '')
     $(document).off('mouseup touchend', this.end)
     dragging.stop()
     
@@ -602,6 +604,7 @@
     
     // revert
     dragging.el.css('margin-bottom', '')
+    dragging.el.css('margin-right', '')
     $(document).off('mouseup touchend', this.end)
     dragging.stop(false)
     
