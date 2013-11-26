@@ -340,7 +340,7 @@
   }
   
   Droppable.prototype.drop = function(e) {
-    if (this.opts.disabled) return false
+    if (this.opts.disabled || !this.accept) return false
     
     e.stopPropagation() // stops the browser from redirecting.
     
