@@ -47,7 +47,7 @@ layout: layout
 </dl>
 <h4>Selector Example</h4>
 {% highlight js %}$('#list-accept-selector').sortable({ accept: '.a' })
-.on('receive', function(e, ui) {
+.on('sortable:receive', function(e, ui) {
   ui.item.removeClass('draggable')
 })
 $('#example-accept-selector .draggable').draggable({ connectWith: '#list-accept-selector' }){% endhighlight %}
@@ -67,7 +67,7 @@ $('#example-accept-selector .draggable').draggable({ connectWith: '#list-accept-
 <script type="text/javascript">
   $(function() {
     $('#list-accept-selector').sortable({ accept: '.a' })
-    .on('receive', function(e, ui) {
+    .on('sortable:receive', function(e, ui) {
       ui.item.removeClass('draggable')
     })
     $('#example-accept-selector .draggable').draggable({ connectWith: '#list-accept-selector' })
@@ -75,7 +75,7 @@ $('#example-accept-selector .draggable').draggable({ connectWith: '#list-accept-
 </script>
 <h4>Function Example</h4>
 {% highlight js %}$('#list-accept-function').sortable({ accept: function(el) { return el.hasClass('b') } })
-.on('receive', function(e, ui) {
+.on('sortable:receive', function(e, ui) {
   ui.item.removeClass('draggable')
 })
 $('#example-accept-function .draggable').draggable({ connectWith: '#list-accept-function' }){% endhighlight %}
@@ -95,7 +95,7 @@ $('#example-accept-function .draggable').draggable({ connectWith: '#list-accept-
 <script type="text/javascript">
   $(function() {
     $('#list-accept-function').sortable({ accept: function(el) { return el.hasClass('b') } })
-    .on('receive', function(e, ui) {
+    .on('sortable:receive', function(e, ui) {
       ui.item.removeClass('draggable')
     })
     $('#example-accept-function .draggable').draggable({ connectWith: '#list-accept-function' })

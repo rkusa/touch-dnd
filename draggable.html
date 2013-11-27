@@ -35,7 +35,7 @@ layout: layout
 <p>Allows the draggable to be dropped onto the specified sortables. If this option is used, a draggable can be dropped onto a sortable list and then becomes part of it.</p>
 <h4>Example</h4>
 {% highlight js %}$('#list').sortable()
-.on('receive', function(e, ui) {
+.on('sortable:receive', function(e, ui) {
 ui.item.removeClass('draggable')
 })
 $('#example-sortable .draggable').draggable({
@@ -57,7 +57,7 @@ connectWith: '#list'
 <script type="text/javascript">
   $(function() {
     $('#list').sortable()
-    .on('receive', function(e, ui) {
+    .on('sortable:receive', function(e, ui) {
       ui.item.removeClass('draggable')
     })
     $('#example-sortable .draggable').draggable({ connectWith: '#list' })

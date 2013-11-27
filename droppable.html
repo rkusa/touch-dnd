@@ -191,8 +191,6 @@ $('#example-destroy').droppable('destroy'){% endhighlight %}
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
-  <dt>ui.position</dt>
-  <dd>current <code>{ top, left }</code> position of the draggable</dd>
 </dl>
 <h4>Example</h4>
 {% highlight js %}$('#example-activate').droppable({ accept: '.c' })
@@ -219,8 +217,6 @@ alert(42)
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
-  <dt>ui.position</dt>
-  <dd>current <code>{ top, left }</code> position of the draggable</dd>
 </dl>
 <h4>Example</h4>
 {% highlight js %}$('#example-deactivate').droppable({ accept: '.e' })
@@ -242,10 +238,10 @@ alert(42)
 <h2>droppable:drop(event, ui)</h2>
 <p>Triggered when an accepted draggable is dropped.</p>
 <dl class="inline">
-  <dt>ui.item</dt>
+  <dt>ui.draggable</dt>
   <dd>the element being dragged</dd>
-  <dt>ui.position</dt>
-  <dd>current <code>{ top, left }</code> position of the draggable</dd>
+  <dt>ui.item</dt>
+  <dd>the new element added to the droppable</dd>
 </dl>
 <h4>Example</h4>
 {% highlight js %}$('#example-drop').droppable({ accept: '.g' })
@@ -269,8 +265,6 @@ alert(42)
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
-  <dt>ui.position</dt>
-  <dd>current <code>{ top, left }</code> position of the draggable</dd>
 </dl>
 <h4>Example</h4>
 {% highlight js %}$('#example-out').droppable({ accept: '.i' })
@@ -294,8 +288,6 @@ alert(42)
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
-  <dt>ui.position</dt>
-  <dd>current <code>{ top, left }</code> position of the draggable</dd>
 </dl>
 <h4>Example</h4>
 {% highlight js %}$('#example-over').droppable({ accept: '.k' })

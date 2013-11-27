@@ -42,7 +42,7 @@ layout: layout
   $(function() {
     $('#lhs').sortable({ connectWith: '.droppable' })
     $('#rhs').sortable({ connectWith: '#lhs' })
-    .on('receive', function(e, ui) {
+    .on('sortable:receive', function(e, ui) {
       ui.item.removeClass('draggable')
     })
     $('.draggable').draggable({ connectWith: '#rhs' })
@@ -57,7 +57,7 @@ layout: layout
   $(function() {
     $('#lhs').sortable({ connectWith: '.droppable' })
     $('#rhs').sortable({ connectWith: '#lhs' })
-    .on('receive', function(e, ui) {
+    .on('sortable:receive', function(e, ui) {
       ui.item.removeClass('draggable')
     })
     $('.draggable').draggable({ connectWith: '#rhs' })
