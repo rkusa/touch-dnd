@@ -17,8 +17,9 @@ This library is a derivative of [zepto-dnd](https://github.com/rkusa/zepto-dnd),
 #### Goals
 
 * **touch compatibility**
-* utilize CSS3 [`transform`](http://www.w3schools.com/cssref/css3_pr_transform.asp) property to move draggables around
-* Zepto.js compatibility
+* utilize CSS3 [`transform`](http://www.w3schools.com/cssref/css3_pr_transform.asp) and [`transition`](http://www.w3schools.com/css/css3_transitions.asp) property to move draggables around
+* [Zepto.js](http://zeptojs.com/) compatibility
+* almost jQuery UI API compatible ([Draggable](https://github.com/rkusa/touch-dnd/issues/2), [Droppable](https://github.com/rkusa/touch-dnd/issues/3), [Sortable](https://github.com/rkusa/touch-dnd/issues/1))
 
 ## MIT License
 Copyright (c) 2013 Markus Ast
