@@ -75,6 +75,7 @@
       var last = this.last
       this.last = null
       $(last).trigger('dragging:drop', e)
+      return
     }
     if (!this.el) return
     if (revert === undefined) revert = true
@@ -397,10 +398,10 @@
     
     this.observer = new Observer(this.el, this.opts.items, function() {
     }, function() {
+      if (this === self.placeholder[0] || (dragging.el && this === dragging.el[0])) return
       var item = $(this)
-      self.el.trigger('sortable:sort',   { item: item })
-      self.el.trigger('sortable:update', { item: item, index: -1 })
       self.el.trigger('sortable:change', { item: item })
+      self.el.trigger('sortable:update', { item: item, index: -1 })
     })
   }
   
@@ -496,7 +497,7 @@
       this.placeholder.width(dragging.el.width())
     }
     
-    this.el.trigger('dragging:start', { item: dragging.el })
+    this.el.trigger('sortable:start', { item: dragging.el })
   }
   
   Sortable.prototype.enter = function(e) {
@@ -519,16 +520,16 @@
       // this.placeholder.width(dragging.el.width())
     }
 
+    var initialized = true
     if (!this.placeholder.parent().length) {
+      initialized = false
       this.el.append(dragging.placeholder = this.placeholder.hide())
-      this.el.append(dragging.el)
-    }
 
-    // if dragging an item that belongs to the current list, hide it while
-    // it is being dragged
-    if (this.index !== null) {
-      // TODO
-      // dragging.el.hide()
+      // if dragging an item that belongs to the current list, hide it while
+      // it is being dragged
+      if (this.index !== null) {
+        this.el.append(dragging.el)
+      }
     }
 
     if (!isContainer) {
@@ -547,7 +548,9 @@
       this.el.append(this.placeholder)
     }
 
-    this.el.trigger('sortable:sort', { item: dragging.el })
+    if (!initialized) return
+
+    this.el.trigger('sortable:change', { item: dragging.el })
   }
   
   Sortable.prototype.end = function(e) {
@@ -561,12 +564,9 @@
     // revert
     dragging.el.insertBefore(this.el.find(this.opts.items).get(this.index))
     $(document).off('mouseup touchend MSPointerUp pointerup', this.end)
-    var self = this
-    setTimeout(function() {
-      dragging.stop(e)
-      self.el.trigger('dragging:stop')
-    })
-    
+    dragging.stop(e)
+    this.el.trigger('dragging:stop')
+
     this.index = null
   }
   
@@ -577,8 +577,8 @@
     e.preventDefault()
     
     if (!dragging.el) return
-    
-    // dragging.el = dragging.el.clone()
+
+    this.observer.disconnect()
     
     dragging.el.insertBefore(this.placeholder).show()
     
@@ -599,8 +599,6 @@
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
     
-    this.el.trigger('sortable:change', { item: dragging.el })
-    
     this.el.trigger('sortable:beforeStop', { item: dragging.el })
     if (dragging.parent instanceof Sortable) {
       dragging.parent.index = null
@@ -610,8 +608,9 @@
     // revert
     $(document).off('mouseup touchend MSPointerUp pointerup', this.end)
     dragging.stop(originalEvent, false)
-    
     this.el.trigger('dragging:stop')
+
+    this.observer.observe()
   }
   
   Sortable.prototype.toArray = function(opts) {

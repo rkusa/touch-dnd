@@ -379,11 +379,51 @@ attribute: 'data-foobar'
 <h2>Events</h2>
 
 <h2>sortable:activate(event, ui)</h2>
-<p>Triggered when an accepted draggable starts dragging.</p>
+<p>Triggered when an accepted draggable starts dragging. Can be an item of the list itself or an item of a connect sortable or draggable.</p>
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
 </dl>
+<h4>Example</h4>
+{% highlight js %}$(function() {
+  $('#example-activate-a').sortable()
+  .on('sortable:activate', function(e, ui) {
+    $('#example-activate-result').append('✓')
+  })
+  $('#example-activate-b').sortable({ connectWith: '#example-activate-a' })
+  $('.draggable.example-activate').draggable({ connectWith: '#example-activate-a' })
+}){% endhighlight %}
+<div id="example-activate-result"></div>
+<div class="draggable example-activate"></div>
+<div class="draggable example-activate"></div>
+<div style="float:left;margin-right:20px">
+  <h4>List A</h4>
+  <ul class="list" id="example-activate-a">
+    <li>A 1</li>
+    <li>A 2</li>
+    <li>A 3</li>
+    <li>A 4</li>
+  </ul>
+</div>
+<div style="float:left">
+  <h4>List B</h4>
+  <ul class="list" id="example-activate-b">
+    <li>B 1</li>
+    <li>B 2</li>
+    <li>B 3</li>
+    <li>B 4</li>
+  </ul>
+</div>
+<script type="text/javascript">
+  $(function() {
+    $('#example-activate-a').sortable()
+    .on('sortable:activate', function(e, ui) {
+      $('#example-activate-result').append('✓')
+    })
+    $('#example-activate-b').sortable({ connectWith: '#example-activate-a' })
+    $('.draggable.example-activate').draggable({ connectWith: '#example-activate-a' })
+  })
+</script>
 
 <h2>sortable:beforeStop(event, ui)</h2>
 <p>This event is triggered when sorting stops, but when the placeholder/helper is still available.</p>
@@ -393,35 +433,132 @@ attribute: 'data-foobar'
 </dl>
 
 <h2>sortable:change(event, ui)</h2>
-<p>This event is triggered during sorting, but only when the DOM position has changed.</p>
-<dl class="inline">
-  <dt>ui.item</dt>
-  <dd>the element being dragged</dd>
-</dl>
-
-<h2>sortable:create(event)</h2>
-<p>Triggered when the droppable is created.</p>
-
-<h2>sortable:deactivate(event, ui)</h2>
-<p>Triggered when an accepted draggable stops dragging.</p>
-<dl class="inline">
-  <dt>ui.item</dt>
-  <dd>the element being dragged</dd>
-</dl>
-
-<h2>sortable:receive(event, ui)</h2>
-<p>This event is triggered when a connected sortable list has received an item from another list.</p>
-<dl class="inline">
-  <dt>ui.item</dt>
-  <dd>the element being received</dd>
-</dl>
-
-<h2>sortable:sort(event, ui)</h2>
 <p>This event is triggered during sorting.</p>
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
 </dl>
+<h4>Example</h4>
+{% highlight js %}$(function() {
+  $('#example-change').sortable()
+  .on('sortable:change', function() {
+    $('#example-change-result').append('✓')
+  })
+}){% endhighlight %}
+<div id="example-change-result"></div>
+<ul class="grid wide" id="example-change">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+  <li>Item 4</li>
+  <li>Item 5</li>
+  <li>Item 6</li>
+</ul>
+<script type="text/javascript">
+  $(function() {
+    $('#example-change').sortable()
+    .on('sortable:change', function() {
+      $('#example-change-result').append('✓')
+    })
+  })
+</script>
+
+<h2>sortable:create(event)</h2>
+<p>Triggered when the droppable is created.</p>
+
+<h2>sortable:deactivate(event, ui)</h2>
+<p>Triggered when an accepted draggable stops dragging. Can be an item of the list itself or an item of a connect sortable or draggable.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being dragged</dd>
+</dl>
+<h4>Example</h4>
+{% highlight js %}$(function() {
+  $('#example-deactivate-a').sortable()
+  .on('sortable:deactivate', function(e, ui) {
+    $('#example-deactivate-result').append('✓')
+  })
+  $('#example-deactivate-b').sortable({ connectWith: '#example-deactivate-a' })
+  $('.draggable.example-deactivate').draggable({ connectWith: '#example-deactivate-a' })
+}){% endhighlight %}
+<div id="example-deactivate-result"></div>
+<div class="draggable example-deactivate"></div>
+<div class="draggable example-deactivate"></div>
+<div style="float:left;margin-right:20px">
+  <h4>List A</h4>
+  <ul class="list" id="example-deactivate-a">
+    <li>A 1</li>
+    <li>A 2</li>
+    <li>A 3</li>
+    <li>A 4</li>
+  </ul>
+</div>
+<div style="float:left">
+  <h4>List B</h4>
+  <ul class="list" id="example-deactivate-b">
+    <li>B 1</li>
+    <li>B 2</li>
+    <li>B 3</li>
+    <li>B 4</li>
+  </ul>
+</div>
+<script type="text/javascript">
+  $(function() {
+    $('#example-deactivate-a').sortable()
+    .on('sortable:deactivate', function(e, ui) {
+      $('#example-deactivate-result').append('✓')
+    })
+    $('#example-deactivate-b').sortable({ connectWith: '#example-deactivate-a' })
+    $('.draggable.example-deactivate').draggable({ connectWith: '#example-deactivate-a' })
+  })
+</script>
+
+<h2>sortable:receive(event, ui)</h2>
+<p>This event is triggered when a connected sortable list has received a draggable or an item from another list.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being received</dd>
+</dl>
+<h4>Example</h4>
+{% highlight js %}$(function() {
+  $('#example-receive-a').sortable()
+  .on('sortable:receive', function(e, ui) {
+    $('#example-receive-result').append('✓')
+  })
+  $('#example-receive-b').sortable({ connectWith: '#example-receive-a' })
+  $('.draggable.example-receive').draggable({ connectWith: '#example-receive-a' })
+}){% endhighlight %}
+<div id="example-receive-result"></div>
+<div class="draggable example-receive"></div>
+<div class="draggable example-receive"></div>
+<div style="float:left;margin-right:20px">
+  <h4>List A</h4>
+  <ul class="list" id="example-receive-a">
+    <li>A 1</li>
+    <li>A 2</li>
+    <li>A 3</li>
+    <li>A 4</li>
+  </ul>
+</div>
+<div style="float:left">
+  <h4>List B</h4>
+  <ul class="list" id="example-receive-b">
+    <li>B 1</li>
+    <li>B 2</li>
+    <li>B 3</li>
+    <li>B 4</li>
+  </ul>
+</div>
+<script type="text/javascript">
+  $(function() {
+    $('#example-receive-a').sortable()
+    .on('sortable:receive', function(e, ui) {
+      $('#example-receive-result').append('✓')
+    })
+    $('#example-receive-b').sortable({ connectWith: '#example-receive-a' })
+    $('.draggable.example-receive').draggable({ connectWith: '#example-receive-a' })
+  })
+</script>
 
 <h2>sortable:start(event, ui)</h2>
 <p>This event is triggered when sorting starts.</p>
@@ -438,8 +575,34 @@ attribute: 'data-foobar'
 </dl>
 
 <h2>sortable:update(event, ui)</h2>
-<p>This event is triggered when the user stopped sorting and the DOM position has changed.</p>
+<p>This event is triggered when the user stopped sorting.</p>
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
+  <dt>index</dt>
+  <dd>the index the element element is dropped at</dd>
 </dl>
+<h4>Example</h4>
+{% highlight js %}$(function() {
+  $('#example-update').sortable()
+  .on('sortable:update', function() {
+    $('#example-update-result').append('✓')
+  })
+}){% endhighlight %}
+<div id="example-update-result"></div>
+<ul class="grid wide" id="example-update">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+  <li>Item 4</li>
+  <li>Item 5</li>
+  <li>Item 6</li>
+</ul>
+<script type="text/javascript">
+  $(function() {
+    $('#example-update').sortable()
+    .on('sortable:update', function() {
+      $('#example-update-result').append('✓')
+    })
+  })
+</script>
