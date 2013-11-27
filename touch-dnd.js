@@ -66,25 +66,15 @@
     this.el[0].style.pointerEvents = 'none'
     $(document).on('mousemove touchmove MSPointerMove pointermove', $.proxy(this.move, this))
     transition(this.el[0], '')
-    var ui = {
-      item: this.el,
-      position: { top: this.origin.y, left: this.origin.x }
-    }
-    ui.draggable = ui.helper = ui.item
-    this.eventHandler.trigger('dragging:start', ui)
+    this.eventHandler.trigger('dragging:start')
     return this.el
   }
   
   Dragging.prototype.stop = function(e, revert) {
-    var ui = {
-      item: this.el,
-      position: { top: e.pageY, left: e.pageX }
-    }
-    ui.draggable = ui.helper = ui.item
     if (this.last) {
       var last = this.last
       this.last = null
-      $(last).trigger('dragging:drop', [e, ui])
+      $(last).trigger('dragging:drop', e)
     }
     if (!this.el) return
     if (revert === undefined) revert = true
@@ -95,7 +85,7 @@
     vendorify('transform', this.el[0], this.origin.transform || 'translate(0, 0)')
     this.el[0].style.pointerEvents = 'auto'
     $(document).off('mousemove touchmove MSPointerMove pointermove', this.move)
-    this.eventHandler.trigger('dragging:stop', ui)
+    this.eventHandler.trigger('dragging:stop')
     this.parent = this.el = this.placeholder = null
   }
 
@@ -105,13 +95,8 @@
       , clientY = e.clientY || event.touches[0].clientY
     var over = document.elementFromPoint(clientX, clientY)
     if (over !== this.last) {
-      var ui = {
-        item: this.el,
-        position: { top: e.pageY, left: e.pageX }
-      }
-      ui.draggable = ui.helper = ui.item
-      $(over).trigger('dragging:enter', ui)
-      $(this.last).trigger('dragging:leave', ui)
+      $(over).trigger('dragging:enter')
+      $(this.last).trigger('dragging:leave')
     }
     this.last = over
     var deltaX = e.pageX - this.origin.x
@@ -299,7 +284,7 @@
     this.opts.disabled = true
   }
   
-  Droppable.prototype.activate = function(e, ui) {
+  Droppable.prototype.activate = function(e) {
     this.accept = this.connectedWith.indexOf(dragging.parent.id) !== -1
     if (!this.accept) {
       var accept = this.opts.accept === '*'
@@ -315,18 +300,18 @@
     if (this.opts.activeClass)
       this.el.addClass(this.opts.activeClass)
     
-    this.el.trigger('droppable:activate', ui)
+    this.el.trigger('droppable:activate', { item: dragging.el })
   }
   
-  Droppable.prototype.reset = function(e, ui) {
+  Droppable.prototype.reset = function(e) {
     if (!this.accept) return
     if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
     if (this.opts.hoverClass)  this.el.removeClass(this.opts.hoverClass)
     
-    this.el.trigger('droppable:deactivate', ui)
+    this.el.trigger('droppable:deactivate', { item: dragging.el })
   }
   
-  Droppable.prototype.enter = function(e, ui) {
+  Droppable.prototype.enter = function(e) {
     if (this.opts.disabled) return false
     
     e.stopPropagation()
@@ -340,32 +325,31 @@
     if (this.opts.hoverClass)
       this.el.addClass(this.opts.hoverClass)
 
-    this.el.trigger('droppable:over', ui)
+    this.el.trigger('droppable:over', { item: dragging.el })
   }
   
-  Droppable.prototype.leave = function(e, ui) {
+  Droppable.prototype.leave = function(e) {
     if (this.opts.disabled) return false
     // e.stopPropagation()
     
     if (this.opts.hoverClass && this.accept)
       this.el.removeClass(this.opts.hoverClass)
 
-    this.el.trigger('droppable:out', ui)
+    this.el.trigger('droppable:out', { item: dragging.el })
   }
   
-  Droppable.prototype.drop = function(e, originalEvent, ui) {
+  Droppable.prototype.drop = function(e, originalEvent) {
     if (this.opts.disabled || !this.accept) return false
     
     if (!dragging.el) return
     
     // zepto <> jquery compatibility
-    var el = dragging.el
+    var el = dragging.el, clone
     dragging.stop(originalEvent, false)
 
-    $(this.el).append(el.clone())
+    $(this.el).append(clone = el.clone())
     
-    ui.item = el
-    this.el.trigger('droppable:drop', ui)
+    this.el.trigger('droppable:drop', { item: clone, draggable: el })
   }
   
   var Sortable = function(element, opts) {
@@ -515,7 +499,7 @@
     this.el.trigger('dragging:start', { item: dragging.el })
   }
   
-  Sortable.prototype.enter = function(e, ui) {
+  Sortable.prototype.enter = function(e) {
     if (!this.accept || this.opts.disabled) return
     
     e.preventDefault()
