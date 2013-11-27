@@ -191,6 +191,8 @@ $('#example-destroy').droppable('destroy'){% endhighlight %}
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
+  <dt>ui.position</dt>
+  <dd>current <code>{ top, left }</code> position of the draggable</dd>
 </dl>
 <h4>Example</h4>
 {% highlight js %}$('#example-activate').droppable({ accept: '.c' })
@@ -217,6 +219,8 @@ alert(42)
 <dl class="inline">
   <dt>ui.item</dt>
   <dd>the element being dragged</dd>
+  <dt>ui.position</dt>
+  <dd>current <code>{ top, left }</code> position of the draggable</dd>
 </dl>
 <h4>Example</h4>
 {% highlight js %}$('#example-deactivate').droppable({ accept: '.e' })
@@ -235,5 +239,77 @@ alert(42)
   })
 </script>
 
-<h2>drop, dragenter, dragleave, dragover</h2>
-<p>These events are natively provided through the HTML5 Drag'n'Drop API.</p>
+<h2>droppable:drop(event, ui)</h2>
+<p>Triggered when an accepted draggable is dropped.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being dragged</dd>
+  <dt>ui.position</dt>
+  <dd>current <code>{ top, left }</code> position of the draggable</dd>
+</dl>
+<h4>Example</h4>
+{% highlight js %}$('#example-drop').droppable({ accept: '.g' })
+.on('droppable:drop', function(e, ui) {
+alert(42)
+}){% endhighlight %}
+<div class="draggable g">g</div>
+<div class="draggable h">h</div>
+<div class="droppable" id="example-drop"></div>
+<script type="text/javascript">
+  $(function() {
+    $('#example-drop').droppable({ accept: '.g' })
+    .on('droppable:drop', function(e, ui) {
+      alert(42)
+    })
+  })
+</script>
+
+<h2>droppable:out(event)</h2>
+<p>Triggered when an accepted draggable is dragged out of the droppable.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being dragged</dd>
+  <dt>ui.position</dt>
+  <dd>current <code>{ top, left }</code> position of the draggable</dd>
+</dl>
+<h4>Example</h4>
+{% highlight js %}$('#example-out').droppable({ accept: '.i' })
+.on('droppable:out', function(e, ui) {
+alert(42)
+}){% endhighlight %}
+<div class="draggable i">i</div>
+<div class="draggable j">j</div>
+<div class="droppable" id="example-out"></div>
+<script type="text/javascript">
+  $(function() {
+    $('#example-out').droppable({ accept: '.i' })
+    .on('droppable:out', function(e, ui) {
+      alert(42)
+    })
+  })
+</script>
+
+<h2>droppable:over(event)</h2>
+<p>Triggered when an accepted draggable is dragged over the droppable.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being dragged</dd>
+  <dt>ui.position</dt>
+  <dd>current <code>{ top, left }</code> position of the draggable</dd>
+</dl>
+<h4>Example</h4>
+{% highlight js %}$('#example-over').droppable({ accept: '.k' })
+.on('droppable:over', function(e, ui) {
+alert(42)
+}){% endhighlight %}
+<div class="draggable k">k</div>
+<div class="draggable l">l</div>
+<div class="droppable" id="example-over"></div>
+<script type="text/javascript">
+  $(function() {
+    $('#example-over').droppable({ accept: '.k' })
+    .on('droppable:over', function(e, ui) {
+      alert(42)
+    })
+  })
+</script>

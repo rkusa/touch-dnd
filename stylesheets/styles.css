@@ -269,6 +269,16 @@ footer {
   padding: 5px 2px;
 }
 
+
+.droppable.big {
+  height: 60px;
+  width: 100px;
+}
+
+.droppable.big .droppable {
+  float: right;
+}
+
 .droppable.active {
   background-color: #abe2a5;
 }
@@ -301,7 +311,7 @@ dl.inline {
 }
 
 dl.inline dl, dl.inline dd {
-  margin-left: 70px;
+  margin-left: 100px;
 }
 
 h4, h2 {
