@@ -182,13 +182,8 @@
 
   Draggable.prototype.connectWith = function(connectWith) {
     var self = this
-      , target = $(connectWith)
-      , context = window
-    if (target[0].ownerDocument !== document) {
-      context = target[0].ownerDocument.defaultView
-    }
-    context.$(connectWith).each(function() {
-      var el = context.$(this)
+    $(connectWith).each(function() {
+      var el = $(this)
       if (el[0] === self.el[0]) return
       var instance = el.data('sortable') || el.data('droppable')
       if (instance) instance.connectedWith.push(self.id)
@@ -582,9 +577,10 @@
     // revert
     dragging.el.insertBefore(this.el.find(this.opts.items).get(this.index))
     $(document).off('mouseup touchend MSPointerUp pointerup', this.end)
+    var self = this
     setTimeout(function() {
       dragging.stop(e)
-      this.el.trigger('dragging:stop')
+      self.el.trigger('dragging:stop')
     })
     
     this.index = null
