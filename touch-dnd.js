@@ -53,8 +53,8 @@
   Dragging.prototype.start = function(parent, el, e) {
     this.parent = parent
     this.el = el
-    this.origin.x = (e.pageX || event.changedTouches[0].pageX)
-    this.origin.y = (e.pageY || event.changedTouches[0].pageY)
+    this.origin.x = event.changedTouches ? event.changedTouches[0].pageX : e.pageX
+    this.origin.y = event.changedTouches ? event.changedTouches[0].pageY : e.pageY
     this.origin.transform  = vendorify('transform', this.el[0])
     this.origin.transition = vendorify('transition', this.el[0])
     var rect = this.el[0].getBoundingClientRect()
@@ -100,8 +100,8 @@
       $(this.last).trigger('dragging:leave')
     }
     this.last = over
-    var deltaX = (e.pageX || event.changedTouches[0].pageX) - this.origin.x
-      , deltaY = (e.pageY || event.changedTouches[0].pageY) - this.origin.y
+    var deltaX = (event.changedTouches ? event.changedTouches[0].pageX : e.pageX) - this.origin.x
+      , deltaY = (event.changedTouches ? event.changedTouches[0].pageY : e.pageY) - this.origin.y
     translate(this.el[0], deltaX, deltaY)
   }
   
