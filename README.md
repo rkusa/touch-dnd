@@ -4,7 +4,7 @@ Advanced touch-compatible Drag'n'Drop library providing Draggable, Droppable and
 
 ```json
 { "name": "touch-dnd",
-  "version": "0.1.0" }
+  "version": "0.1.1" }
 ```
 
 **Status:** Tested with current version of Chrome (Mac & Android), Safari (Mac & iOS), Opera Next, Firefox and IE  
