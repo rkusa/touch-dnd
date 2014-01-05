@@ -53,6 +53,7 @@
   Dragging.prototype.start = function(parent, el, e) {
     this.parent = parent
     this.el = el
+    this.el.css('-ms-touch-action', 'none').css('touch-action', 'none')
     this.origin.x = event.changedTouches ? event.changedTouches[0].pageX : e.pageX
     this.origin.y = event.changedTouches ? event.changedTouches[0].pageY : e.pageY
     this.origin.transform  = vendorify('transform', this.el[0])
@@ -182,7 +183,8 @@
   }
   
   Draggable.prototype.create = function() {
-    this.el.on('mousedown touchstart MSPointerDown pointerdown', $.proxy(this.start, this))
+    this.el
+    .on('mousedown touchstart MSPointerDown pointerdown', $.proxy(this.start, this))
     
     var self = this
     setTimeout(function() {
