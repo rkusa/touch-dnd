@@ -76,7 +76,6 @@
       var last = this.last
       this.last = null
       $(last).trigger('dragging:drop', e)
-      return
     }
     if (!this.el) return
     if (revert === undefined) revert = true
