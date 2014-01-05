@@ -461,15 +461,12 @@
   }
   
   Sortable.prototype.start = function(e) {
-    if (this.opts.disabled) return false
-    
-    e.stopPropagation()
-    e.preventDefault() // prevent text selection
+    if (this.opts.disabled) return
 
     if (this.opts.cancel) {
       var target = $(e.target)
       while (target[0] !== this.el[0]) {
-        if (target.is(this.opts.cancel)) return false
+        if (target.is(this.opts.cancel)) return
         target = target.parent()
       }
     }
@@ -483,8 +480,11 @@
         }
         target = target.parent()
       }
-      if (!isHandle) return false
+      if (!isHandle) return
     }
+    
+    e.stopPropagation()
+    e.preventDefault() // prevent text selection
     
     // use e.currentTarget instead of e.target because we want the target
     // the event is bound to, not the target (child) the event is triggered from
@@ -524,7 +524,7 @@
     var initialized = true
     if (!this.placeholder.parent().length) {
       initialized = false
-      this.el.append(dragging.placeholder = this.placeholder.hide())
+      this.el.append(dragging.placeholder = this.placeholder)
 
       // if dragging an item that belongs to the current list, hide it while
       // it is being dragged
