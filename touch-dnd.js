@@ -1,4 +1,7 @@
 !function($) {
+  var START_EVENT = 'mousedown touchstart MSPointerDown pointerdown'
+    , END_EVENT   = 'mouseup touchend MSPointerUp pointerup'
+
   function translate(el, x, y) {
     vendorify('transform', el, 'translate(' + x + 'px, ' + y + 'px)')
   }
@@ -28,6 +31,8 @@
     this.eventHandler = $('<div />')
     this.parent = this.el = null
     this.origin = { x: 0, y: 0, transition: null, translate: null, offset: { x: 0, y: 0 } }
+    this.lastEntered = this.currentTarget = null
+    this.lastX = this.lastY = this.lastDirection = null
 
     var placeholder
     Object.defineProperty(this, 'placeholder', {
@@ -92,17 +97,38 @@
 
   Dragging.prototype.move = function(e) {
     if (!this.el) return
+
     var clientX = e.clientX || event.touches[0].clientX
       , clientY = e.clientY || event.touches[0].clientY
     var over = document.elementFromPoint(clientX, clientY)
-    if (over !== this.last) {
-      $(over).trigger('dragging:enter')
-      $(this.last).trigger('dragging:leave')
+
+    var deltaX = this.lastX - clientX
+      , deltaY = this.lastY - clientY
+      , direction = Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0 && 'left'
+                 || Math.abs(deltaX) > Math.abs(deltaY) && deltaX < 0 && 'right'
+                 || Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0 && 'up'
+                 || 'down'
+    if (over !== this.last && $(over).trigger('dragging:identify') && this.lastEntered !== this.currentTarget) {
+      $(this.currentTarget).trigger('dragging:enter')
+      $(this.lastEntered).trigger('dragging:leave')
+      this.lastEntered = this.currentTarget
+    } else if (direction !== this.lastDirection) {
+      if (!this.currentTarget) $(over).trigger('dragging:identify')
+      $(this.currentTarget).trigger('dragging:diverted')
     }
     this.last = over
+    this.currentTarget = null
+    this.lastDirection = direction
+    this.lastX = clientX
+    this.lastY = clientY
+
     var deltaX = (event.changedTouches ? event.changedTouches[0].pageX : e.pageX) - this.origin.x
       , deltaY = (event.changedTouches ? event.changedTouches[0].pageY : e.pageY) - this.origin.y
     translate(this.el[0], deltaX, deltaY)
+  }
+
+  Dragging.prototype.setCurrent = function(target) {
+    this.currentTarget = target
   }
   
   var dragging = $.dragging = parent.$.dragging || new Dragging()
@@ -183,7 +209,7 @@
   
   Draggable.prototype.create = function() {
     this.el
-    .on('mousedown touchstart MSPointerDown pointerdown', $.proxy(this.start, this))
+    .on(START_EVENT, $.proxy(this.start, this))
     
     var self = this
     setTimeout(function() {
@@ -192,7 +218,7 @@
   }
   
   Draggable.prototype.destroy = function() {
-    this.el.off('mousedown touchstart MSPointerDown pointerdown', this.start)
+    this.el.off(START_EVENT, this.start)
   }
   
   Draggable.prototype.enable = function() {
@@ -230,7 +256,7 @@
     }
     
     dragging.start(this, this.el, e)
-    $(document).on('mouseup touchend MSPointerUp pointerup', $.proxy(this.end, this))
+    $(document).on(END_EVENT, $.proxy(this.end, this))
   }
   
   Draggable.prototype.end = function(e) {
@@ -238,7 +264,7 @@
     // e.preventDefault()
     
     // revert
-    $(document).off('mouseup touchend MSPointerUp pointerup', this.end)
+    $(document).off(END_EVENT, this.end)
     dragging.stop(e)
   }
   
@@ -368,8 +394,7 @@
     
     this.placeholder = $('<' + tag + ' class="' + this.opts.placeholder + '" />')
     
-    this.accept = this.index = this.lastEntered = null
-    this.lastX  = this.lastY = this.direction = null
+    this.accept = this.index = this.direction = null
     this.connectedWith = []
     if (this.opts.connectWith) {
       this.connectWith(this.opts.connectWith)
@@ -380,13 +405,17 @@
   
   Sortable.prototype.create = function() {
     this.el
-    .on('mousedown touchstart MSPointerDown pointerdown', this.opts.items, $.proxy(this.start, this))
-    .on('dragging:enter',       this.opts.items, $.proxy(this.enter, this))
-    .on('dragging:drop',        this.opts.items, $.proxy(this.drop, this))
+    .on(START_EVENT,         this.opts.items, $.proxy(this.start, this))
+    .on('dragging:identify', this.opts.items, $.proxy(this.identify, this))
+    .on('dragging:enter',    this.opts.items, $.proxy(this.enter, this))
+    .on('dragging:diverted', this.opts.items, $.proxy(this.diverted, this))
+    .on('dragging:drop',     this.opts.items, $.proxy(this.drop, this))
     
     this.el
-    .on('dragging:enter', $.proxy(this.enter, this))
-    .on('dragging:drop',  $.proxy(this.drop, this))
+    .on('dragging:identify', $.proxy(this.identify, this))
+    .on('dragging:enter',    $.proxy(this.enter, this))
+    .on('dragging:diverted', $.proxy(this.diverted, this))
+    .on('dragging:drop',     $.proxy(this.drop, this))
     
     dragging
     .on('dragging:start', $.proxy(this.activate, this))
@@ -408,13 +437,17 @@
   
   Sortable.prototype.destroy = function() {
     this.el
-    .off('mousedown touchstart MSPointerDown pointerdown', this.opts.items, this.start)
-    .off('dragging:enter',       this.opts.items, this.enter)
-    .off('dragging:drop',        this.opts.items, this.drop)
+    .off(START_EVENT,         this.opts.items, this.start)
+    .off('dragging:identify', this.opts.items, this.identify)
+    .off('dragging:enter',    this.opts.items, this.enter)
+    .off('dragging:diverted', this.opts.items, this.diverted)
+    .off('dragging:drop',     this.opts.items, this.drop)
     
     this.el
-    .off('dragging:enter', this.enter)
-    .off('dragging:drop',  this.drop)
+    .off('dragging:identify', this.identify)
+    .off('dragging:enter',    this.enter)
+    .off('dragging:diverted', this.diverted)
+    .off('dragging:drop',     this.drop)
     
     // Todo: Fix Zepto Bug
     // dragging
@@ -489,7 +522,7 @@
     // use e.currentTarget instead of e.target because we want the target
     // the event is bound to, not the target (child) the event is triggered from
     dragging.start(this, $(e.currentTarget), e)
-    $(document).on('mouseup touchend MSPointerUp pointerup', $.proxy(this.end, this))
+    $(document).on(END_EVENT, $.proxy(this.end, this))
 
     this.index = dragging.el.index()
     
@@ -500,11 +533,15 @@
     
     this.el.trigger('sortable:start', { item: dragging.el })
   }
+
+  Sortable.prototype.identify = function(e) {
+    if (dragging.currentTarget) return
+    dragging.setCurrent(e.currentTarget)
+  }
   
   Sortable.prototype.enter = function(e) {
     if (!this.accept || this.opts.disabled) return
-    
-    e.preventDefault()
+
     e.stopPropagation()
     
     // stop if event is fired on the placeholder
@@ -553,6 +590,25 @@
 
     this.el.trigger('sortable:change', { item: dragging.el })
   }
+
+  Sortable.prototype.diverted = function(e) {
+    e.stopPropagation()
+
+    var child = $(e.currentTarget), isContainer = child[0] === this.el[0]
+    if (isContainer) return
+
+    // insert the placeholder according to the dragging direction
+    this.direction = this.placeholder.show().index() < child.index() ? 'down' : 'up'
+    child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
+
+    translate(dragging.el[0], 0, 0)
+    var rect = dragging.el[0].getBoundingClientRect()
+    dragging.origin.x = rect.left - dragging.origin.offset.x
+    dragging.origin.y = rect.top  - dragging.origin.offset.y
+    var deltaX = e.pageX - dragging.origin.x
+      , deltaY = e.pageY - dragging.origin.y
+    translate(dragging.el[0], deltaX, deltaY)
+  }
   
   Sortable.prototype.end = function(e) {
     e.stopPropagation()
@@ -564,7 +620,7 @@
     
     // revert
     dragging.el.insertBefore(this.el.find(this.opts.items).get(this.index))
-    $(document).off('mouseup touchend MSPointerUp pointerup', this.end)
+    $(document).off(END_EVENT, this.end)
     dragging.stop(e)
     this.el.trigger('dragging:stop')
 
@@ -607,7 +663,7 @@
     }
     
     // revert
-    $(document).off('mouseup touchend MSPointerUp pointerup', this.end)
+    $(document).off(END_EVENT, this.end)
     dragging.stop(originalEvent, false)
     this.el.trigger('dragging:stop')
 
