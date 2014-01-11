@@ -59,8 +59,8 @@
     this.parent = parent
     this.el = el
     this.el.css('-ms-touch-action', 'none').css('touch-action', 'none')
-    this.origin.x = event.changedTouches ? event.changedTouches[0].pageX : e.pageX
-    this.origin.y = event.changedTouches ? event.changedTouches[0].pageY : e.pageY
+    this.origin.x = event && event.changedTouches && event.changedTouches[0].pageX || e.pageX
+    this.origin.y = event && event.changedTouches && event.changedTouches[0].pageY || e.pageY
     this.origin.transform  = vendorify('transform', this.el[0])
     this.origin.transition = vendorify('transition', this.el[0])
     var rect = this.el[0].getBoundingClientRect()
@@ -98,6 +98,8 @@
   Dragging.prototype.move = function(e) {
     if (!this.el) return
 
+    if (e.originalEvent) e = e.originalEvent
+
     var clientX = e.clientX || event.touches[0].clientX
       , clientY = e.clientY || event.touches[0].clientY
     var over = document.elementFromPoint(clientX, clientY)
@@ -122,8 +124,8 @@
     this.lastX = clientX
     this.lastY = clientY
 
-    var deltaX = (event.changedTouches ? event.changedTouches[0].pageX : e.pageX) - this.origin.x
-      , deltaY = (event.changedTouches ? event.changedTouches[0].pageY : e.pageY) - this.origin.y
+    var deltaX = (event && event.changedTouches && event.changedTouches[0].pageX || e.pageX) - this.origin.x
+      , deltaY = (event && event.changedTouches && event.changedTouches[0].pageY || e.pageY) - this.origin.y
     translate(this.el[0], deltaX, deltaY)
   }
 
