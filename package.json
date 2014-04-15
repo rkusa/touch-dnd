@@ -4,7 +4,7 @@
     "name": "Markus Ast",
     "email": "npm.m@rkusa.st"
   },
-  "version": "0.1.2",
+  "version": "0.2.0",
   "homepage": "http://ma.rkusa.st/touch-dnd/",
   "devDependencies": {
     "uglify-js": "2.x.x"

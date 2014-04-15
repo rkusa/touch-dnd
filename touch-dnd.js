@@ -44,17 +44,17 @@
       }
     })
   }
-  
+
   Dragging.prototype.on = function() {
     this.eventHandler.on.apply(this.eventHandler, Array.prototype.slice.call(arguments))
     return this
   }
-  
+
   Dragging.prototype.off = function() {
     this.eventHandler.off.apply(this.eventHandler, Array.prototype.slice.call(arguments))
     return this
   }
-  
+
   Dragging.prototype.start = function(parent, el, e) {
     this.parent = parent
     this.el = el
@@ -75,7 +75,7 @@
     this.eventHandler.trigger('dragging:start')
     return this.el
   }
-  
+
   Dragging.prototype.stop = function(e, revert) {
     if (this.last) {
       var last = this.last
@@ -130,18 +130,18 @@
   Dragging.prototype.setCurrent = function(target) {
     this.currentTarget = target
   }
-  
+
   var dragging = $.dragging = parent.$.dragging || new Dragging()
-  
+
   // from https://github.com/rkusa/jquery-observe
   var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver
   var Observer = function(target, selector, onAdded, onRemoved) {
     var self    = this
     this.target = target
-    
+
     var childsOnly = selector[0] === '>'
       , search = childsOnly ? selector.substr(1) : selector
-      
+
     function apply(nodes, callback) {
       Array.prototype.slice.call(nodes).forEach(function(node) {
         if (childsOnly && self.target[0] !== $(node).parent()[0]) return
@@ -152,10 +152,10 @@
         })
       })
     }
-    
+
     this.observer = new MutationObserver(function(mutations) {
       self.disconnect()
-      
+
       mutations.forEach(function(mutation) {
         if (onAdded)   apply(mutation.addedNodes,   onAdded)
         if (onRemoved) apply(mutation.removedNodes, onRemoved)
@@ -163,29 +163,29 @@
 
       self.observe()
     })
-    
+
     // call onAdded for existing elements
     $(selector, target).each(function() {
       onAdded.call(this)
     })
-    
+
     this.observe()
   }
-  
+
   Observer.prototype.disconnect = function() {
     this.observer.disconnect()
   }
-  
+
   Observer.prototype.observe = function() {
     this.observer.observe(this.target[0], { childList: true, subtree: true })
   }
-  
+
   var Draggable = function(element, opts) {
     this.id     = nextId++
     this.el     = $(element)
     this.opts   = opts
     this.cancel = opts.handle !== false
-    
+
     this.connectedWith = []
     if (this.opts.connectWith) {
       this.connectWith(this.opts.connectWith)
@@ -206,32 +206,32 @@
       }
     })
   }
-  
+
   Draggable.prototype.create = function() {
     this.el
     .on(START_EVENT, $.proxy(this.start, this))
-    
+
     var self = this
     setTimeout(function() {
       self.el.trigger('draggable:create', self)
     })
   }
-  
+
   Draggable.prototype.destroy = function() {
     this.el.off(START_EVENT, this.start)
   }
-  
+
   Draggable.prototype.enable = function() {
     this.opts.disabled = false
   }
-  
+
   Draggable.prototype.disable = function() {
     this.opts.disabled = true
   }
-  
+
   Draggable.prototype.start = function(e) {
     if (this.opts.disabled) return false
-    
+
     e = e.originalEvent || e // zepto <> jquery compatibility
     e.preventDefault() // prevent text selection
 
@@ -254,20 +254,20 @@
       }
       if (!isHandle) return false
     }
-    
+
     dragging.start(this, this.el, e)
     $(document).on(END_EVENT, $.proxy(this.end, this))
   }
-  
+
   Draggable.prototype.end = function(e) {
     // e.stopPropagation()
     // e.preventDefault()
-    
+
     // revert
     $(document).off(END_EVENT, this.end)
     dragging.stop(e)
   }
-  
+
   var Droppable = function(element, opts) {
     this.id            = nextId++
     this.el            = $(element)
@@ -275,7 +275,7 @@
     this.accept        = false
     this.connectedWith = []
   }
-  
+
   Droppable.prototype.create = function() {
     this.el
     .on('dragging:enter', $.proxy(this.enter, this))
@@ -285,33 +285,33 @@
     dragging
     .on('dragging:start', $.proxy(this.activate, this))
     .on('dragging:stop',  $.proxy(this.reset, this))
-    
+
     var self = this
     setTimeout(function() {
       self.el.trigger('droppable:create', self)
     })
   }
-  
+
   Droppable.prototype.destroy = function() {
     this.el
     .off('dragging:enter', this.enter)
     .off('dragging:leave', this.leave)
     .off('dragging:drop',  this.drop)
-    
+
     // Todo: Fix Zepto Bug
     // dragging
     // .off('dragging:start', this.activate)
     // .off('dragging:stop',  this.reset)
   }
-  
+
   Droppable.prototype.enable = function() {
     this.opts.disabled = false
   }
-  
+
   Droppable.prototype.disable = function() {
     this.opts.disabled = true
   }
-  
+
   Droppable.prototype.activate = function(e) {
     this.accept = this.connectedWith.indexOf(dragging.parent.id) !== -1
     if (!this.accept) {
@@ -323,31 +323,31 @@
         if (!this.accept && this.opts.accept !== '*') this.accept = accept
       } else this.accept = accept
     }
-    
+
     if (!this.accept) return
     if (this.opts.activeClass)
       this.el.addClass(this.opts.activeClass)
-    
+
     this.el.trigger('droppable:activate', { item: dragging.el })
   }
-  
+
   Droppable.prototype.reset = function(e) {
     if (!this.accept) return
     if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
     if (this.opts.hoverClass)  this.el.removeClass(this.opts.hoverClass)
-    
+
     this.el.trigger('droppable:deactivate', { item: dragging.el })
   }
-  
+
   Droppable.prototype.enter = function(e) {
     if (this.opts.disabled) return false
-    
+
     e.stopPropagation()
-    
+
     // hide placeholder, if set (e.g. enter the droppable after
     // entering a sortable)
     if (dragging.placeholder) dragging.placeholder.hide()
-    
+
     if (!this.accept) return
 
     if (this.opts.hoverClass)
@@ -355,45 +355,46 @@
 
     this.el.trigger('droppable:over', { item: dragging.el })
   }
-  
+
   Droppable.prototype.leave = function(e) {
     if (this.opts.disabled) return false
     // e.stopPropagation()
-    
+
     if (this.opts.hoverClass && this.accept)
       this.el.removeClass(this.opts.hoverClass)
 
     this.el.trigger('droppable:out', { item: dragging.el })
   }
-  
+
   Droppable.prototype.drop = function(e, originalEvent) {
     if (this.opts.disabled || !this.accept) return false
-    
+
     if (!dragging.el) return
-    
+
     // zepto <> jquery compatibility
-    var el = dragging.el, clone
+    var el = dragging.el
     dragging.stop(originalEvent, false)
 
-    $(this.el).append(clone = el.clone())
-    
-    this.el.trigger('droppable:drop', { item: clone, draggable: el })
+    var item = this.opts.clone ? el.clone() : el
+    $(this.el).append(item)
+
+    this.el.trigger('droppable:drop', { item: item, draggable: el })
   }
-  
+
   var Sortable = function(element, opts) {
     this.id   = nextId++
     this.el   = element
     this.opts = opts
-    
+
     var tag
     try {
       tag = this.el.find(this.opts.items)[0].tagName
     } catch(e) {
       tag = /^ul|ol$/i.test(this.el.tagName) ? 'li' : 'div'
     }
-    
+
     this.placeholder = $('<' + tag + ' class="' + this.opts.placeholder + '" />')
-    
+
     this.accept = this.index = this.direction = null
     this.connectedWith = []
     if (this.opts.connectWith) {
@@ -402,7 +403,7 @@
   }
 
   Sortable.prototype.connectWith = Draggable.prototype.connectWith
-  
+
   Sortable.prototype.create = function() {
     this.el
     .on(START_EVENT,         this.opts.items, $.proxy(this.start, this))
@@ -410,22 +411,22 @@
     .on('dragging:enter',    this.opts.items, $.proxy(this.enter, this))
     .on('dragging:diverted', this.opts.items, $.proxy(this.diverted, this))
     .on('dragging:drop',     this.opts.items, $.proxy(this.drop, this))
-    
+
     this.el
     .on('dragging:identify', $.proxy(this.identify, this))
     .on('dragging:enter',    $.proxy(this.enter, this))
     .on('dragging:diverted', $.proxy(this.diverted, this))
     .on('dragging:drop',     $.proxy(this.drop, this))
-    
+
     dragging
     .on('dragging:start', $.proxy(this.activate, this))
     .on('dragging:stop',  $.proxy(this.reset, this))
-    
+
     var self = this
     setTimeout(function() {
       self.el.trigger('sortable:create', self)
     })
-    
+
     this.observer = new Observer(this.el, this.opts.items, function() {
     }, function() {
       if (this === self.placeholder[0] || (dragging.el && this === dragging.el[0])) return
@@ -434,7 +435,7 @@
       self.el.trigger('sortable:update', { item: item, index: -1 })
     })
   }
-  
+
   Sortable.prototype.destroy = function() {
     this.el
     .off(START_EVENT,         this.opts.items, this.start)
@@ -442,29 +443,29 @@
     .off('dragging:enter',    this.opts.items, this.enter)
     .off('dragging:diverted', this.opts.items, this.diverted)
     .off('dragging:drop',     this.opts.items, this.drop)
-    
+
     this.el
     .off('dragging:identify', this.identify)
     .off('dragging:enter',    this.enter)
     .off('dragging:diverted', this.diverted)
     .off('dragging:drop',     this.drop)
-    
+
     // Todo: Fix Zepto Bug
     // dragging
     // .off('dragging:start', this.activate)
     // .off('dragging:stop',  this.reset)
-    
+
     this.observer.disconnect()
   }
-  
+
   Sortable.prototype.enable = function() {
     this.opts.disabled = false
   }
-  
+
   Sortable.prototype.disable = function() {
     this.opts.disabled = true
   }
-  
+
   Sortable.prototype.activate = function(e) {
     this.accept  = dragging.parent.id === this.id
                    || !!~this.connectedWith.indexOf(dragging.parent.id)
@@ -479,20 +480,20 @@
         : dragging.el.is(this.opts.accept))
 
     if (!this.accept) return
-    
+
     if (this.opts.activeClass)
       this.el.addClass(this.opts.activeClass)
-    
+
     this.el.trigger('sortable:activate', dragging.el)
   }
-  
+
   Sortable.prototype.reset = function(e) {
     if (!this.accept) return
     if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
-    
+
     this.el.trigger('sortable:deactivate', dragging.el)
   }
-  
+
   Sortable.prototype.start = function(e) {
     if (this.opts.disabled) return
 
@@ -515,22 +516,22 @@
       }
       if (!isHandle) return
     }
-    
+
     e.stopPropagation()
     e.preventDefault() // prevent text selection
-    
+
     // use e.currentTarget instead of e.target because we want the target
     // the event is bound to, not the target (child) the event is triggered from
     dragging.start(this, $(e.currentTarget), e)
     $(document).on(END_EVENT, $.proxy(this.end, this))
 
     this.index = dragging.el.index()
-    
+
     if (this.opts.forcePlaceholderSize) {
       this.placeholder.height(dragging.el.height())
       this.placeholder.width(dragging.el.width())
     }
-    
+
     this.el.trigger('sortable:start', { item: dragging.el })
   }
 
@@ -538,12 +539,12 @@
     if (dragging.currentTarget) return
     dragging.setCurrent(e.currentTarget)
   }
-  
+
   Sortable.prototype.enter = function(e) {
     if (!this.accept || this.opts.disabled) return
 
     e.stopPropagation()
-    
+
     // stop if event is fired on the placeholder
     var child = e.currentTarget, isContainer = child === this.el[0]
     if (child === this.placeholder[0]) return
@@ -609,15 +610,15 @@
       , deltaY = e.pageY - dragging.origin.y
     translate(dragging.el[0], deltaX, deltaY)
   }
-  
+
   Sortable.prototype.end = function(e) {
     e.stopPropagation()
     e.preventDefault()
 
     if (!dragging.el) return
-    
+
     this.el.trigger('sortable:beforeStop', { item: dragging.el })
-    
+
     // revert
     dragging.el.insertBefore(this.el.find(this.opts.items).get(this.index))
     $(document).off(END_EVENT, this.end)
@@ -626,28 +627,28 @@
 
     this.index = null
   }
-  
+
   Sortable.prototype.drop = function(e, originalEvent) {
     if (!this.accept || this.opts.disabled) return
 
     e.stopPropagation()
     e.preventDefault()
-    
+
     if (!dragging.el) return
 
     this.observer.disconnect()
-    
+
     dragging.el.insertBefore(this.placeholder).show()
-    
+
     // remove placeholder to be able to calculate new index
     dragging.placeholder = null
-    
+
     // if the dropped element belongs to another list, trigger the receive event
     var newIndex = dragging.el.index()
     if (this.index === null) { // dropped element belongs to another list
       // if (dragging.parent instanceof Draggable)
       //   dragging.parent.destroy()
-      
+
       this.el.trigger('sortable:receive', { item: dragging.el })
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
@@ -655,13 +656,13 @@
     else if (newIndex !== this.index) {
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
-    
+
     this.el.trigger('sortable:beforeStop', { item: dragging.el })
     if (dragging.parent instanceof Sortable) {
       dragging.parent.index = null
       dragging.parent.el.trigger('dragging:stop')
     }
-    
+
     // revert
     $(document).off(END_EVENT, this.end)
     dragging.stop(originalEvent, false)
@@ -669,7 +670,7 @@
 
     this.observer.observe()
   }
-  
+
   Sortable.prototype.toArray = function(opts) {
     if (!opts) opts = {}
     var attr = opts.attribute || 'id', attrs = []
@@ -678,7 +679,7 @@
     })
     return attrs
   }
-  
+
   function generic(constructor, identifier, defaults) {
     return function(opts, name, value) {
       var result = []
@@ -725,14 +726,14 @@
           $(this).data(identifier, instance)
         }
       })
-    
+
       if (result.length)
         return result.length === 1 ? result[0] : result
       else
         return this
     }
   }
-  
+
   $.fn.draggable = generic(Draggable, 'draggable', {
     cancel: 'input, textarea, button, select, option',
     connectWith: false,
@@ -742,16 +743,17 @@
     initialized: false,
     scope: 'default'
   })
-  
+
   $.fn.droppable = generic(Droppable, 'droppable', {
     accept: '*',
     activeClass: false,
     disabled: false,
     hoverClass: false,
     initialized: false,
+    clone: false,
     scope: 'default'
   })
-  
+
   $.fn.sortable = generic(Sortable, 'sortable', {
     accept: '*',
     activeClass: false,

@@ -2,12 +2,10 @@
 
 Advanced touch-compatible Drag'n'Drop library providing Draggable, Droppable and Sortable for Zepto.js and jQuery (for Zepto, you have to include its `data` module).
 
-```json
-{ "name": "touch-dnd",
-  "version": "0.1.2" }
-```
+[![NPM](https://badge.fury.io/js/touch-dnd.png)](https://npmjs.org/package/touch-dnd)
+[![Dependency Status](https://david-dm.org/rkusa/touch-dnd.png?theme=shields.io)](https://david-dm.org/rkusa/touch-dnd)
 
-**Status:** Tested with current version of Chrome (Mac & Android), Safari (Mac & iOS), Opera Next, Firefox and IE  
+**Status:** Tested with current version of Chrome (Mac & Android), Safari (Mac & iOS), Opera Next, Firefox and IE
 **Documentation:** [ma.rkusa.st/touch-dnd](http://ma.rkusa.st/touch-dnd)
 
 #### Why?
