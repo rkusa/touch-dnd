@@ -255,7 +255,13 @@
       if (!isHandle) return false
     }
 
-    dragging.start(this, this.el, e)
+    var el = this.el;
+    if (this.opts.clone) {
+      el = el.clone();
+      el.insertAfter(this.el);
+    }
+
+    dragging.start(this, el, e)
     $(document).on(END_EVENT, $.proxy(this.end, this))
   }
 
@@ -741,6 +747,7 @@
     disabled: false,
     handle: false,
     initialized: false,
+    clone: false,
     scope: 'default'
   })
 
