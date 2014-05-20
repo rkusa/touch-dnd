@@ -200,7 +200,7 @@
       var instance = el.data('sortable') || el.data('droppable')
       if (instance) instance.connectedWith.push(self.id)
       else {
-        el.once('sortable:create droppable:create', function(e, instance) {
+        el.one('sortable:create droppable:create', function(e, instance) {
           instance.connectedWith.push(self.id)
         })
       }
