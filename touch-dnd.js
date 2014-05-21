@@ -85,17 +85,27 @@
       $(last).trigger('dragging:drop', e)
     }
     if (!this.el) return
-    var el = this.handle || this.el
+    var transform = this.origin.transform || 'translate(0, 0)'
+    var el = this.handle || this.el, self = this
     if (revert === undefined) revert = true
-    if (revert) {
-      transition(el[0], 'all 0.5s ease-in-out 0s')
-      setTimeout(vendorify.bind(null, 'transition', el[0], this.origin.transition), 500)
+    if (this.handle) {
+      transition(this.handle[0], 'all 0.5s ease-in-out 0s')
+      if (revert) {
+        vendorify('transform', this.handle[0], transform)
+        setTimeout(this.handle.remove.bind(this.handle), 500)
+      } else {
+        this.handle.remove()
+      }
+    } else {
+      if (revert) {
+        transition(this.el[0], 'all 0.5s ease-in-out 0s')
+        setTimeout(vendorify.bind(null, 'transition', this.el[0], this.origin.transition), 500)
+      }
+      vendorify('transform', this.el[0], transform)
+      this.el[0].style.pointerEvents = 'auto'
     }
-    vendorify('transform', el[0], this.origin.transform || 'translate(0, 0)')
-    el[0].style.pointerEvents = 'auto'
     $(document).off('mousemove touchmove MSPointerMove pointermove', this.move)
     this.eventHandler.trigger('dragging:stop')
-    if (this.handle) setTimeout(this.handle.remove.bind(this.handle), 500)
     this.parent = this.el = this.placeholder = this.handle = null
   }
 
