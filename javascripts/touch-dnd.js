@@ -29,7 +29,7 @@
   var nextId = 0
   var Dragging = function() {
     this.eventHandler = $('<div />')
-    this.parent = this.el = null
+    this.parent = this.el = this.handle = null
     this.origin = { x: 0, y: 0, transition: null, translate: null, offset: { x: 0, y: 0 } }
     this.lastEntered = this.currentTarget = null
     this.lastX = this.lastY = this.lastDirection = null
@@ -55,10 +55,12 @@
     return this
   }
 
-  Dragging.prototype.start = function(parent, el, e) {
+  Dragging.prototype.start = function(parent, el, e, handle) {
     this.parent = parent
     this.el = el
-    this.el.css('-ms-touch-action', 'none').css('touch-action', 'none')
+    this.handle = handle
+    var el = this.handle || this.el
+    el.css('-ms-touch-action', 'none').css('touch-action', 'none')
     this.origin.x = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
     this.origin.y = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
     this.origin.transform  = vendorify('transform', this.el[0])
@@ -69,9 +71,9 @@
     // the draged element is going to stick right under the cursor
     // setting the css property `pointer-events` to `none` will let
     // the pointer events fire on the elements underneath the helper
-    this.el[0].style.pointerEvents = 'none'
+    el[0].style.pointerEvents = 'none'
     $(document).on('mousemove touchmove MSPointerMove pointermove', $.proxy(this.move, this))
-    transition(this.el[0], '')
+    transition(el[0], '')
     this.eventHandler.trigger('dragging:start')
     return this.el
   }
@@ -83,16 +85,28 @@
       $(last).trigger('dragging:drop', e)
     }
     if (!this.el) return
+    var transform = this.origin.transform || 'translate(0, 0)'
+    var el = this.handle || this.el, self = this
     if (revert === undefined) revert = true
-    if (revert) {
-      transition(this.el[0], 'all 0.5s ease-in-out 0s')
-      setTimeout(vendorify.bind(null, 'transition', this.el[0], this.origin.transition), 500)
+    if (this.handle) {
+      transition(this.handle[0], 'all 0.5s ease-in-out 0s')
+      if (revert) {
+        vendorify('transform', this.handle[0], transform)
+        setTimeout(this.handle.remove.bind(this.handle), 500)
+      } else {
+        this.handle.remove()
+      }
+    } else {
+      if (revert) {
+        transition(this.el[0], 'all 0.5s ease-in-out 0s')
+        setTimeout(vendorify.bind(null, 'transition', this.el[0], this.origin.transition), 500)
+      }
+      vendorify('transform', this.el[0], transform)
+      this.el[0].style.pointerEvents = 'auto'
     }
-    vendorify('transform', this.el[0], this.origin.transform || 'translate(0, 0)')
-    this.el[0].style.pointerEvents = 'auto'
     $(document).off('mousemove touchmove MSPointerMove pointermove', this.move)
     this.eventHandler.trigger('dragging:stop')
-    this.parent = this.el = this.placeholder = null
+    this.parent = this.el = this.placeholder = this.handle = null
   }
 
   Dragging.prototype.move = function(e) {
@@ -124,7 +138,8 @@
 
     var deltaX = (window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX) - this.origin.x
       , deltaY = (window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY) - this.origin.y
-    translate(this.el[0], deltaX, deltaY)
+    var el = this.handle || this.el
+    translate(el[0], deltaX, deltaY)
   }
 
   Dragging.prototype.setCurrent = function(target) {
@@ -255,7 +270,18 @@
       if (!isHandle) return false
     }
 
-    dragging.start(this, this.el, e)
+    var el = this.el, handle
+    if (this.opts.clone) {
+      el = this.el.clone()
+      handle = this.el.clone()
+      var position = this.el.position()
+      handle.css('position', 'absolute')
+            .css('left', position.left).css('top', position.top)
+            .width(this.el.width()).height(this.el.height())
+      handle.insertAfter(this.el)
+    }
+
+    dragging.start(this, el, e, handle)
     $(document).on(END_EVENT, $.proxy(this.end, this))
   }
 
@@ -375,10 +401,9 @@
     var el = dragging.el
     dragging.stop(originalEvent, false)
 
-    var item = this.opts.clone ? el.clone() : el
-    $(this.el).append(item)
+    $(this.el).append(el)
 
-    this.el.trigger('droppable:drop', { item: item, draggable: el })
+    this.el.trigger('droppable:drop', { item: el })
   }
 
   var Sortable = function(element, opts) {
@@ -741,6 +766,7 @@
     disabled: false,
     handle: false,
     initialized: false,
+    clone: false,
     scope: 'default'
   })
 
@@ -750,7 +776,6 @@
     disabled: false,
     hoverClass: false,
     initialized: false,
-    clone: false,
     scope: 'default'
   })
 

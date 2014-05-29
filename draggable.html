@@ -25,6 +25,26 @@ layout: layout
   })
 </script>
 
+<h2>clone</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Boolean</dd>
+  <dt>Default</dt>
+  <dd>false</dd>
+</dl>
+<p>Specifies whether the draggable should be cloned or not.</p>
+<h4>Example</h4>
+{% highlight js %}$('.draggable-clone').draggable({ clone: true }){% endhighlight %}
+<div class="draggable draggable-clone"></div>
+<div class="draggable draggable-clone"></div>
+<div class="droppable" id="droppable-clone" style="float:right"></div>
+<script type="text/javascript">
+  $(function() {
+    $('.draggable-clone').draggable({ clone: true })
+    $('#droppable-clone').droppable()
+  })
+</script>
+
 <h2>connectWith</h2>
 <dl>
   <dt>Type</dt>
