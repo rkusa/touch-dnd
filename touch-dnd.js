@@ -552,6 +552,15 @@
 
     this.index = dragging.el.index()
 
+    this.el.append((dragging.placeholder = this.placeholder).hide())
+
+    // if dragging an item that belongs to the current list, hide it while
+    // it is being dragged
+    if (this.index !== null) {
+      this.el.append(dragging.el)
+      dragging.move(e)
+    }
+
     if (this.opts.forcePlaceholderSize) {
       this.placeholder.height(dragging.el.height())
       this.placeholder.width(dragging.el.width())
@@ -579,21 +588,11 @@
     if (isContainer && !this.isEmpty && this.placeholder.parent().length)
       return
 
+    dragging.placeholder = this.placeholder
+
     if (this.opts.forcePlaceholderSize) {
       this.placeholder.height(dragging.el.height())
       // this.placeholder.width(dragging.el.width())
-    }
-
-    var initialized = true
-    if (!this.placeholder.parent().length) {
-      initialized = false
-      this.el.append((dragging.placeholder = this.placeholder).hide())
-
-      // if dragging an item that belongs to the current list, hide it while
-      // it is being dragged
-      if (this.index !== null) {
-        this.el.append(dragging.el)
-      }
     }
 
     if (!isContainer) {
@@ -612,18 +611,18 @@
       this.el.append(this.placeholder)
     }
 
-    if (!initialized) return
-
     this.el.trigger('sortable:change', { item: dragging.el })
   }
 
   Sortable.prototype.diverted = function(e) {
+    if (!this.accept || this.opts.disabled) return
     e.stopPropagation()
 
     var child = $(e.currentTarget), isContainer = child[0] === this.el[0]
     if (isContainer) return
 
     // insert the placeholder according to the dragging direction
+    dragging.placeholder = this.placeholder
     this.direction = this.placeholder.show().index() < child.index() ? 'down' : 'up'
     child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
 
