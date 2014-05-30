@@ -587,7 +587,7 @@
     var initialized = true
     if (!this.placeholder.parent().length) {
       initialized = false
-      this.el.append(dragging.placeholder = this.placeholder)
+      this.el.append((dragging.placeholder = this.placeholder).hide())
 
       // if dragging an item that belongs to the current list, hide it while
       // it is being dragged
@@ -663,6 +663,7 @@
 
     this.observer.disconnect()
 
+    if (!this.placeholder.parent().length) return
     dragging.el.insertBefore(this.placeholder).show()
 
     // remove placeholder to be able to calculate new index
