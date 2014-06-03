@@ -33,6 +33,7 @@
     this.origin = { x: 0, y: 0, transition: null, translate: null, offset: { x: 0, y: 0 } }
     this.lastEntered = this.currentTarget = null
     this.lastX = this.lastY = this.lastDirection = null
+    this.originalCss = {}
 
     var placeholder
     Object.defineProperty(this, 'placeholder', {
@@ -104,6 +105,10 @@
       vendorify('transform', this.el[0], transform)
       this.el[0].style.pointerEvents = 'auto'
     }
+    for (var prop in this.originalCss) {
+      this.el.css(prop, this.originalCss[prop])
+      delete this.originalCss[prop]
+    }
     $(document).off('mousemove touchmove MSPointerMove pointermove', this.move)
     this.eventHandler.trigger('dragging:stop')
     this.parent = this.el = this.placeholder = this.handle = null
@@ -144,6 +149,12 @@
 
   Dragging.prototype.setCurrent = function(target) {
     this.currentTarget = target
+  }
+
+  Dragging.prototype.css = function(prop, val) {
+    if (!this.el) return
+    this.originalCss[prop] = this.el.css(prop)
+    this.el.css(prop, val)
   }
 
   var dragging = $.dragging = parent.$.dragging || new Dragging()
@@ -557,6 +568,8 @@
     // if dragging an item that belongs to the current list, hide it while
     // it is being dragged
     if (this.index !== null) {
+      var marginBottom = (parseInt(dragging.el.css('margin-bottom'), 10) + dragging.el.height()) * -1
+      dragging.css('margin-bottom', marginBottom)
       this.el.append(dragging.el)
       dragging.move(e)
     }
