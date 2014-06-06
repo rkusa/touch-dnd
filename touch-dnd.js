@@ -68,10 +68,10 @@
     this.origin.transform  = vendorify('transform', this.el[0])
     this.origin.transition = vendorify('transition', this.el[0])
     var rect = this.el[0].getBoundingClientRect()
-    this.origin.offset.x = rect.left + window.scrollX - this.origin.x
-    this.origin.offset.y = rect.top + window.scrollY - this.origin.y
-    this.origin.scrollX = window.scrollX
-    this.origin.scrollY = window.scrollY
+    this.origin.offset.x = rect.left + (window.scrollX || window.pageXOffset) - this.origin.x
+    this.origin.offset.y = rect.top + (window.scrollY || window.pageYOffset) - this.origin.y
+    this.origin.scrollX = (window.scrollX || window.pageXOffset)
+    this.origin.scrollY = (window.scrollY || window.pageYOffset)
     // the draged element is going to stick right under the cursor
     // setting the css property `pointer-events` to `none` will let
     // the pointer events fire on the elements underneath the helper
@@ -124,8 +124,8 @@
       var pageX = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
         , pageY = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
 
-      var clientX = e.clientX || window.event && window.event.touches[0].clientX || 0
-        , clientY = e.clientY || window.event && window.event.touches[0].clientY || 0
+      var clientX = e.clientX || window.event && window.event.touches && window.event.touches[0].clientX || 0
+        , clientY = e.clientY || window.event && window.event.touches && window.event.touches[0].clientY || 0
 
       var over = document.elementFromPoint(clientX, clientY)
 
@@ -148,21 +148,21 @@
       this.lastDirection = direction
       this.lastX = pageX
       this.lastY = pageY
-      this.origin.scrollX = window.scrollX
-      this.origin.scrollY = window.scrollY
+      this.origin.scrollX = (window.scrollX || window.pageXOffset)
+      this.origin.scrollY = (window.scrollY || window.pageYOffset)
     } else {
-      var pageX = this.lastX + (window.scrollX - this.origin.scrollX)
-        , pageY = this.lastY + (window.scrollY - this.origin.scrollY)
+      var pageX = this.lastX + ((window.scrollX || window.pageXOffset) - this.origin.scrollX)
+        , pageY = this.lastY + ((window.scrollY || window.pageYOffset) - this.origin.scrollY)
     }
 
-    var bottom = (pageY - window.scrollY - window.innerHeight) * -1
-    var bottomReached = document.documentElement.offsetHeight < window.scrollY + window.innerHeight
+    var bottom = (pageY - (window.scrollY || window.pageYOffset) - window.innerHeight) * -1
+    var bottomReached = document.documentElement.offsetHeight < (window.scrollY || window.pageYOffset) + window.innerHeight
     if (bottom <= 10 && !bottomReached) {
       setTimeout(function() { window.scrollBy(0, 5) }, 50)
     }
 
-    var top = (pageY - window.scrollY)
-    var topReached = window.scrollY <= 0
+    var top = (pageY - (window.scrollY || window.pageYOffset))
+    var topReached = (window.scrollY || window.pageYOffset) <= 0
     if (top <= 10 && !topReached) {
       setTimeout(function() { window.scrollBy(0, -5) }, 50)
     }
@@ -186,8 +186,8 @@
   Dragging.prototype.adjustPlacement = function(e) {
     translate(this.el[0], 0, 0)
     var rect = this.el[0].getBoundingClientRect()
-    this.origin.x = rect.left + window.scrollX - this.origin.offset.x
-    this.origin.y = rect.top + window.scrollY - this.origin.offset.y
+    this.origin.x = rect.left + (window.scrollX || window.pageXOffset) - this.origin.offset.x
+    this.origin.y = rect.top + (window.scrollY || window.pageYOffset) - this.origin.offset.y
     var deltaX = e.pageX - this.origin.x
       , deltaY = e.pageY - this.origin.y
     translate(this.el[0], deltaX, deltaY)
@@ -567,7 +567,7 @@
   }
 
   Sortable.prototype.start = function(e) {
-    if (this.opts.disabled) return
+    if (this.opts.disabled || dragging.el) return
 
     if (this.opts.cancel) {
       var target = $(e.target)
