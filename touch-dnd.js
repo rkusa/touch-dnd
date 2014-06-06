@@ -124,8 +124,8 @@
       var pageX = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
         , pageY = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
 
-      var clientX = e.clientX || window.event.touches[0].clientX
-        , clientY = e.clientY || window.event.touches[0].clientY
+      var clientX = e.clientX || window.event && window.event.touches[0].clientX || 0
+        , clientY = e.clientY || window.event && window.event.touches[0].clientY || 0
 
       var over = document.elementFromPoint(clientX, clientY)
 
@@ -153,6 +153,18 @@
     } else {
       var pageX = this.lastX + (window.scrollX - this.origin.scrollX)
         , pageY = this.lastY + (window.scrollY - this.origin.scrollY)
+    }
+
+    var bottom = (pageY - window.scrollY - window.innerHeight) * -1
+    var bottomReached = document.body.offsetHeight < window.scrollY + window.innerHeight
+    if (bottom <= 10 && !bottomReached) {
+      papaWindow.scrollBy(0, 10)
+    }
+
+    var top = (pageY - window.scrollY)
+    var topReached = window.scrollY <= 0
+    if (top <= 10 && !topReached) {
+      papaWindow.scrollBy(0, -10)
     }
 
     var deltaX = pageX - this.origin.x
