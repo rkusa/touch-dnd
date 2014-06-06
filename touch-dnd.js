@@ -157,6 +157,16 @@
     this.el.css(prop, val)
   }
 
+  Dragging.prototype.adjustPlacement = function(e) {
+    translate(this.el[0], 0, 0)
+    var rect = this.el[0].getBoundingClientRect()
+    this.origin.x = rect.left - this.origin.offset.x
+    this.origin.y = rect.top  - this.origin.offset.y
+    var deltaX = e.pageX - this.origin.x
+      , deltaY = e.pageY - this.origin.y
+    translate(this.el[0], deltaX, deltaY)
+  }
+
   var dragging = $.dragging = parent.$.dragging || new Dragging()
 
   // from https://github.com/rkusa/jquery-observe
@@ -563,7 +573,7 @@
 
     this.index = dragging.el.index()
 
-    this.el.append((dragging.placeholder = this.placeholder).hide())
+    dragging.el.before(dragging.placeholder = this.placeholder)
 
     // if dragging an item that belongs to the current list, hide it while
     // it is being dragged
@@ -571,13 +581,14 @@
       var marginBottom = (parseInt(dragging.el.css('margin-bottom'), 10) + dragging.el.height()) * -1
       dragging.css('margin-bottom', marginBottom)
       this.el.append(dragging.el)
-      dragging.move(e)
     }
 
     if (this.opts.forcePlaceholderSize) {
       this.placeholder.height(dragging.el.height())
       this.placeholder.width(dragging.el.width())
     }
+
+    dragging.adjustPlacement(e)
 
     this.el.trigger('sortable:start', { item: dragging.el })
   }
@@ -605,21 +616,14 @@
 
     if (this.opts.forcePlaceholderSize) {
       this.placeholder.height(dragging.el.height())
-      // this.placeholder.width(dragging.el.width())
+      this.placeholder.width(dragging.el.width())
     }
 
     if (!isContainer) {
       // insert the placeholder according to the dragging direction
       this.direction = this.placeholder.show().index() < child.index() ? 'down' : 'up'
       child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
-
-      translate(dragging.el[0], 0, 0)
-      var rect = dragging.el[0].getBoundingClientRect()
-      dragging.origin.x = rect.left - dragging.origin.offset.x
-      dragging.origin.y = rect.top  - dragging.origin.offset.y
-      var deltaX = e.pageX - dragging.origin.x
-        , deltaY = e.pageY - dragging.origin.y
-      translate(dragging.el[0], deltaX, deltaY)
+      dragging.adjustPlacement(e)
     } else {
       this.el.append(this.placeholder)
     }
@@ -638,14 +642,7 @@
     dragging.placeholder = this.placeholder
     this.direction = this.placeholder.show().index() < child.index() ? 'down' : 'up'
     child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
-
-    translate(dragging.el[0], 0, 0)
-    var rect = dragging.el[0].getBoundingClientRect()
-    dragging.origin.x = rect.left - dragging.origin.offset.x
-    dragging.origin.y = rect.top  - dragging.origin.offset.y
-    var deltaX = e.pageX - dragging.origin.x
-      , deltaY = e.pageY - dragging.origin.y
-    translate(dragging.el[0], deltaX, deltaY)
+    dragging.adjustPlacement(e)
   }
 
   Sortable.prototype.end = function(e) {
