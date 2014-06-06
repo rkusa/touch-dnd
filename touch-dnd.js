@@ -61,14 +61,14 @@
     this.el = el
     this.handle = handle
     var el = this.handle || this.el
-    el.css('-ms-touch-action', 'none').css('touch-action', 'none')
+    // vendorify('touchAction', el[0], 'none')
     this.origin.x = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
     this.origin.y = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
     this.origin.transform  = vendorify('transform', this.el[0])
     this.origin.transition = vendorify('transition', this.el[0])
     var rect = this.el[0].getBoundingClientRect()
-    this.origin.offset.x = rect.left - this.origin.x
-    this.origin.offset.y = rect.top - this.origin.y
+    this.origin.offset.x = rect.left + window.scrollX - this.origin.x
+    this.origin.offset.y = rect.top + window.scrollY - this.origin.y
     // the draged element is going to stick right under the cursor
     // setting the css property `pointer-events` to `none` will let
     // the pointer events fire on the elements underneath the helper
@@ -119,10 +119,14 @@
 
     var clientX = e.clientX || window.event.touches[0].clientX
       , clientY = e.clientY || window.event.touches[0].clientY
+
     var over = document.elementFromPoint(clientX, clientY)
 
-    var deltaX = this.lastX - clientX
-      , deltaY = this.lastY - clientY
+    var pageX = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
+      , pageY = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
+
+    var deltaX = this.lastX - pageX
+      , deltaY = this.lastY - pageY
       , direction = Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0 && 'left'
                  || Math.abs(deltaX) > Math.abs(deltaY) && deltaX < 0 && 'right'
                  || Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0 && 'up'
@@ -138,11 +142,11 @@
     this.last = over
     this.currentTarget = null
     this.lastDirection = direction
-    this.lastX = clientX
-    this.lastY = clientY
+    this.lastX = pageX
+    this.lastY = pageY
 
-    var deltaX = (window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX) - this.origin.x
-      , deltaY = (window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY) - this.origin.y
+    var deltaX = pageX - this.origin.x
+      , deltaY = pageY - this.origin.y
     var el = this.handle || this.el
     translate(el[0], deltaX, deltaY)
   }
@@ -160,8 +164,8 @@
   Dragging.prototype.adjustPlacement = function(e) {
     translate(this.el[0], 0, 0)
     var rect = this.el[0].getBoundingClientRect()
-    this.origin.x = rect.left - this.origin.offset.x
-    this.origin.y = rect.top  - this.origin.offset.y
+    this.origin.x = rect.left + window.scrollX - this.origin.offset.x
+    this.origin.y = rect.top + window.scrollY - this.origin.offset.y
     var deltaX = e.pageX - this.origin.x
       , deltaY = e.pageY - this.origin.y
     translate(this.el[0], deltaX, deltaY)
