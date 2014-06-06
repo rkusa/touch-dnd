@@ -15,6 +15,6 @@
     "url" : "git://github.com/rkusa/touch-dnd.git"
   },
   "scripts": {
-    "minify": "uglifyjs --source-map touch-dnd.min.map -o touch-dnd.min.js touch-dnd.js"
+    "prepublish": "uglifyjs --source-map touch-dnd.min.map -o touch-dnd.min.js touch-dnd.js"
   }
 }

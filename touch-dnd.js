@@ -1,6 +1,7 @@
 !function($) {
   var START_EVENT = 'mousedown touchstart MSPointerDown pointerdown'
     , END_EVENT   = 'mouseup touchend MSPointerUp pointerup'
+    , MOVE_EVENT  = 'mousemove touchmove MSPointerMove pointermove scroll'
 
   function translate(el, x, y) {
     vendorify('transform', el, 'translate(' + x + 'px, ' + y + 'px)')
@@ -69,11 +70,13 @@
     var rect = this.el[0].getBoundingClientRect()
     this.origin.offset.x = rect.left + window.scrollX - this.origin.x
     this.origin.offset.y = rect.top + window.scrollY - this.origin.y
+    this.origin.scrollX = window.scrollX
+    this.origin.scrollY = window.scrollY
     // the draged element is going to stick right under the cursor
     // setting the css property `pointer-events` to `none` will let
     // the pointer events fire on the elements underneath the helper
     el[0].style.pointerEvents = 'none'
-    $(document).on('mousemove touchmove MSPointerMove pointermove', $.proxy(this.move, this))
+    $(document).on(MOVE_EVENT, $.proxy(this.move, this))
     transition(el[0], '')
     this.eventHandler.trigger('dragging:start')
     return this.el
@@ -109,7 +112,7 @@
       this.el.css(prop, this.originalCss[prop])
       delete this.originalCss[prop]
     }
-    $(document).off('mousemove touchmove MSPointerMove pointermove', this.move)
+    $(document).off(MOVE_EVENT, this.move)
     this.eventHandler.trigger('dragging:stop')
     this.parent = this.el = this.placeholder = this.handle = null
   }
@@ -117,33 +120,40 @@
   Dragging.prototype.move = function(e) {
     if (!this.el) return
 
-    var clientX = e.clientX || window.event.touches[0].clientX
-      , clientY = e.clientY || window.event.touches[0].clientY
+    if (e.type !== 'scroll') {
+      var pageX = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
+        , pageY = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
 
-    var over = document.elementFromPoint(clientX, clientY)
+      var clientX = e.clientX || window.event.touches[0].clientX
+        , clientY = e.clientY || window.event.touches[0].clientY
 
-    var pageX = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
-      , pageY = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
+      var over = document.elementFromPoint(clientX, clientY)
 
-    var deltaX = this.lastX - pageX
-      , deltaY = this.lastY - pageY
-      , direction = Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0 && 'left'
-                 || Math.abs(deltaX) > Math.abs(deltaY) && deltaX < 0 && 'right'
-                 || Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0 && 'up'
-                 || 'down'
-    if (over !== this.last && $(over).trigger('dragging:identify') && this.lastEntered !== this.currentTarget) {
-      $(this.currentTarget).trigger('dragging:enter')
-      $(this.lastEntered).trigger('dragging:leave')
-      this.lastEntered = this.currentTarget
-    } else if (direction !== this.lastDirection) {
-      if (!this.currentTarget) $(over).trigger('dragging:identify')
-      $(this.currentTarget).trigger('dragging:diverted')
+      var deltaX = this.lastX - pageX
+        , deltaY = this.lastY - pageY
+        , direction = Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0 && 'left'
+                   || Math.abs(deltaX) > Math.abs(deltaY) && deltaX < 0 && 'right'
+                   || Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0 && 'up'
+                   || 'down'
+      if (over !== this.last && $(over).trigger('dragging:identify') && this.lastEntered !== this.currentTarget) {
+        $(this.currentTarget).trigger('dragging:enter')
+        $(this.lastEntered).trigger('dragging:leave')
+        this.lastEntered = this.currentTarget
+      } else if (direction !== this.lastDirection) {
+        if (!this.currentTarget) $(over).trigger('dragging:identify')
+        $(this.currentTarget).trigger('dragging:diverted')
+      }
+      this.last = over
+      this.currentTarget = null
+      this.lastDirection = direction
+      this.lastX = pageX
+      this.lastY = pageY
+      this.origin.scrollX = window.scrollX
+      this.origin.scrollY = window.scrollY
+    } else {
+      var pageX = this.lastX + (window.scrollX - this.origin.scrollX)
+        , pageY = this.lastY + (window.scrollY - this.origin.scrollY)
     }
-    this.last = over
-    this.currentTarget = null
-    this.lastDirection = direction
-    this.lastX = pageX
-    this.lastY = pageY
 
     var deltaX = pageX - this.origin.x
       , deltaY = pageY - this.origin.y
