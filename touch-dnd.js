@@ -158,13 +158,13 @@
     var bottom = (pageY - window.scrollY - window.innerHeight) * -1
     var bottomReached = document.documentElement.offsetHeight < window.scrollY + window.innerHeight
     if (bottom <= 10 && !bottomReached) {
-      papaWindow.scrollBy(0, 10)
+      setTimeout(function() { window.scrollBy(0, 5) }, 50)
     }
 
     var top = (pageY - window.scrollY)
     var topReached = window.scrollY <= 0
     if (top <= 10 && !topReached) {
-      papaWindow.scrollBy(0, -10)
+      setTimeout(function() { window.scrollBy(0, -5) }, 50)
     }
 
     var deltaX = pageX - this.origin.x
