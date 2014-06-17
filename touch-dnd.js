@@ -680,7 +680,7 @@
     this.el.trigger('sortable:beforeStop', { item: dragging.el })
 
     // revert
-    dragging.el.insertBefore(this.el.find(this.opts.items).get(this.index))
+    dragging.el.insertBefore(this.el.find(this.opts.items).get(this.index - 1))
     $(document).off(END_EVENT, this.end)
     dragging.stop(e)
     this.el.trigger('dragging:stop')
