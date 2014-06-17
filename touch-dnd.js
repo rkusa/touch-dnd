@@ -101,11 +101,13 @@
         this.handle.remove()
       }
     } else {
-      if (revert) {
-        transition(this.el[0], 'all 0.5s ease-in-out 0s')
-        setTimeout(vendorify.bind(null, 'transition', this.el[0], this.origin.transition), 500)
-      }
-      vendorify('transform', this.el[0], transform)
+      setTimeout((function(el, origin) {
+        if (revert) {
+          transition(el, 'all 0.5s ease-in-out 0s')
+          setTimeout(transition.bind(null, el, origin.transition), 500)
+        }
+        vendorify('transform', el, transform)
+      }).bind(null, self.el[0], self.origin))
       this.el[0].style.pointerEvents = 'auto'
     }
     for (var prop in this.originalCss) {
@@ -680,7 +682,9 @@
     this.el.trigger('sortable:beforeStop', { item: dragging.el })
 
     // revert
+    dragging.placeholder = null
     dragging.el.insertBefore(this.el.find(this.opts.items).get(this.index - 1))
+    dragging.adjustPlacement(e)
     $(document).off(END_EVENT, this.end)
     dragging.stop(e)
     this.el.trigger('dragging:stop')
