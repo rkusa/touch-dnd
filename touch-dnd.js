@@ -601,7 +601,7 @@
 
     this.index = dragging.el.index()
 
-    dragging.el.before(dragging.placeholder = this.placeholder)
+    dragging.el.before(dragging.placeholder = this.placeholder.show())
 
     // if dragging an item that belongs to the current list, hide it while
     // it is being dragged
@@ -682,8 +682,8 @@
     this.el.trigger('sortable:beforeStop', { item: dragging.el })
 
     // revert
-    dragging.placeholder = null
-    dragging.el.insertBefore(this.el.find(this.opts.items).get(this.index - 1))
+    dragging.placeholder.hide()
+    dragging.el.insertBefore(this.el.children().get(this.index))
     dragging.adjustPlacement(e)
     $(document).off(END_EVENT, this.end)
     dragging.stop(e)
