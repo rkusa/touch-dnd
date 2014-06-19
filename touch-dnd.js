@@ -89,7 +89,7 @@
       $(last).trigger('dragging:drop', e)
     }
     if (!this.el) return
-    var transform = this.origin.transform || 'translate(0, 0)'
+    var transform = this.origin.transform || 'none'
     var el = this.handle || this.el, self = this
     if (revert === undefined) revert = true
     if (this.handle) {
