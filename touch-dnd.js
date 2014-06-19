@@ -62,7 +62,7 @@
     this.el = el
     this.handle = handle
     var el = this.handle || this.el
-    // vendorify('touchAction', el[0], 'none')
+    el.css('-ms-touch-action', 'none').css('touch-action', 'none')
     this.origin.x = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
     this.origin.y = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
     this.origin.transform  = vendorify('transform', this.el[0])
