@@ -1,6 +1,7 @@
 !function($) {
   var START_EVENT = 'mousedown touchstart MSPointerDown pointerdown'
     , END_EVENT   = 'mouseup touchend MSPointerUp pointerup'
+    , MOVE_EVENT  = 'mousemove touchmove MSPointerMove pointermove scroll'
 
   function translate(el, x, y) {
     vendorify('transform', el, 'translate(' + x + 'px, ' + y + 'px)')
@@ -33,6 +34,7 @@
     this.origin = { x: 0, y: 0, transition: null, translate: null, offset: { x: 0, y: 0 } }
     this.lastEntered = this.currentTarget = null
     this.lastX = this.lastY = this.lastDirection = null
+    this.originalCss = {}
 
     var placeholder
     Object.defineProperty(this, 'placeholder', {
@@ -66,13 +68,15 @@
     this.origin.transform  = vendorify('transform', this.el[0])
     this.origin.transition = vendorify('transition', this.el[0])
     var rect = this.el[0].getBoundingClientRect()
-    this.origin.offset.x = rect.left - this.origin.x
-    this.origin.offset.y = rect.top - this.origin.y
+    this.origin.offset.x = rect.left + (window.scrollX || window.pageXOffset) - this.origin.x
+    this.origin.offset.y = rect.top + (window.scrollY || window.pageYOffset) - this.origin.y
+    this.origin.scrollX = (window.scrollX || window.pageXOffset)
+    this.origin.scrollY = (window.scrollY || window.pageYOffset)
     // the draged element is going to stick right under the cursor
     // setting the css property `pointer-events` to `none` will let
     // the pointer events fire on the elements underneath the helper
     el[0].style.pointerEvents = 'none'
-    $(document).on('mousemove touchmove MSPointerMove pointermove', $.proxy(this.move, this))
+    $(document).on(MOVE_EVENT, $.proxy(this.move, this))
     transition(el[0], '')
     this.eventHandler.trigger('dragging:start')
     return this.el
@@ -97,14 +101,20 @@
         this.handle.remove()
       }
     } else {
-      if (revert) {
-        transition(this.el[0], 'all 0.5s ease-in-out 0s')
-        setTimeout(vendorify.bind(null, 'transition', this.el[0], this.origin.transition), 500)
-      }
-      vendorify('transform', this.el[0], transform)
+      setTimeout((function(el, origin) {
+        if (revert) {
+          transition(el, 'all 0.5s ease-in-out 0s')
+          setTimeout(transition.bind(null, el, origin.transition), 500)
+        }
+        vendorify('transform', el, transform)
+      }).bind(null, self.el[0], self.origin))
       this.el[0].style.pointerEvents = 'auto'
     }
-    $(document).off('mousemove touchmove MSPointerMove pointermove', this.move)
+    for (var prop in this.originalCss) {
+      this.el.css(prop, this.originalCss[prop])
+      delete this.originalCss[prop]
+    }
+    $(document).off(MOVE_EVENT, this.move)
     this.eventHandler.trigger('dragging:stop')
     this.parent = this.el = this.placeholder = this.handle = null
   }
@@ -112,38 +122,77 @@
   Dragging.prototype.move = function(e) {
     if (!this.el) return
 
-    var clientX = e.clientX || window.event.touches[0].clientX
-      , clientY = e.clientY || window.event.touches[0].clientY
-    var over = document.elementFromPoint(clientX, clientY)
+    if (e.type !== 'scroll') {
+      var pageX = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
+        , pageY = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
 
-    var deltaX = this.lastX - clientX
-      , deltaY = this.lastY - clientY
-      , direction = Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0 && 'left'
-                 || Math.abs(deltaX) > Math.abs(deltaY) && deltaX < 0 && 'right'
-                 || Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0 && 'up'
-                 || 'down'
-    if (over !== this.last && $(over).trigger('dragging:identify') && this.lastEntered !== this.currentTarget) {
-      $(this.currentTarget).trigger('dragging:enter')
-      $(this.lastEntered).trigger('dragging:leave')
-      this.lastEntered = this.currentTarget
-    } else if (direction !== this.lastDirection) {
-      if (!this.currentTarget) $(over).trigger('dragging:identify')
-      $(this.currentTarget).trigger('dragging:diverted')
+      var clientX = e.clientX || window.event && window.event.touches && window.event.touches[0].clientX || 0
+        , clientY = e.clientY || window.event && window.event.touches && window.event.touches[0].clientY || 0
+
+      var over = document.elementFromPoint(clientX, clientY)
+
+      var deltaX = this.lastX - pageX
+        , deltaY = this.lastY - pageY
+        , direction = Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0 && 'left'
+                   || Math.abs(deltaX) > Math.abs(deltaY) && deltaX < 0 && 'right'
+                   || Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0 && 'up'
+                   || 'down'
+      if (over !== this.last && $(over).trigger('dragging:identify') && this.lastEntered !== this.currentTarget) {
+        $(this.currentTarget).trigger('dragging:enter')
+        $(this.lastEntered).trigger('dragging:leave')
+        this.lastEntered = this.currentTarget
+      } else if (direction !== this.lastDirection) {
+        if (!this.currentTarget) $(over).trigger('dragging:identify')
+        $(this.currentTarget).trigger('dragging:diverted')
+      }
+      this.last = over
+      this.currentTarget = null
+      this.lastDirection = direction
+      this.lastX = pageX
+      this.lastY = pageY
+      this.origin.scrollX = (window.scrollX || window.pageXOffset)
+      this.origin.scrollY = (window.scrollY || window.pageYOffset)
+    } else {
+      var pageX = this.lastX + ((window.scrollX || window.pageXOffset) - this.origin.scrollX)
+        , pageY = this.lastY + ((window.scrollY || window.pageYOffset) - this.origin.scrollY)
     }
-    this.last = over
-    this.currentTarget = null
-    this.lastDirection = direction
-    this.lastX = clientX
-    this.lastY = clientY
 
-    var deltaX = (window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX) - this.origin.x
-      , deltaY = (window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY) - this.origin.y
+    var bottom = (pageY - (window.scrollY || window.pageYOffset) - window.innerHeight) * -1
+    var bottomReached = document.documentElement.offsetHeight < (window.scrollY || window.pageYOffset) + window.innerHeight
+    if (bottom <= 10 && !bottomReached) {
+      setTimeout(function() { window.scrollBy(0, 5) }, 50)
+    }
+
+    var top = (pageY - (window.scrollY || window.pageYOffset))
+    var topReached = (window.scrollY || window.pageYOffset) <= 0
+    if (top <= 10 && !topReached) {
+      setTimeout(function() { window.scrollBy(0, -5) }, 50)
+    }
+
+    var deltaX = pageX - this.origin.x
+      , deltaY = pageY - this.origin.y
     var el = this.handle || this.el
     translate(el[0], deltaX, deltaY)
   }
 
   Dragging.prototype.setCurrent = function(target) {
     this.currentTarget = target
+  }
+
+  Dragging.prototype.css = function(prop, val) {
+    if (!this.el) return
+    this.originalCss[prop] = this.el.css(prop)
+    this.el.css(prop, val)
+  }
+
+  Dragging.prototype.adjustPlacement = function(e) {
+    translate(this.el[0], 0, 0)
+    var rect = this.el[0].getBoundingClientRect()
+    this.origin.x = rect.left + (window.scrollX || window.pageXOffset) - this.origin.offset.x
+    this.origin.y = rect.top + (window.scrollY || window.pageYOffset) - this.origin.offset.y
+    var deltaX = e.pageX - this.origin.x
+      , deltaY = e.pageY - this.origin.y
+    translate(this.el[0], deltaX, deltaY)
   }
 
   var dragging = $.dragging = parent.$.dragging || new Dragging()
@@ -520,7 +569,7 @@
   }
 
   Sortable.prototype.start = function(e) {
-    if (this.opts.disabled) return
+    if (this.opts.disabled || dragging.el) return
 
     if (this.opts.cancel) {
       var target = $(e.target)
@@ -552,10 +601,22 @@
 
     this.index = dragging.el.index()
 
+    dragging.el.before(dragging.placeholder = this.placeholder.show())
+
+    // if dragging an item that belongs to the current list, hide it while
+    // it is being dragged
+    if (this.index !== null) {
+      var marginBottom = (parseInt(dragging.el.css('margin-bottom'), 10) + dragging.el.height()) * -1
+      dragging.css('margin-bottom', marginBottom)
+      this.el.append(dragging.el)
+    }
+
     if (this.opts.forcePlaceholderSize) {
       this.placeholder.height(dragging.el.height())
       this.placeholder.width(dragging.el.width())
     }
+
+    dragging.adjustPlacement(e)
 
     this.el.trigger('sortable:start', { item: dragging.el })
   }
@@ -579,61 +640,37 @@
     if (isContainer && !this.isEmpty && this.placeholder.parent().length)
       return
 
+    dragging.placeholder = this.placeholder
+
     if (this.opts.forcePlaceholderSize) {
       this.placeholder.height(dragging.el.height())
-      // this.placeholder.width(dragging.el.width())
-    }
-
-    var initialized = true
-    if (!this.placeholder.parent().length) {
-      initialized = false
-      this.el.append(dragging.placeholder = this.placeholder)
-
-      // if dragging an item that belongs to the current list, hide it while
-      // it is being dragged
-      if (this.index !== null) {
-        this.el.append(dragging.el)
-      }
+      this.placeholder.width(dragging.el.width())
     }
 
     if (!isContainer) {
       // insert the placeholder according to the dragging direction
       this.direction = this.placeholder.show().index() < child.index() ? 'down' : 'up'
       child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
-
-      translate(dragging.el[0], 0, 0)
-      var rect = dragging.el[0].getBoundingClientRect()
-      dragging.origin.x = rect.left - dragging.origin.offset.x
-      dragging.origin.y = rect.top  - dragging.origin.offset.y
-      var deltaX = e.pageX - dragging.origin.x
-        , deltaY = e.pageY - dragging.origin.y
-      translate(dragging.el[0], deltaX, deltaY)
+      dragging.adjustPlacement(e)
     } else {
       this.el.append(this.placeholder)
     }
-
-    if (!initialized) return
 
     this.el.trigger('sortable:change', { item: dragging.el })
   }
 
   Sortable.prototype.diverted = function(e) {
+    if (!this.accept || this.opts.disabled) return
     e.stopPropagation()
 
     var child = $(e.currentTarget), isContainer = child[0] === this.el[0]
     if (isContainer) return
 
     // insert the placeholder according to the dragging direction
+    dragging.placeholder = this.placeholder
     this.direction = this.placeholder.show().index() < child.index() ? 'down' : 'up'
     child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
-
-    translate(dragging.el[0], 0, 0)
-    var rect = dragging.el[0].getBoundingClientRect()
-    dragging.origin.x = rect.left - dragging.origin.offset.x
-    dragging.origin.y = rect.top  - dragging.origin.offset.y
-    var deltaX = e.pageX - dragging.origin.x
-      , deltaY = e.pageY - dragging.origin.y
-    translate(dragging.el[0], deltaX, deltaY)
+    dragging.adjustPlacement(e)
   }
 
   Sortable.prototype.end = function(e) {
@@ -645,7 +682,9 @@
     this.el.trigger('sortable:beforeStop', { item: dragging.el })
 
     // revert
-    dragging.el.insertBefore(this.el.find(this.opts.items).get(this.index))
+    dragging.placeholder.hide()
+    dragging.el.insertBefore(this.el.children().get(this.index))
+    dragging.adjustPlacement(e)
     $(document).off(END_EVENT, this.end)
     dragging.stop(e)
     this.el.trigger('dragging:stop')
@@ -663,6 +702,7 @@
 
     this.observer.disconnect()
 
+    if (!this.placeholder.parent().length) return
     dragging.el.insertBefore(this.placeholder).show()
 
     // remove placeholder to be able to calculate new index
