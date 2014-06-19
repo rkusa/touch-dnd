@@ -2,7 +2,7 @@
 
 Advanced touch-compatible Drag'n'Drop library providing Draggable, Droppable and Sortable for Zepto.js and jQuery (for Zepto, you have to include its `data` module).
 
-[![NPM](https://badge.fury.io/js/touch-dnd.svg)](https://npmjs.org/package/touch-dnd)
+[![NPM](http://img.shields.io/npm/v/touch-dnd.svg?style=flat)](https://npmjs.org/package/touch-dnd)
 
 
 **Status:** Tested with current version of Chrome (Mac & Android), Safari (Mac & iOS), Opera Next, Firefox and IE
@@ -12,10 +12,11 @@ Advanced touch-compatible Drag'n'Drop library providing Draggable, Droppable and
 
 This library is a derivative of [zepto-dnd](https://github.com/rkusa/zepto-dnd), which reached the limits of the native HTML5 Drag'n'Drop API, especially in terms of dragging helper accessibility and - most important - in terms of compatiblity with touch devices.
 
-#### Goals
+#### Features
 
+* Draggable, Droppable & Sortable
 * **touch compatibility**
-* utilize CSS3 [`transform`](http://www.w3schools.com/cssref/css3_pr_transform.asp) and [`transition`](http://www.w3schools.com/css/css3_transitions.asp) property to move draggables around
+* utilizes CSS3 [`transform`](http://www.w3schools.com/cssref/css3_pr_transform.asp) and [`transition`](http://www.w3schools.com/css/css3_transitions.asp) property for moving draggables around
 * [Zepto.js](http://zeptojs.com/) compatibility
 
 ## MIT License
