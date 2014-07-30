@@ -612,8 +612,8 @@
     }
 
     if (this.opts.forcePlaceholderSize) {
-      this.placeholder.height(dragging.el.height())
-      this.placeholder.width(dragging.el.width())
+      this.placeholder.height(parseFloat(dragging.el.css('height')))
+      this.placeholder.width(parseFloat(dragging.el.css('width')))
     }
 
     dragging.adjustPlacement(e)
@@ -643,8 +643,8 @@
     dragging.placeholder = this.placeholder
 
     if (this.opts.forcePlaceholderSize) {
-      this.placeholder.height(dragging.el.height())
-      this.placeholder.width(dragging.el.width())
+      this.placeholder.height(parseFloat(dragging.el.css('height')))
+      this.placeholder.width(parseFloat(dragging.el.css('width')))
     }
 
     if (!isContainer) {
