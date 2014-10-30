@@ -701,17 +701,21 @@
     this.observer.disconnect()
 
     if (!this.placeholder.parent().length) return
-    dragging.el.insertBefore(this.placeholder).show()
 
-    // remove placeholder to be able to calculate new index
-    dragging.placeholder = null
+    var newIndex = this.placeholder.index()
+    if (newIndex > this.index) {
+      newIndex--
+    }
+    dragging.placeholder = null // remove placeholder
+
+    if (typeof this.opts.updatePosition === 'function') {
+      this.opts.updatePosition.call(this, { item: dragging.el, index: newIndex })
+    } else {
+      dragging.el.insertBefore(this.placeholder).show()
+    }
 
     // if the dropped element belongs to another list, trigger the receive event
-    var newIndex = dragging.el.index()
     if (this.index === null) { // dropped element belongs to another list
-      // if (dragging.parent instanceof Draggable)
-      //   dragging.parent.destroy()
-
       this.el.trigger('sortable:receive', { item: dragging.el })
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
@@ -827,6 +831,7 @@
     handle: false,
     initialized: false,
     items: 'li, div',
-    placeholder: 'placeholder'
+    placeholder: 'placeholder',
+    updatePosition: null
   })
 }(window.Zepto || window.jQuery)
