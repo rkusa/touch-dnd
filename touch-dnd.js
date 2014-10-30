@@ -608,7 +608,6 @@
     if (this.index !== null) {
       var marginBottom = (parseInt(dragging.el.css('margin-bottom'), 10) + dragging.el.height()) * -1
       dragging.css('margin-bottom', marginBottom)
-      this.el.append(dragging.el)
     }
 
     if (this.opts.forcePlaceholderSize) {
@@ -683,7 +682,6 @@
 
     // revert
     dragging.placeholder.hide()
-    dragging.el.insertBefore(this.el.children().get(this.index))
     dragging.adjustPlacement(e)
     $(document).off(END_EVENT, this.end)
     dragging.stop(e)
