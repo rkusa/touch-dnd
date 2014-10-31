@@ -568,6 +568,10 @@
     this.el.trigger('sortable:deactivate', dragging.el)
   }
 
+  Sortable.prototype.indexOf = function(el) {
+    return this.el.find(this.opts.items).index(el)
+  }
+
   Sortable.prototype.start = function(e) {
     if (this.opts.disabled || dragging.el) return
 
@@ -599,7 +603,7 @@
     dragging.start(this, $(e.currentTarget), e)
     $(document).on(END_EVENT, $.proxy(this.end, this))
 
-    this.index = dragging.el.index()
+    this.index = this.indexOf(dragging.el)
 
     dragging.el.before(dragging.placeholder = this.placeholder.show())
 
@@ -648,7 +652,7 @@
 
     if (!isContainer) {
       // insert the placeholder according to the dragging direction
-      this.direction = this.placeholder.show().index() < child.index() ? 'down' : 'up'
+      this.direction = this.indexOf(this.placeholder.show()) < this.indexOf(child) ? 'down' : 'up'
       child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
       dragging.adjustPlacement(e)
     } else {
@@ -667,7 +671,7 @@
 
     // insert the placeholder according to the dragging direction
     dragging.placeholder = this.placeholder
-    this.direction = this.placeholder.show().index() < child.index() ? 'down' : 'up'
+    this.direction = this.indexOf(this.placeholder.show()) < this.indexOf(child) ? 'down' : 'up'
     child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
     dragging.adjustPlacement(e)
   }
@@ -702,7 +706,7 @@
 
     if (!this.placeholder.parent().length) return
 
-    var newIndex = this.placeholder.index()
+    var newIndex = this.indexOf(this.placeholder)
     if (newIndex > this.index) {
       newIndex--
     }
