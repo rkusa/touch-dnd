@@ -1,4 +1,4 @@
-!function($) {
+(function($) {
   var START_EVENT = 'mousedown touchstart MSPointerDown pointerdown'
     , END_EVENT   = 'mouseup touchend MSPointerUp pointerup'
     , MOVE_EVENT  = 'mousemove touchmove MSPointerMove pointermove scroll'
@@ -838,4 +838,4 @@
     placeholder: 'placeholder',
     updatePosition: null
   })
-}(window.Zepto || window.jQuery)
+})(window.Zepto || window.jQuery);
