@@ -11,6 +11,14 @@
     vendorify('transition', el, val)
   }
 
+  function getTouchPageX(e) {
+    return window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
+  }
+
+  function getTouchPageY(e) {
+    return window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
+  }
+
   function vendorify(property, el, val) {
     property = property.toLowerCase()
     var titleCased = property.charAt(0).toUpperCase() + property.substr(1)
@@ -63,8 +71,8 @@
     this.handle = handle
     var el = this.handle || this.el
     el.css('-ms-touch-action', 'none').css('touch-action', 'none')
-    this.origin.x = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
-    this.origin.y = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
+    this.origin.x = getTouchPageX(e)
+    this.origin.y = getTouchPageY(e)
     this.origin.transform  = vendorify('transform', this.el[0])
     this.origin.transition = vendorify('transition', this.el[0])
     var rect = this.el[0].getBoundingClientRect()
@@ -123,8 +131,8 @@
     if (!this.el) return
 
     if (e.type !== 'scroll') {
-      var pageX = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
-        , pageY = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
+      var pageX = getTouchPageX(e)
+        , pageY = getTouchPageY(e)
 
       var clientX = e.clientX || window.event && window.event.touches && window.event.touches[0].clientX || 0
         , clientY = e.clientY || window.event && window.event.touches && window.event.touches[0].clientY || 0
@@ -190,8 +198,10 @@
     var rect = this.el[0].getBoundingClientRect()
     this.origin.x = rect.left + (window.scrollX || window.pageXOffset) - this.origin.offset.x
     this.origin.y = rect.top + (window.scrollY || window.pageYOffset) - this.origin.offset.y
-    var deltaX = e.pageX - this.origin.x
-      , deltaY = e.pageY - this.origin.y
+    var pageX  = getTouchPageX(e)
+      , pageY  = getTouchPageY(e)
+      , deltaX = pageX - this.origin.x
+      , deltaY = pageY - this.origin.y
     translate(this.el[0], deltaX, deltaY)
   }
 
