@@ -1,4 +1,4 @@
-!function($) {
+(function($) {
   var START_EVENT = 'mousedown touchstart MSPointerDown pointerdown'
     , END_EVENT   = 'mouseup touchend MSPointerUp pointerup'
     , MOVE_EVENT  = 'mousemove touchmove MSPointerMove pointermove scroll'
@@ -568,6 +568,10 @@
     this.el.trigger('sortable:deactivate', dragging.el)
   }
 
+  Sortable.prototype.indexOf = function(el) {
+    return this.el.find(this.opts.items).index(el)
+  }
+
   Sortable.prototype.start = function(e) {
     if (this.opts.disabled || dragging.el) return
 
@@ -599,7 +603,7 @@
     dragging.start(this, $(e.currentTarget), e)
     $(document).on(END_EVENT, $.proxy(this.end, this))
 
-    this.index = dragging.el.index()
+    this.index = this.indexOf(dragging.el)
 
     dragging.el.before(dragging.placeholder = this.placeholder.show())
 
@@ -608,7 +612,6 @@
     if (this.index !== null) {
       var marginBottom = (parseInt(dragging.el.css('margin-bottom'), 10) + dragging.el.height()) * -1
       dragging.css('margin-bottom', marginBottom)
-      this.el.append(dragging.el)
     }
 
     if (this.opts.forcePlaceholderSize) {
@@ -649,7 +652,7 @@
 
     if (!isContainer) {
       // insert the placeholder according to the dragging direction
-      this.direction = this.placeholder.show().index() < child.index() ? 'down' : 'up'
+      this.direction = this.indexOf(this.placeholder.show()) < this.indexOf(child) ? 'down' : 'up'
       child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
       dragging.adjustPlacement(e)
     } else {
@@ -668,7 +671,7 @@
 
     // insert the placeholder according to the dragging direction
     dragging.placeholder = this.placeholder
-    this.direction = this.placeholder.show().index() < child.index() ? 'down' : 'up'
+    this.direction = this.indexOf(this.placeholder.show()) < this.indexOf(child) ? 'down' : 'up'
     child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
     dragging.adjustPlacement(e)
   }
@@ -683,7 +686,6 @@
 
     // revert
     dragging.placeholder.hide()
-    dragging.el.insertBefore(this.el.children().get(this.index))
     dragging.adjustPlacement(e)
     $(document).off(END_EVENT, this.end)
     dragging.stop(e)
@@ -703,17 +705,22 @@
     this.observer.disconnect()
 
     if (!this.placeholder.parent().length) return
-    dragging.el.insertBefore(this.placeholder).show()
 
-    // remove placeholder to be able to calculate new index
-    dragging.placeholder = null
+    var newIndex = this.indexOf(this.placeholder)
+    if (newIndex > this.index) {
+      newIndex--
+    }
+
+    if (typeof this.opts.updatePosition === 'function') {
+      this.opts.updatePosition.call(this, { item: dragging.el, index: newIndex })
+    } else {
+      dragging.el.insertBefore(this.placeholder).show()
+    }
+
+    dragging.placeholder = null // remove placeholder
 
     // if the dropped element belongs to another list, trigger the receive event
-    var newIndex = dragging.el.index()
     if (this.index === null) { // dropped element belongs to another list
-      // if (dragging.parent instanceof Draggable)
-      //   dragging.parent.destroy()
-
       this.el.trigger('sortable:receive', { item: dragging.el })
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
@@ -829,6 +836,7 @@
     handle: false,
     initialized: false,
     items: 'li, div',
-    placeholder: 'placeholder'
+    placeholder: 'placeholder',
+    updatePosition: null
   })
-}(window.Zepto || window.jQuery)
+})(window.Zepto || window.jQuery);
