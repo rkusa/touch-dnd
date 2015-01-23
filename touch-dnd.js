@@ -710,13 +710,14 @@
     if (newIndex > this.index) {
       newIndex--
     }
-    dragging.placeholder = null // remove placeholder
 
     if (typeof this.opts.updatePosition === 'function') {
       this.opts.updatePosition.call(this, { item: dragging.el, index: newIndex })
     } else {
       dragging.el.insertBefore(this.placeholder).show()
     }
+
+    dragging.placeholder = null // remove placeholder
 
     // if the dropped element belongs to another list, trigger the receive event
     if (this.index === null) { // dropped element belongs to another list
