@@ -20,6 +20,11 @@ h1, h2, h3 {
   line-height:1.1;
 }
 
+h1 small, h2 small, h3 small {
+  font-size: .8em;
+  color: #bbb;
+}
+
 h1 {
   font-size:28px;
 }
@@ -163,6 +168,10 @@ section {
   width:500px;
   float:right;
   padding-bottom:50px;
+}
+
+section a {
+  text-decoration:underline;
 }
 
 small {
