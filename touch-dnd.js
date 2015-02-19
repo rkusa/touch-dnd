@@ -91,7 +91,7 @@
     return this.el
   }
 
-  Dragging.prototype.stop = function(e, revert) {
+  Dragging.prototype.stop = function(e) {
     if (this.last) {
       var last = this.last
       this.last = null
@@ -100,21 +100,14 @@
     if (!this.el) return
     var transform = this.origin.transform || 'none'
     var el = this.handle || this.el, self = this
-    if (revert === undefined) revert = true
     if (this.handle) {
-      transition(this.handle[0], 'all 0.5s ease-in-out 0s')
-      if (revert) {
-        vendorify('transform', this.handle[0], transform)
-        setTimeout(this.handle.remove.bind(this.handle), 500)
-      } else {
-        this.handle.remove()
-      }
+      transition(this.handle[0], 'all 0.25s ease-in-out 0s')
+      vendorify('transform', this.handle[0], transform)
+      setTimeout(this.handle.remove.bind(this.handle), 250)
     } else {
       setTimeout((function(el, origin) {
-        if (revert) {
-          transition(el, 'all 0.5s ease-in-out 0s')
-          setTimeout(transition.bind(null, el, origin.transition), 500)
-        }
+        transition(el, 'all 0.25s ease-in-out 0s')
+        setTimeout(transition.bind(null, el, origin.transition), 250)
         vendorify('transform', el, transform)
       }).bind(null, self.el[0], self.origin))
       this.el[0].style.pointerEvents = 'auto'
@@ -126,7 +119,9 @@
     $(document).off(MOVE_EVENT, this.move)
     $(document).off(END_EVENT, this.stop)
     this.eventHandler.trigger('dragging:stop')
-    this.parent = this.el = this.placeholder = this.handle = null
+    this.placeholder = null
+    this.adjustPlacement(e)
+    this.parent = this.el = this.handle = null
     return false
   }
 
@@ -817,12 +812,8 @@
     if (typeof this.opts.updatePosition === 'function') {
       this.opts.updatePosition.call(this, { item: dragging.el, index: newIndex })
     } else {
-      // this.placeholder.replaceWith(dragging.el)
       dragging.el.insertBefore(this.placeholder)
     }
-
-    dragging.placeholder = null // remove placeholder
-    dragging.adjustPlacement(e)
 
     // if the dropped element belongs to another list, trigger the receive event
     if (this.index === null) { // dropped element belongs to another list
