@@ -85,6 +85,7 @@
     // the pointer events fire on the elements underneath the helper
     el[0].style.pointerEvents = 'none'
     $(document).on(MOVE_EVENT, $.proxy(this.move, this))
+    $(document).on(END_EVENT, $.proxy(this.stop, this))
     transition(el[0], '')
     this.eventHandler.trigger('dragging:start')
     return this.el
@@ -123,8 +124,10 @@
       delete this.originalCss[prop]
     }
     $(document).off(MOVE_EVENT, this.move)
+    $(document).off(END_EVENT, this.stop)
     this.eventHandler.trigger('dragging:stop')
     this.parent = this.el = this.placeholder = this.handle = null
+    return false
   }
 
   Dragging.prototype.move = function(e) {
@@ -454,16 +457,6 @@
     }
 
     dragging.start(this, el, e, handle)
-    $(document).on(END_EVENT, $.proxy(this.end, this))
-  }
-
-  Draggable.prototype.end = function(e) {
-    // e.stopPropagation()
-    // e.preventDefault()
-
-    // revert
-    $(document).off(END_EVENT, this.end)
-    dragging.stop(e)
   }
 
   var Droppable = function(element, opts) {
@@ -726,7 +719,6 @@
     // use e.currentTarget instead of e.target because we want the target
     // the event is bound to, not the target (child) the event is triggered from
     dragging.start(this, $(e.currentTarget), e)
-    $(document).on(END_EVENT, $.proxy(this.end, this))
 
     this.index = this.indexOf(dragging.el)
 
@@ -735,7 +727,9 @@
     // if dragging an item that belongs to the current list, hide it while
     // it is being dragged
     if (this.index !== null) {
-      var marginBottom = (parseInt(dragging.el.css('margin-bottom'), 10) + dragging.el.height()) * -1
+      // zepto <> jquery compatibility
+      var height = dragging.el.outerHeight ? dragging.el.outerHeight() : dragging.el.height()
+      var marginBottom = (parseInt(dragging.el.css('margin-bottom'), 10) + height) * -1
       dragging.css('margin-bottom', marginBottom)
     }
 
@@ -801,24 +795,6 @@
     dragging.adjustPlacement(e)
   }
 
-  Sortable.prototype.end = function(e) {
-    e.stopPropagation()
-    e.preventDefault()
-
-    if (!dragging.el) return
-
-    this.el.trigger('sortable:beforeStop', { item: dragging.el })
-
-    // revert
-    dragging.placeholder.hide()
-    dragging.adjustPlacement(e)
-    $(document).off(END_EVENT, this.end)
-    dragging.stop(e)
-    this.el.trigger('dragging:stop')
-
-    this.index = null
-  }
-
   Sortable.prototype.drop = function(e, originalEvent) {
     if (!this.accept || this.opts.disabled) return
 
@@ -826,6 +802,8 @@
     e.preventDefault()
 
     if (!dragging.el) return
+
+    this.el.trigger('sortable:beforeStop', { item: dragging.el })
 
     this.observer.disconnect()
 
@@ -839,10 +817,12 @@
     if (typeof this.opts.updatePosition === 'function') {
       this.opts.updatePosition.call(this, { item: dragging.el, index: newIndex })
     } else {
-      dragging.el.insertBefore(this.placeholder).show()
+      // this.placeholder.replaceWith(dragging.el)
+      dragging.el.insertBefore(this.placeholder)
     }
 
     dragging.placeholder = null // remove placeholder
+    dragging.adjustPlacement(e)
 
     // if the dropped element belongs to another list, trigger the receive event
     if (this.index === null) { // dropped element belongs to another list
@@ -861,9 +841,9 @@
     }
 
     // revert
-    $(document).off(END_EVENT, this.end)
-    dragging.stop(originalEvent, false)
-    this.el.trigger('dragging:stop')
+    // dragging.stop(originalEvent, false)
+    // this.el.trigger('dragging:stop')
+    this.index = null
 
     this.observer.observe()
   }
