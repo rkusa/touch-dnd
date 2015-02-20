@@ -225,7 +225,7 @@ $('#rhs').sortable(){% endhighlight %}
 </dl>
 <p>If <code>true</code>, forces the helper to have a size.</p>
 <h4>Example</h4>
-{% highlight js %}$('#example-forcePlaceholderSize').sortable({ 
+{% highlight js %}$('#example-forcePlaceholderSize').sortable({
 forcePlaceholderSize: true
 }){% endhighlight %}
 <ul class="grid wide" id="example-forcePlaceholderSize">
@@ -288,6 +288,17 @@ forcePlaceholderSize: true
 <p>A class name that gets applied to the otherwise white space.</p>
 <h4>Example</h4>
 {% highlight js %}$('#example-placeholder').sortable({ placeholder: 'dummy' }){% endhighlight %}
+
+<h2>placeholderTag</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>String</dd>
+  <dt>Default</dt>
+  <dd>null</dd>
+</dl>
+<p>This option could be used to manually set the HTML tag used to create the placeholder. If this option is not set, the HTML tag is detected automatically.</p>
+<h4>Example</h4>
+{% highlight js %}$('#example-placeholder').sortable({ placeholderTag: 'section' }){% endhighlight %}
 
 <h2>Methods</h2>
 <h2>destroy()</h2>

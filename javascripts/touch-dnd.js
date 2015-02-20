@@ -11,6 +11,14 @@
     vendorify('transition', el, val)
   }
 
+  function getTouchPageX(e) {
+    return window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
+  }
+
+  function getTouchPageY(e) {
+    return window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
+  }
+
   function vendorify(property, el, val) {
     property = property.toLowerCase()
     var titleCased = property.charAt(0).toUpperCase() + property.substr(1)
@@ -25,6 +33,25 @@
         break
       }
     }
+  }
+
+  var eventProperties = [
+    'altKey', 'bubbles', 'button', 'cancelable', 'charCode', 'clientX',
+    'clientY', 'ctrlKey', 'currentTarget', 'data', 'detail', 'eventPhase',
+    'metaKey', 'offsetX', 'offsetY', 'originalTarget', 'pageX', 'pageY',
+    'relatedTarget', 'screenX', 'screenY', 'shiftKey', 'target', 'view',
+    'which'
+  ]
+  function trigger(el, name, originalEvent, arg) {
+    originalEvent = originalEvent.originalEvent || originalEvent
+    var props = {}
+    eventProperties.forEach(function(prop) {
+      props[prop] = originalEvent[prop]
+    })
+
+    var e = $.Event(name, props)
+    el.trigger(e, arg)
+    return e
   }
 
   var nextId = 0
@@ -63,8 +90,8 @@
     this.handle = handle
     var el = this.handle || this.el
     el.css('-ms-touch-action', 'none').css('touch-action', 'none')
-    this.origin.x = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
-    this.origin.y = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
+    this.origin.x = getTouchPageX(e)
+    this.origin.y = getTouchPageY(e)
     this.origin.transform  = vendorify('transform', this.el[0])
     this.origin.transition = vendorify('transition', this.el[0])
     var rect = this.el[0].getBoundingClientRect()
@@ -77,54 +104,65 @@
     // the pointer events fire on the elements underneath the helper
     el[0].style.pointerEvents = 'none'
     $(document).on(MOVE_EVENT, $.proxy(this.move, this))
+    $(document).on(END_EVENT, $.proxy(this.stop, this))
     transition(el[0], '')
-    this.eventHandler.trigger('dragging:start')
+    trigger(this.eventHandler, 'dragging:start', e)
     return this.el
   }
 
-  Dragging.prototype.stop = function(e, revert) {
+  Dragging.prototype.stop = function(e) {
+    var dropEvent = null
+    var revert = true
     if (this.last) {
       var last = this.last
       this.last = null
-      $(last).trigger('dragging:drop', e)
+      dropEvent = trigger($(last), 'dragging:drop', e)
+      revert = !dropEvent.isDefaultPrevented()
     }
-    if (!this.el) return
-    var transform = this.origin.transform || 'none'
-    var el = this.handle || this.el, self = this
-    if (revert === undefined) revert = true
-    if (this.handle) {
-      transition(this.handle[0], 'all 0.5s ease-in-out 0s')
-      if (revert) {
-        vendorify('transform', this.handle[0], transform)
-        setTimeout(this.handle.remove.bind(this.handle), 500)
-      } else {
-        this.handle.remove()
-      }
-    } else {
-      setTimeout((function(el, origin) {
-        if (revert) {
-          transition(el, 'all 0.5s ease-in-out 0s')
-          setTimeout(transition.bind(null, el, origin.transition), 500)
-        }
-        vendorify('transform', el, transform)
-      }).bind(null, self.el[0], self.origin))
-      this.el[0].style.pointerEvents = 'auto'
+
+    if (!this.el) {
+      return
     }
+
     for (var prop in this.originalCss) {
       this.el.css(prop, this.originalCss[prop])
       delete this.originalCss[prop]
     }
+
+    trigger(this.eventHandler, 'dragging:stop', e)
+    this.placeholder = null
+    if (!this.handle) {
+      this.adjustPlacement(e)
+    }
+
+    var el = this.el
+    if (this.handle) {
+      if (revert) {
+        el = this.handle
+        setTimeout(this.handle.remove.bind(this.handle), 250)
+      } else {
+        this.handle.remove()
+      }
+    }
+
+    setTimeout((function(el, origin) {
+      transition(el[0], 'all 0.25s ease-in-out 0s')
+      vendorify('transform', el[0], origin.transform || 'none')
+      setTimeout(transition.bind(null, el[0], origin.transition || 'none'), 250)
+      el[0].style.pointerEvents = 'auto'
+    }).bind(null, el, this.origin))
+
     $(document).off(MOVE_EVENT, this.move)
-    this.eventHandler.trigger('dragging:stop')
-    this.parent = this.el = this.placeholder = this.handle = null
+    $(document).off(END_EVENT, this.stop)
+    this.parent = this.el = this.handle = null
   }
 
   Dragging.prototype.move = function(e) {
     if (!this.el) return
 
     if (e.type !== 'scroll') {
-      var pageX = window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
-        , pageY = window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
+      var pageX = getTouchPageX(e)
+        , pageY = getTouchPageY(e)
 
       var clientX = e.clientX || window.event && window.event.touches && window.event.touches[0].clientX || 0
         , clientY = e.clientY || window.event && window.event.touches && window.event.touches[0].clientY || 0
@@ -137,13 +175,13 @@
                    || Math.abs(deltaX) > Math.abs(deltaY) && deltaX < 0 && 'right'
                    || Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0 && 'up'
                    || 'down'
-      if (over !== this.last && $(over).trigger('dragging:identify') && this.lastEntered !== this.currentTarget) {
-        $(this.currentTarget).trigger('dragging:enter')
-        $(this.lastEntered).trigger('dragging:leave')
+      if (over !== this.last && trigger($(over), 'dragging:identify', e) && this.lastEntered !== this.currentTarget) {
+        trigger($(this.currentTarget), 'dragging:enter', e)
+        trigger($(this.lastEntered), 'dragging:leave', e)
         this.lastEntered = this.currentTarget
       } else if (direction !== this.lastDirection) {
-        if (!this.currentTarget) $(over).trigger('dragging:identify')
-        $(this.currentTarget).trigger('dragging:diverted')
+        if (!this.currentTarget) trigger($(over), 'dragging:identify', e)
+        trigger($(this.currentTarget), 'dragging:diverted', e)
       }
       this.last = over
       this.currentTarget = null
@@ -190,58 +228,173 @@
     var rect = this.el[0].getBoundingClientRect()
     this.origin.x = rect.left + (window.scrollX || window.pageXOffset) - this.origin.offset.x
     this.origin.y = rect.top + (window.scrollY || window.pageYOffset) - this.origin.offset.y
-    var deltaX = e.pageX - this.origin.x
-      , deltaY = e.pageY - this.origin.y
+    var pageX  = getTouchPageX(e)
+      , pageY  = getTouchPageY(e)
+      , deltaX = pageX - this.origin.x
+      , deltaY = pageY - this.origin.y
     translate(this.el[0], deltaX, deltaY)
   }
 
   var dragging = $.dragging = parent.$.dragging || new Dragging()
 
-  // from https://github.com/rkusa/jquery-observe
+  // from https://github.com/rkusa/selector-observer
   var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver
-  var Observer = function(target, selector, onAdded, onRemoved) {
-    var self    = this
-    this.target = target
+  function matches(el, selector) {
+    var fn = el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.webkitMatchesSelector || el.oMatchesSelector
+    return fn ? fn.call(el, selector) : false
+  }
+  function toArr(nodeList) {
+    return Array.prototype.slice.call(nodeList)
+  }
 
+  // polyfill for IE < 11
+  var isOldIE = false
+  if (typeof MutationObserver === 'undefined') {
+    MutationObserver = function(callback) {
+      this.targets = []
+      this.onAdded = function(e) {
+        callback([{ addedNodes: [e.target], removedNodes: [] }])
+      }
+      this.onRemoved = function(e) {
+        callback([{ addedNodes: [], removedNodes: [e.target] }])
+      }
+    }
+
+    MutationObserver.prototype.observe = function(target) {
+      target.addEventListener('DOMNodeInserted', this.onAdded)
+      target.addEventListener('DOMNodeRemoved', this.onRemoved)
+      this.targets.push(target)
+    }
+
+    MutationObserver.prototype.disconnect = function() {
+      var target
+      while (target = this.targets.shift()) {
+        target.removeEventListener('DOMNodeInserted', this.onAdded)
+        target.removeEventListener('DOMNodeRemoved', this.onRemoved)
+      }
+    }
+
+    isOldIE = !!~navigator.appName.indexOf('Internet Explorer')
+  }
+
+  var SelectorObserver = function(targets, selector, onAdded, onRemoved) {
+    var self     = this
+    this.targets = targets instanceof NodeList
+                     ? Array.prototype.slice.call(targets)
+                     : [targets]
+
+    // support selectors starting with the childs only selector `>`
     var childsOnly = selector[0] === '>'
-      , search = childsOnly ? selector.substr(1) : selector
+    var search = childsOnly ? selector.substr(1) : selector
+    var initialized = false
 
-    function apply(nodes, callback) {
-      Array.prototype.slice.call(nodes).forEach(function(node) {
-        if (childsOnly && self.target[0] !== $(node).parent()[0]) return
-        if ($(node).is(search)) callback.call(node)
-        if (childsOnly) return
-        $(selector, node).each(function() {
-          callback.call(this)
+    function query(nodes, deep) {
+      var result = []
+
+      toArr(nodes).forEach(function(node) {
+        //ignore non-element nodes
+        if (node.nodeType !== 1) return;
+
+        // if looking for childs only, the node's parentNode
+        // should be one of our targets
+        if (childsOnly && self.targets.indexOf(node.parentNode) === -1) {
+          return
+        }
+
+        // test if the node itself matches the selector
+        if (matches(node, search)) {
+          result.push(node)
+        }
+
+        if (childsOnly || !deep) {
+          return
+        }
+
+        toArr(node.querySelectorAll(selector)).forEach(function(node) {
+          result.push(node)
         })
+      })
+
+      return result
+    }
+
+    function apply(nodes, deep, callback) {
+      if (!callback) {
+        return
+      }
+
+      // flatten
+      query(nodes, deep)
+      // filter unique nodes
+      .filter(function(node, i, self) {
+        return self.indexOf(node) === i
+      })
+      // execute callback
+      .forEach(function(node) {
+        callback.call(node)
       })
     }
 
-    this.observer = new MutationObserver(function(mutations) {
+    var timeout      = null
+    var addedNodes   = []
+    var removedNodes = []
+
+    function handle() {
       self.disconnect()
 
-      mutations.forEach(function(mutation) {
-        if (onAdded)   apply(mutation.addedNodes,   onAdded)
-        if (onRemoved) apply(mutation.removedNodes, onRemoved)
-      })
+      // filter moved elements (removed and re-added)
+      for (var i = 0, len = removedNodes.length; i < len; ++i) {
+        var index = addedNodes.indexOf(removedNodes[i])
+        if (index > -1) {
+          addedNodes.splice(index, 1)
+          removedNodes.splice(i--, 1)
+        }
+      }
+
+      //                ↓ IE workarounds ...
+      apply(addedNodes, !(initialized && isOldIE), onAdded)
+      apply(removedNodes, true, onRemoved)
+
+      addedNodes.length   = 0
+      removedNodes.length = 0
 
       self.observe()
+    }
+
+    this.observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        addedNodes.push.apply(addedNodes, mutation.addedNodes)
+        removedNodes.push.apply(removedNodes, mutation.removedNodes)
+      })
+
+      // IE < 10 fix: wait a cycle to gather all mutations
+      if (timeout) {
+        clearTimeout(timeout)
+      }
+      timeout = setTimeout(handle)
     })
 
     // call onAdded for existing elements
-    $(selector, target).each(function() {
-      onAdded.call(this)
-    })
+    if (onAdded) {
+      this.targets.forEach(function(target) {
+        apply(target.children, true, onAdded)
+      })
+    }
+
+    initialized = true
 
     this.observe()
   }
 
-  Observer.prototype.disconnect = function() {
+  SelectorObserver.prototype.disconnect = function() {
     this.observer.disconnect()
   }
 
-  Observer.prototype.observe = function() {
-    this.observer.observe(this.target[0], { childList: true, subtree: true })
+  SelectorObserver.prototype.observe = function() {
+    var self = this
+    this.targets.forEach(function(target) {
+      self.observer.observe(target, { childList: true, subtree: true })
+    })
   }
 
   var Draggable = function(element, opts) {
@@ -331,16 +484,6 @@
     }
 
     dragging.start(this, el, e, handle)
-    $(document).on(END_EVENT, $.proxy(this.end, this))
-  }
-
-  Draggable.prototype.end = function(e) {
-    // e.stopPropagation()
-    // e.preventDefault()
-
-    // revert
-    $(document).off(END_EVENT, this.end)
-    dragging.stop(e)
   }
 
   var Droppable = function(element, opts) {
@@ -403,7 +546,7 @@
     if (this.opts.activeClass)
       this.el.addClass(this.opts.activeClass)
 
-    this.el.trigger('droppable:activate', { item: dragging.el })
+    trigger(this.el, 'droppable:activate', e, { item: dragging.el })
   }
 
   Droppable.prototype.reset = function(e) {
@@ -411,7 +554,7 @@
     if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
     if (this.opts.hoverClass)  this.el.removeClass(this.opts.hoverClass)
 
-    this.el.trigger('droppable:deactivate', { item: dragging.el })
+    trigger(this.el, 'droppable:deactivate', e, { item: dragging.el })
   }
 
   Droppable.prototype.enter = function(e) {
@@ -425,34 +568,36 @@
 
     if (!this.accept) return
 
-    if (this.opts.hoverClass)
+    if (this.opts.hoverClass) {
       this.el.addClass(this.opts.hoverClass)
+    }
 
-    this.el.trigger('droppable:over', { item: dragging.el })
+    trigger(this.el, 'droppable:over', e, { item: dragging.el })
   }
 
   Droppable.prototype.leave = function(e) {
     if (this.opts.disabled) return false
     // e.stopPropagation()
 
-    if (this.opts.hoverClass && this.accept)
+    if (this.opts.hoverClass && this.accept) {
       this.el.removeClass(this.opts.hoverClass)
+    }
 
-    this.el.trigger('droppable:out', { item: dragging.el })
+    trigger(this.el, 'droppable:out', e, { item: dragging.el })
   }
 
-  Droppable.prototype.drop = function(e, originalEvent) {
+  Droppable.prototype.drop = function(e) {
     if (this.opts.disabled || !this.accept) return false
 
     if (!dragging.el) return
 
+    e.preventDefault() // accept drop
+
     // zepto <> jquery compatibility
     var el = dragging.el
-    dragging.stop(originalEvent, false)
-
     $(this.el).append(el)
 
-    this.el.trigger('droppable:drop', { item: el })
+    trigger(this.el, 'droppable:drop', e, { item: el })
   }
 
   var Sortable = function(element, opts) {
@@ -460,11 +605,13 @@
     this.el   = element
     this.opts = opts
 
-    var tag
-    try {
-      tag = this.el.find(this.opts.items)[0].tagName
-    } catch(e) {
-      tag = /^ul|ol$/i.test(this.el.tagName) ? 'li' : 'div'
+    var tag = this.opts.placeholderTag
+    if (!tag) {
+      try {
+        tag = this.el.find(this.opts.items)[0].tagName
+      } catch(e) {
+        tag = /^ul|ol$/i.test(this.el[0].tagName) ? 'li' : 'div'
+      }
     }
 
     this.placeholder = $('<' + tag + ' class="' + this.opts.placeholder + '" />')
@@ -501,9 +648,11 @@
       self.el.trigger('sortable:create', self)
     })
 
-    this.observer = new Observer(this.el, this.opts.items, function() {
+    this.observer = new SelectorObserver(this.el[0], this.opts.items, function() {
     }, function() {
-      if (this === self.placeholder[0] || (dragging.el && this === dragging.el[0])) return
+      if (this === self.placeholder[0] || (dragging.el && this === dragging.el[0])) {
+        return
+      }
       var item = $(this)
       self.el.trigger('sortable:change', { item: item })
       self.el.trigger('sortable:update', { item: item, index: -1 })
@@ -558,14 +707,14 @@
     if (this.opts.activeClass)
       this.el.addClass(this.opts.activeClass)
 
-    this.el.trigger('sortable:activate', dragging.el)
+    trigger(this.el, 'sortable:activate', e, { item: dragging.el })
   }
 
   Sortable.prototype.reset = function(e) {
     if (!this.accept) return
     if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
 
-    this.el.trigger('sortable:deactivate', dragging.el)
+    trigger(this.el, 'sortable:deactivate', e, { item: dragging.el })
   }
 
   Sortable.prototype.indexOf = function(el) {
@@ -601,7 +750,6 @@
     // use e.currentTarget instead of e.target because we want the target
     // the event is bound to, not the target (child) the event is triggered from
     dragging.start(this, $(e.currentTarget), e)
-    $(document).on(END_EVENT, $.proxy(this.end, this))
 
     this.index = this.indexOf(dragging.el)
 
@@ -610,8 +758,10 @@
     // if dragging an item that belongs to the current list, hide it while
     // it is being dragged
     if (this.index !== null) {
-      var marginBottom = (parseInt(dragging.el.css('margin-bottom'), 10) + dragging.el.height()) * -1
-      dragging.css('margin-bottom', marginBottom)
+      // zepto <> jquery compatibility
+      var height = dragging.el.outerHeight ? dragging.el.outerHeight() : dragging.el.height()
+      var marginBottom = parseInt(dragging.el.css('margin-bottom'), 10)
+      dragging.css('margin-bottom', (height + Math.max(0, marginBottom)) * -1)
     }
 
     if (this.opts.forcePlaceholderSize) {
@@ -621,7 +771,7 @@
 
     dragging.adjustPlacement(e)
 
-    this.el.trigger('sortable:start', { item: dragging.el })
+    trigger(this.el, 'sortable:start', e, { item: dragging.el })
   }
 
   Sortable.prototype.identify = function(e) {
@@ -676,35 +826,18 @@
     dragging.adjustPlacement(e)
   }
 
-  Sortable.prototype.end = function(e) {
-    e.stopPropagation()
-    e.preventDefault()
-
-    if (!dragging.el) return
-
-    this.el.trigger('sortable:beforeStop', { item: dragging.el })
-
-    // revert
-    dragging.placeholder.hide()
-    dragging.adjustPlacement(e)
-    $(document).off(END_EVENT, this.end)
-    dragging.stop(e)
-    this.el.trigger('dragging:stop')
-
-    this.index = null
-  }
-
-  Sortable.prototype.drop = function(e, originalEvent) {
+  Sortable.prototype.drop = function(e) {
     if (!this.accept || this.opts.disabled) return
 
     e.stopPropagation()
     e.preventDefault()
 
     if (!dragging.el) return
+    if (!this.placeholder.parent().length) return
+
+    trigger(this.el, 'sortable:beforeStop', e, { item: dragging.el })
 
     this.observer.disconnect()
-
-    if (!this.placeholder.parent().length) return
 
     var newIndex = this.indexOf(this.placeholder)
     if (newIndex > this.index) {
@@ -714,14 +847,12 @@
     if (typeof this.opts.updatePosition === 'function') {
       this.opts.updatePosition.call(this, { item: dragging.el, index: newIndex })
     } else {
-      dragging.el.insertBefore(this.placeholder).show()
+      dragging.el.insertBefore(this.placeholder)
     }
-
-    dragging.placeholder = null // remove placeholder
 
     // if the dropped element belongs to another list, trigger the receive event
     if (this.index === null) { // dropped element belongs to another list
-      this.el.trigger('sortable:receive', { item: dragging.el })
+      trigger(this.el, 'sortable:receive', e, { item: dragging.el })
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
     // if the index changed, trigger the update event
@@ -729,17 +860,12 @@
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
 
-    this.el.trigger('sortable:beforeStop', { item: dragging.el })
     if (dragging.parent instanceof Sortable) {
       dragging.parent.index = null
-      dragging.parent.el.trigger('dragging:stop')
+      trigger(dragging.parent.el, 'dragging:stop', e)
     }
 
-    // revert
-    $(document).off(END_EVENT, this.end)
-    dragging.stop(originalEvent, false)
-    this.el.trigger('dragging:stop')
-
+    this.index = null
     this.observer.observe()
   }
 
@@ -837,6 +963,7 @@
     initialized: false,
     items: 'li, div',
     placeholder: 'placeholder',
+    placeholderTag: null,
     updatePosition: null
   })
 })(window.Zepto || window.jQuery);
