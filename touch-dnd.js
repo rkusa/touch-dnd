@@ -605,11 +605,13 @@
     this.el   = element
     this.opts = opts
 
-    var tag
-    try {
-      tag = this.el.find(this.opts.items)[0].tagName
-    } catch(e) {
-      tag = /^ul|ol$/i.test(this.el.tagName) ? 'li' : 'div'
+    var tag = this.opts.placeholderTag
+    if (!tag) {
+      try {
+        tag = this.el.find(this.opts.items)[0].tagName
+      } catch(e) {
+        tag = /^ul|ol$/i.test(this.el[0].tagName) ? 'li' : 'div'
+      }
     }
 
     this.placeholder = $('<' + tag + ' class="' + this.opts.placeholder + '" />')
@@ -961,6 +963,7 @@
     initialized: false,
     items: 'li, div',
     placeholder: 'placeholder',
+    placeholderTag: null,
     updatePosition: null
   })
 })(window.Zepto || window.jQuery);
