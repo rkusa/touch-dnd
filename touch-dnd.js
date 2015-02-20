@@ -760,8 +760,8 @@
     if (this.index !== null) {
       // zepto <> jquery compatibility
       var height = dragging.el.outerHeight ? dragging.el.outerHeight() : dragging.el.height()
-      var marginBottom = (parseInt(dragging.el.css('margin-bottom'), 10) + height) * -1
-      dragging.css('margin-bottom', marginBottom)
+      var marginBottom = parseInt(dragging.el.css('margin-bottom'), 10)
+      dragging.css('margin-bottom', (height + Math.max(0, marginBottom)) * -1)
     }
 
     if (this.opts.forcePlaceholderSize) {
