@@ -50,7 +50,8 @@
     })
 
     var e = $.Event(name, props)
-    return el.trigger(e, arg)
+    el.trigger(e, arg)
+    return e
   }
 
   var nextId = 0
@@ -110,37 +111,50 @@
   }
 
   Dragging.prototype.stop = function(e) {
+    var dropEvent = null
+    var revert = true
     if (this.last) {
       var last = this.last
       this.last = null
-      trigger($(last), 'dragging:drop', e)
+      dropEvent = trigger($(last), 'dragging:drop', e)
+      revert = !dropEvent.isDefaultPrevented()
     }
-    if (!this.el) return
-    var transform = this.origin.transform || 'none'
-    var el = this.handle || this.el, self = this
-    if (this.handle) {
-      transition(this.handle[0], 'all 0.25s ease-in-out 0s')
-      vendorify('transform', this.handle[0], transform)
-      setTimeout(this.handle.remove.bind(this.handle), 250)
-    } else {
-      setTimeout((function(el, origin) {
-        transition(el, 'all 0.25s ease-in-out 0s')
-        setTimeout(transition.bind(null, el, origin.transition), 250)
-        vendorify('transform', el, transform)
-      }).bind(null, self.el[0], self.origin))
-      this.el[0].style.pointerEvents = 'auto'
+
+    if (!this.el) {
+      return
     }
+
     for (var prop in this.originalCss) {
       this.el.css(prop, this.originalCss[prop])
       delete this.originalCss[prop]
     }
-    $(document).off(MOVE_EVENT, this.move)
-    $(document).off(END_EVENT, this.stop)
+
     trigger(this.eventHandler, 'dragging:stop', e)
     this.placeholder = null
-    this.adjustPlacement(e)
+    if (!this.handle) {
+      this.adjustPlacement(e)
+    }
+
+    var el = this.el
+    if (this.handle) {
+      if (revert) {
+        el = this.handle
+        setTimeout(this.handle.remove.bind(this.handle), 250)
+      } else {
+        this.handle.remove()
+      }
+    }
+
+    setTimeout((function(el, origin) {
+      transition(el[0], 'all 0.25s ease-in-out 0s')
+      vendorify('transform', el[0], origin.transform || 'none')
+      setTimeout(transition.bind(null, el[0], origin.transition || 'none'), 250)
+      el[0].style.pointerEvents = 'auto'
+    }).bind(null, el, this.origin))
+
+    $(document).off(MOVE_EVENT, this.move)
+    $(document).off(END_EVENT, this.stop)
     this.parent = this.el = this.handle = null
-    return false
   }
 
   Dragging.prototype.move = function(e) {
@@ -554,8 +568,9 @@
 
     if (!this.accept) return
 
-    if (this.opts.hoverClass)
+    if (this.opts.hoverClass) {
       this.el.addClass(this.opts.hoverClass)
+    }
 
     trigger(this.el, 'droppable:over', e, { item: dragging.el })
   }
@@ -564,8 +579,9 @@
     if (this.opts.disabled) return false
     // e.stopPropagation()
 
-    if (this.opts.hoverClass && this.accept)
+    if (this.opts.hoverClass && this.accept) {
       this.el.removeClass(this.opts.hoverClass)
+    }
 
     trigger(this.el, 'droppable:out', e, { item: dragging.el })
   }
@@ -575,10 +591,10 @@
 
     if (!dragging.el) return
 
+    e.preventDefault() // accept drop
+
     // zepto <> jquery compatibility
     var el = dragging.el
-    dragging.stop(originalEvent, false)
-
     $(this.el).append(el)
 
     trigger(this.el, 'droppable:drop', e, { item: el })
@@ -815,6 +831,7 @@
     e.preventDefault()
 
     if (!dragging.el) return
+    if (!this.placeholder.parent().length) return
 
     trigger(this.el, 'sortable:beforeStop', e, { item: dragging.el })
 
