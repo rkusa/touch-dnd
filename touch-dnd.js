@@ -35,6 +35,24 @@
     }
   }
 
+  var eventProperties = [
+    'altKey', 'bubbles', 'button', 'cancelable', 'charCode', 'clientX',
+    'clientY', 'ctrlKey', 'currentTarget', 'data', 'detail', 'eventPhase',
+    'metaKey', 'offsetX', 'offsetY', 'originalTarget', 'pageX', 'pageY',
+    'relatedTarget', 'screenX', 'screenY', 'shiftKey', 'target', 'view',
+    'which'
+  ]
+  function trigger(el, name, originalEvent, arg) {
+    originalEvent = originalEvent.originalEvent || originalEvent
+    var props = {}
+    eventProperties.forEach(function(prop) {
+      props[prop] = originalEvent[prop]
+    })
+
+    var e = $.Event(name, props)
+    return el.trigger(e, arg)
+  }
+
   var nextId = 0
   var Dragging = function() {
     this.eventHandler = $('<div />')
@@ -87,7 +105,7 @@
     $(document).on(MOVE_EVENT, $.proxy(this.move, this))
     $(document).on(END_EVENT, $.proxy(this.stop, this))
     transition(el[0], '')
-    this.eventHandler.trigger('dragging:start')
+    trigger(this.eventHandler, 'dragging:start', e)
     return this.el
   }
 
@@ -95,7 +113,7 @@
     if (this.last) {
       var last = this.last
       this.last = null
-      $(last).trigger('dragging:drop', e)
+      trigger($(last), 'dragging:drop', e)
     }
     if (!this.el) return
     var transform = this.origin.transform || 'none'
@@ -118,7 +136,7 @@
     }
     $(document).off(MOVE_EVENT, this.move)
     $(document).off(END_EVENT, this.stop)
-    this.eventHandler.trigger('dragging:stop')
+    trigger(this.eventHandler, 'dragging:stop', e)
     this.placeholder = null
     this.adjustPlacement(e)
     this.parent = this.el = this.handle = null
@@ -143,13 +161,13 @@
                    || Math.abs(deltaX) > Math.abs(deltaY) && deltaX < 0 && 'right'
                    || Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0 && 'up'
                    || 'down'
-      if (over !== this.last && $(over).trigger('dragging:identify') && this.lastEntered !== this.currentTarget) {
-        $(this.currentTarget).trigger('dragging:enter')
-        $(this.lastEntered).trigger('dragging:leave')
+      if (over !== this.last && trigger($(over), 'dragging:identify', e) && this.lastEntered !== this.currentTarget) {
+        trigger($(this.currentTarget), 'dragging:enter', e)
+        trigger($(this.lastEntered), 'dragging:leave', e)
         this.lastEntered = this.currentTarget
       } else if (direction !== this.lastDirection) {
-        if (!this.currentTarget) $(over).trigger('dragging:identify')
-        $(this.currentTarget).trigger('dragging:diverted')
+        if (!this.currentTarget) trigger($(over), 'dragging:identify', e)
+        trigger($(this.currentTarget), 'dragging:diverted', e)
       }
       this.last = over
       this.currentTarget = null
@@ -514,7 +532,7 @@
     if (this.opts.activeClass)
       this.el.addClass(this.opts.activeClass)
 
-    this.el.trigger('droppable:activate', { item: dragging.el })
+    trigger(this.el, 'droppable:activate', e, { item: dragging.el })
   }
 
   Droppable.prototype.reset = function(e) {
@@ -522,7 +540,7 @@
     if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
     if (this.opts.hoverClass)  this.el.removeClass(this.opts.hoverClass)
 
-    this.el.trigger('droppable:deactivate', { item: dragging.el })
+    trigger(this.el, 'droppable:deactivate', e, { item: dragging.el })
   }
 
   Droppable.prototype.enter = function(e) {
@@ -539,7 +557,7 @@
     if (this.opts.hoverClass)
       this.el.addClass(this.opts.hoverClass)
 
-    this.el.trigger('droppable:over', { item: dragging.el })
+    trigger(this.el, 'droppable:over', e, { item: dragging.el })
   }
 
   Droppable.prototype.leave = function(e) {
@@ -549,10 +567,10 @@
     if (this.opts.hoverClass && this.accept)
       this.el.removeClass(this.opts.hoverClass)
 
-    this.el.trigger('droppable:out', { item: dragging.el })
+    trigger(this.el, 'droppable:out', e, { item: dragging.el })
   }
 
-  Droppable.prototype.drop = function(e, originalEvent) {
+  Droppable.prototype.drop = function(e) {
     if (this.opts.disabled || !this.accept) return false
 
     if (!dragging.el) return
@@ -563,7 +581,7 @@
 
     $(this.el).append(el)
 
-    this.el.trigger('droppable:drop', { item: el })
+    trigger(this.el, 'droppable:drop', e, { item: el })
   }
 
   var Sortable = function(element, opts) {
@@ -671,14 +689,14 @@
     if (this.opts.activeClass)
       this.el.addClass(this.opts.activeClass)
 
-    this.el.trigger('sortable:activate', dragging.el)
+    trigger(this.el, 'sortable:activate', e, { item: dragging.el })
   }
 
   Sortable.prototype.reset = function(e) {
     if (!this.accept) return
     if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
 
-    this.el.trigger('sortable:deactivate', dragging.el)
+    trigger(this.el, 'sortable:deactivate', e, { item: dragging.el })
   }
 
   Sortable.prototype.indexOf = function(el) {
@@ -735,7 +753,7 @@
 
     dragging.adjustPlacement(e)
 
-    this.el.trigger('sortable:start', { item: dragging.el })
+    trigger(this.el, 'sortable:start', e, { item: dragging.el })
   }
 
   Sortable.prototype.identify = function(e) {
@@ -790,7 +808,7 @@
     dragging.adjustPlacement(e)
   }
 
-  Sortable.prototype.drop = function(e, originalEvent) {
+  Sortable.prototype.drop = function(e) {
     if (!this.accept || this.opts.disabled) return
 
     e.stopPropagation()
@@ -798,11 +816,9 @@
 
     if (!dragging.el) return
 
-    this.el.trigger('sortable:beforeStop', { item: dragging.el })
+    trigger(this.el, 'sortable:beforeStop', e, { item: dragging.el })
 
     this.observer.disconnect()
-
-    if (!this.placeholder.parent().length) return
 
     var newIndex = this.indexOf(this.placeholder)
     if (newIndex > this.index) {
@@ -817,7 +833,7 @@
 
     // if the dropped element belongs to another list, trigger the receive event
     if (this.index === null) { // dropped element belongs to another list
-      this.el.trigger('sortable:receive', { item: dragging.el })
+      trigger(this.el, 'sortable:receive', e, { item: dragging.el })
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
     // if the index changed, trigger the update event
@@ -825,17 +841,12 @@
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
 
-    this.el.trigger('sortable:beforeStop', { item: dragging.el })
     if (dragging.parent instanceof Sortable) {
       dragging.parent.index = null
-      dragging.parent.el.trigger('dragging:stop')
+      trigger(dragging.parent.el, 'dragging:stop', e)
     }
 
-    // revert
-    // dragging.stop(originalEvent, false)
-    // this.el.trigger('dragging:stop')
     this.index = null
-
     this.observer.observe()
   }
 
