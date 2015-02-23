@@ -219,7 +219,7 @@
 
   Dragging.prototype.css = function(prop, val) {
     if (!this.el) return
-    this.originalCss[prop] = this.el.css(prop)
+    this.originalCss[prop] = this.el[0].style[prop] ? this.el.css(prop) : ''
     this.el.css(prop, val)
   }
 
