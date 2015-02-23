@@ -447,7 +447,14 @@
   }
 
   Draggable.prototype.start = function(e) {
-    if (this.opts.disabled) return false
+    if (this.opts.disabled) {
+      return false
+    }
+
+    // only start on left mouse button
+    if (e.type === 'mousedown' && e.which !== 1) {
+      return false
+    }
 
     e = e.originalEvent || e // zepto <> jquery compatibility
     e.preventDefault() // prevent text selection
@@ -722,7 +729,14 @@
   }
 
   Sortable.prototype.start = function(e) {
-    if (this.opts.disabled || dragging.el) return
+    if (this.opts.disabled || dragging.el) {
+      return
+    }
+
+    // only start on left mouse button
+    if (e.type === 'mousedown' && e.which !== 1) {
+      return false
+    }
 
     if (this.opts.cancel) {
       var target = $(e.target)
