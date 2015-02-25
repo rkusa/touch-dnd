@@ -147,9 +147,9 @@
 
     setTimeout((function(el, origin) {
       transition(el[0], 'all 0.25s ease-in-out 0s')
-      vendorify('transform', el[0], origin.transform || 'none')
-      setTimeout(transition.bind(null, el[0], origin.transition || 'none'), 250)
-      el[0].style.pointerEvents = 'auto'
+      vendorify('transform', el[0], origin.transform || '')
+      setTimeout(transition.bind(null, el[0], origin.transition || ''), 250)
+      el.css('pointer-events', '').css('-ms-touch-action', '').css('touch-action', '')
     }).bind(null, el, this.origin))
 
     $(document).off(MOVE_EVENT, this.move)
