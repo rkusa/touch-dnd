@@ -719,9 +719,17 @@
 
   Sortable.prototype.reset = function(e) {
     if (!this.accept) return
-    if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
+    if (this.opts.activeClass) {
+      this.el.removeClass(this.opts.activeClass)
+    }
 
     trigger(this.el, 'sortable:deactivate', e, { item: dragging.el })
+
+    if (this.index !== null) {
+      trigger(this.el, 'sortable:beforeStop', e, { item: dragging.el })
+      trigger(this.el, 'sortable:stop', e, { item: dragging.el })
+      this.index = null
+    }
   }
 
   Sortable.prototype.indexOf = function(el) {
@@ -874,11 +882,7 @@
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
 
-    if (dragging.parent instanceof Sortable) {
-      dragging.parent.index = null
-      trigger(dragging.parent.el, 'dragging:stop', e)
-    }
-
+    trigger(this.el, 'sortable:stop', e, { item: dragging.el })
     this.index = null
     this.observer.observe()
   }
