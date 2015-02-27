@@ -48,6 +48,7 @@
     eventProperties.forEach(function(prop) {
       props[prop] = originalEvent[prop]
     })
+    props.currentTarget = props.target = el[0]
 
     var e = $.Event(name, props)
     el.trigger(e, arg)
