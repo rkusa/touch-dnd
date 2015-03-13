@@ -43,14 +43,19 @@
     'which'
   ]
   function trigger(el, name, originalEvent, arg) {
+    if (!el[0]) return
+
     originalEvent = originalEvent.originalEvent || originalEvent
     var props = {}
     eventProperties.forEach(function(prop) {
       props[prop] = originalEvent[prop]
     })
+    props.currentTarget = props.target = el[0]
 
-    var e = $.Event(name, props)
-    el.trigger(e, arg)
+    var win = (el[0].ownerDocument.defaultView || el[0].ownerDocument.parentWindow)
+
+    var e = win.$.Event(name, props)
+    win.$(el[0]).trigger(e, arg)
     return e
   }
 
@@ -62,6 +67,7 @@
     this.lastEntered = this.currentTarget = null
     this.lastX = this.lastY = this.lastDirection = null
     this.originalCss = {}
+    this.windows = [window]
 
     var placeholder
     Object.defineProperty(this, 'placeholder', {
@@ -103,8 +109,10 @@
     // setting the css property `pointer-events` to `none` will let
     // the pointer events fire on the elements underneath the helper
     el[0].style.pointerEvents = 'none'
-    $(document).on(MOVE_EVENT, $.proxy(this.move, this))
-    $(document).on(END_EVENT, $.proxy(this.stop, this))
+    this.windows.forEach(function(win) {
+      $(win).on(MOVE_EVENT, $.proxy(this.move, this))
+      $(win).on(END_EVENT, $.proxy(this.stop, this))
+    }, this)
     transition(el[0], '')
     trigger(this.eventHandler, 'dragging:start', e)
     return this.el
@@ -147,27 +155,41 @@
 
     setTimeout((function(el, origin) {
       transition(el[0], 'all 0.25s ease-in-out 0s')
-      vendorify('transform', el[0], origin.transform || 'none')
-      setTimeout(transition.bind(null, el[0], origin.transition || 'none'), 250)
-      el[0].style.pointerEvents = 'auto'
+      vendorify('transform', el[0], origin.transform || '')
+      setTimeout(transition.bind(null, el[0], origin.transition || ''), 250)
+      el.css('pointer-events', '').css('-ms-touch-action', '').css('touch-action', '')
     }).bind(null, el, this.origin))
 
-    $(document).off(MOVE_EVENT, this.move)
-    $(document).off(END_EVENT, this.stop)
+    this.windows.forEach(function(win) {
+      $(win).off(MOVE_EVENT, this.move)
+      $(win).off(END_EVENT, this.stop)
+    }, this)
     this.parent = this.el = this.handle = null
   }
 
   Dragging.prototype.move = function(e) {
     if (!this.el) return
 
+    var doc = this.el[0].ownerDocument
+    var win = doc.defaultView || doc.parentWindow
+
     if (e.type !== 'scroll') {
       var pageX = getTouchPageX(e)
         , pageY = getTouchPageY(e)
 
+      if (e.view !== win && e.view.frameElement) {
+        // clientX += e.view.frameElement.offsetLeft
+        pageX += e.view.frameElement.offsetLeft
+
+        // clientY += e.view.frameElement.offsetTop
+        pageY += e.view.frameElement.offsetTop
+      }
+
       var clientX = e.clientX || window.event && window.event.touches && window.event.touches[0].clientX || 0
         , clientY = e.clientY || window.event && window.event.touches && window.event.touches[0].clientY || 0
 
-      var over = document.elementFromPoint(clientX, clientY)
+      var doc = this.el[0].ownerDocument
+      var over = e.view.document.elementFromPoint(clientX, clientY)
 
       var deltaX = this.lastX - pageX
         , deltaY = this.lastY - pageY
@@ -175,14 +197,21 @@
                    || Math.abs(deltaX) > Math.abs(deltaY) && deltaX < 0 && 'right'
                    || Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0 && 'up'
                    || 'down'
-      if (over !== this.last && trigger($(over), 'dragging:identify', e) && this.lastEntered !== this.currentTarget) {
-        trigger($(this.currentTarget), 'dragging:enter', e)
-        trigger($(this.lastEntered), 'dragging:leave', e)
-        this.lastEntered = this.currentTarget
-      } else if (direction !== this.lastDirection) {
-        if (!this.currentTarget) trigger($(over), 'dragging:identify', e)
-        trigger($(this.currentTarget), 'dragging:diverted', e)
+
+      if (!dragging.currentTarget) {
+        this.setCurrent(over)
       }
+
+      if (this.currentTarget) {
+        if (over !== this.last && this.lastEntered !== this.currentTarget) {
+          trigger($(this.currentTarget), 'dragging:enter', e)
+          trigger($(this.lastEntered), 'dragging:leave', e)
+          this.lastEntered = this.currentTarget
+        } else if (direction !== this.lastDirection) {
+          trigger($(this.currentTarget), 'dragging:diverted', e)
+        }
+      }
+
       this.last = over
       this.currentTarget = null
       this.lastDirection = direction
@@ -219,7 +248,7 @@
 
   Dragging.prototype.css = function(prop, val) {
     if (!this.el) return
-    this.originalCss[prop] = this.el.css(prop)
+    this.originalCss[prop] = this.el[0].style[prop] ? this.el.css(prop) : ''
     this.el.css(prop, val)
   }
 
@@ -235,7 +264,13 @@
     translate(this.el[0], deltaX, deltaY)
   }
 
-  var dragging = $.dragging = parent.$.dragging || new Dragging()
+  var dragging
+  if (parent.$ && parent.$.dragging) {
+    dragging = parent.$.dragging
+    dragging.windows.push(window)
+  }
+
+  dragging = $.dragging = dragging || new Dragging()
 
   // from https://github.com/rkusa/selector-observer
   var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver
@@ -411,8 +446,13 @@
 
   Draggable.prototype.connectWith = function(connectWith) {
     var self = this
-    $(connectWith).each(function() {
-      var el = $(this)
+    var target = $(connectWith)
+    var context = window
+    if (target[0].ownerDocument !== document) {
+      context = target[0].ownerDocument.defaultView
+    }
+    context.$(connectWith).each(function() {
+      var el = context.$(this)
       if (el[0] === self.el[0]) return
       var instance = el.data('sortable') || el.data('droppable')
       if (instance) instance.connectedWith.push(self.id)
@@ -635,13 +675,11 @@
   Sortable.prototype.create = function() {
     this.el
     .on(START_EVENT,         this.opts.items, $.proxy(this.start, this))
-    .on('dragging:identify', this.opts.items, $.proxy(this.identify, this))
     .on('dragging:enter',    this.opts.items, $.proxy(this.enter, this))
     .on('dragging:diverted', this.opts.items, $.proxy(this.diverted, this))
     .on('dragging:drop',     this.opts.items, $.proxy(this.drop, this))
 
     this.el
-    .on('dragging:identify', $.proxy(this.identify, this))
     .on('dragging:enter',    $.proxy(this.enter, this))
     .on('dragging:diverted', $.proxy(this.diverted, this))
     .on('dragging:drop',     $.proxy(this.drop, this))
@@ -669,13 +707,11 @@
   Sortable.prototype.destroy = function() {
     this.el
     .off(START_EVENT,         this.opts.items, this.start)
-    .off('dragging:identify', this.opts.items, this.identify)
     .off('dragging:enter',    this.opts.items, this.enter)
     .off('dragging:diverted', this.opts.items, this.diverted)
     .off('dragging:drop',     this.opts.items, this.drop)
 
     this.el
-    .off('dragging:identify', this.identify)
     .off('dragging:enter',    this.enter)
     .off('dragging:diverted', this.diverted)
     .off('dragging:drop',     this.drop)
@@ -719,9 +755,17 @@
 
   Sortable.prototype.reset = function(e) {
     if (!this.accept) return
-    if (this.opts.activeClass) this.el.removeClass(this.opts.activeClass)
+    if (this.opts.activeClass) {
+      this.el.removeClass(this.opts.activeClass)
+    }
 
     trigger(this.el, 'sortable:deactivate', e, { item: dragging.el })
+
+    if (this.index !== null) {
+      trigger(this.el, 'sortable:beforeStop', e, { item: dragging.el })
+      trigger(this.el, 'sortable:stop', e, { item: dragging.el })
+      this.index = null
+    }
   }
 
   Sortable.prototype.indexOf = function(el) {
@@ -786,11 +830,6 @@
     dragging.adjustPlacement(e)
 
     trigger(this.el, 'sortable:start', e, { item: dragging.el })
-  }
-
-  Sortable.prototype.identify = function(e) {
-    if (dragging.currentTarget) return
-    dragging.setCurrent(e.currentTarget)
   }
 
   Sortable.prototype.enter = function(e) {
@@ -874,11 +913,7 @@
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
 
-    if (dragging.parent instanceof Sortable) {
-      dragging.parent.index = null
-      trigger(dragging.parent.el, 'dragging:stop', e)
-    }
-
+    trigger(this.el, 'sortable:stop', e, { item: dragging.el })
     this.index = null
     this.observer.observe()
   }
