@@ -43,6 +43,8 @@
     'which'
   ]
   function trigger(el, name, originalEvent, arg) {
+    if (!el[0]) return
+
     originalEvent = originalEvent.originalEvent || originalEvent
     var props = {}
     eventProperties.forEach(function(prop) {
@@ -50,8 +52,10 @@
     })
     props.currentTarget = props.target = el[0]
 
-    var e = $.Event(name, props)
-    el.trigger(e, arg)
+    var win = (el[0].ownerDocument.defaultView || el[0].ownerDocument.parentWindow)
+
+    var e = win.$.Event(name, props)
+    win.$(el[0]).trigger(e, arg)
     return e
   }
 
@@ -63,6 +67,7 @@
     this.lastEntered = this.currentTarget = null
     this.lastX = this.lastY = this.lastDirection = null
     this.originalCss = {}
+    this.windows = [window]
 
     var placeholder
     Object.defineProperty(this, 'placeholder', {
@@ -104,8 +109,10 @@
     // setting the css property `pointer-events` to `none` will let
     // the pointer events fire on the elements underneath the helper
     el[0].style.pointerEvents = 'none'
-    $(document).on(MOVE_EVENT, $.proxy(this.move, this))
-    $(document).on(END_EVENT, $.proxy(this.stop, this))
+    this.windows.forEach(function(win) {
+      $(win).on(MOVE_EVENT, $.proxy(this.move, this))
+      $(win).on(END_EVENT, $.proxy(this.stop, this))
+    }, this)
     transition(el[0], '')
     trigger(this.eventHandler, 'dragging:start', e)
     return this.el
@@ -153,22 +160,36 @@
       el.css('pointer-events', '').css('-ms-touch-action', '').css('touch-action', '')
     }).bind(null, el, this.origin))
 
-    $(document).off(MOVE_EVENT, this.move)
-    $(document).off(END_EVENT, this.stop)
+    this.windows.forEach(function(win) {
+      $(win).off(MOVE_EVENT, this.move)
+      $(win).off(END_EVENT, this.stop)
+    }, this)
     this.parent = this.el = this.handle = null
   }
 
   Dragging.prototype.move = function(e) {
     if (!this.el) return
 
+    var doc = this.el[0].ownerDocument
+    var win = doc.defaultView || doc.parentWindow
+
     if (e.type !== 'scroll') {
       var pageX = getTouchPageX(e)
         , pageY = getTouchPageY(e)
 
+      if (e.view !== win && e.view.frameElement) {
+        // clientX += e.view.frameElement.offsetLeft
+        pageX += e.view.frameElement.offsetLeft
+
+        // clientY += e.view.frameElement.offsetTop
+        pageY += e.view.frameElement.offsetTop
+      }
+
       var clientX = e.clientX || window.event && window.event.touches && window.event.touches[0].clientX || 0
         , clientY = e.clientY || window.event && window.event.touches && window.event.touches[0].clientY || 0
 
-      var over = document.elementFromPoint(clientX, clientY)
+      var doc = this.el[0].ownerDocument
+      var over = e.view.document.elementFromPoint(clientX, clientY)
 
       var deltaX = this.lastX - pageX
         , deltaY = this.lastY - pageY
@@ -243,7 +264,13 @@
     translate(this.el[0], deltaX, deltaY)
   }
 
-  var dragging = $.dragging = parent.$.dragging || new Dragging()
+  var dragging
+  if (parent.$ && parent.$.dragging) {
+    dragging = parent.$.dragging
+    dragging.windows.push(window)
+  }
+
+  dragging = $.dragging = dragging || new Dragging()
 
   // from https://github.com/rkusa/selector-observer
   var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver
@@ -419,8 +446,13 @@
 
   Draggable.prototype.connectWith = function(connectWith) {
     var self = this
-    $(connectWith).each(function() {
-      var el = $(this)
+    var target = $(connectWith)
+    var context = window
+    if (target[0].ownerDocument !== document) {
+      context = target[0].ownerDocument.defaultView
+    }
+    context.$(connectWith).each(function() {
+      var el = context.$(this)
       if (el[0] === self.el[0]) return
       var instance = el.data('sortable') || el.data('droppable')
       if (instance) instance.connectedWith.push(self.id)
