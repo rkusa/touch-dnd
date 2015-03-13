@@ -176,14 +176,21 @@
                    || Math.abs(deltaX) > Math.abs(deltaY) && deltaX < 0 && 'right'
                    || Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0 && 'up'
                    || 'down'
-      if (over !== this.last && trigger($(over), 'dragging:identify', e) && this.lastEntered !== this.currentTarget) {
-        trigger($(this.currentTarget), 'dragging:enter', e)
-        trigger($(this.lastEntered), 'dragging:leave', e)
-        this.lastEntered = this.currentTarget
-      } else if (direction !== this.lastDirection) {
-        if (!this.currentTarget) trigger($(over), 'dragging:identify', e)
-        trigger($(this.currentTarget), 'dragging:diverted', e)
+
+      if (!dragging.currentTarget) {
+        this.setCurrent(over)
       }
+
+      if (this.currentTarget) {
+        if (over !== this.last && this.lastEntered !== this.currentTarget) {
+          trigger($(this.currentTarget), 'dragging:enter', e)
+          trigger($(this.lastEntered), 'dragging:leave', e)
+          this.lastEntered = this.currentTarget
+        } else if (direction !== this.lastDirection) {
+          trigger($(this.currentTarget), 'dragging:diverted', e)
+        }
+      }
+
       this.last = over
       this.currentTarget = null
       this.lastDirection = direction
@@ -636,13 +643,11 @@
   Sortable.prototype.create = function() {
     this.el
     .on(START_EVENT,         this.opts.items, $.proxy(this.start, this))
-    .on('dragging:identify', this.opts.items, $.proxy(this.identify, this))
     .on('dragging:enter',    this.opts.items, $.proxy(this.enter, this))
     .on('dragging:diverted', this.opts.items, $.proxy(this.diverted, this))
     .on('dragging:drop',     this.opts.items, $.proxy(this.drop, this))
 
     this.el
-    .on('dragging:identify', $.proxy(this.identify, this))
     .on('dragging:enter',    $.proxy(this.enter, this))
     .on('dragging:diverted', $.proxy(this.diverted, this))
     .on('dragging:drop',     $.proxy(this.drop, this))
@@ -670,13 +675,11 @@
   Sortable.prototype.destroy = function() {
     this.el
     .off(START_EVENT,         this.opts.items, this.start)
-    .off('dragging:identify', this.opts.items, this.identify)
     .off('dragging:enter',    this.opts.items, this.enter)
     .off('dragging:diverted', this.opts.items, this.diverted)
     .off('dragging:drop',     this.opts.items, this.drop)
 
     this.el
-    .off('dragging:identify', this.identify)
     .off('dragging:enter',    this.enter)
     .off('dragging:diverted', this.diverted)
     .off('dragging:drop',     this.drop)
@@ -795,11 +798,6 @@
     dragging.adjustPlacement(e)
 
     trigger(this.el, 'sortable:start', e, { item: dragging.el })
-  }
-
-  Sortable.prototype.identify = function(e) {
-    if (dragging.currentTarget) return
-    dragging.setCurrent(e.currentTarget)
   }
 
   Sortable.prototype.enter = function(e) {
