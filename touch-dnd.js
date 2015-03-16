@@ -175,13 +175,10 @@
 
     if (e.type !== 'scroll') {
       var pageX = getTouchPageX(e)
-        , pageY = getTouchPageY(e)
+      var pageY = getTouchPageY(e)
 
       if (e.view !== win && e.view.frameElement) {
-        // clientX += e.view.frameElement.offsetLeft
         pageX += e.view.frameElement.offsetLeft
-
-        // clientY += e.view.frameElement.offsetTop
         pageY += e.view.frameElement.offsetTop
       }
 
@@ -224,16 +221,19 @@
         , pageY = this.lastY + ((window.scrollY || window.pageYOffset) - this.origin.scrollY)
     }
 
-    var bottom = (pageY - (window.scrollY || window.pageYOffset) - window.innerHeight) * -1
-    var bottomReached = document.documentElement.offsetHeight < (window.scrollY || window.pageYOffset) + window.innerHeight
-    if (bottom <= 10 && !bottomReached) {
-      setTimeout(function() { window.scrollBy(0, 5) }, 50)
-    }
+    // border scrolling only for root window
+    if (e.view !== win && e.view.frameElement) {
+      var bottom = (pageY - (window.scrollY || window.pageYOffset) - window.innerHeight) * -1
+      var bottomReached = document.documentElement.offsetHeight < (window.scrollY || window.pageYOffset) + window.innerHeight
+      if (bottom <= 10 && !bottomReached) {
+        setTimeout(function() { window.scrollBy(0, 5) }, 50)
+      }
 
-    var top = (pageY - (window.scrollY || window.pageYOffset))
-    var topReached = (window.scrollY || window.pageYOffset) <= 0
-    if (top <= 10 && !topReached) {
-      setTimeout(function() { window.scrollBy(0, -5) }, 50)
+      var top = (pageY - (window.scrollY || window.pageYOffset))
+      var topReached = (window.scrollY || window.pageYOffset) <= 0
+      if (top <= 10 && !topReached) {
+        setTimeout(function() { window.scrollBy(0, -5) }, 50)
+      }
     }
 
     var deltaX = pageX - this.origin.x
