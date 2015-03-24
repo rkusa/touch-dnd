@@ -222,7 +222,7 @@
     }
 
     // border scrolling only for root window
-    if (e.view !== win && e.view.frameElement) {
+    if (e.view !== win && e.view && e.view.frameElement) {
       var bottom = (pageY - (window.scrollY || window.pageYOffset) - window.innerHeight) * -1
       var bottomReached = document.documentElement.offsetHeight < (window.scrollY || window.pageYOffset) + window.innerHeight
       if (bottom <= 10 && !bottomReached) {
