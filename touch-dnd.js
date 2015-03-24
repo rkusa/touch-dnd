@@ -606,13 +606,12 @@
 
     if (!dragging.el) return
 
-    e.preventDefault() // accept drop
-
-    // zepto <> jquery compatibility
-    var el = dragging.el
-    $(this.el).append(el)
-
-    trigger(this.el, 'droppable:drop', e, { item: el })
+    var drop = trigger(this.el, 'droppable:drop', e, { item: el })
+    if (!drop.isDefaultPrevented()) {
+      // zepto <> jquery compatibility
+      var el = dragging.el
+      $(this.el).append(el)
+    }
   }
 
   var Sortable = function(element, opts) {
