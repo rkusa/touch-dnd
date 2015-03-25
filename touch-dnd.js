@@ -410,26 +410,6 @@
     this.el     = $(element)
     this.opts   = opts
     this.cancel = opts.handle !== false
-
-    this.connectedWith = []
-    if (this.opts.connectWith) {
-      this.connectWith(this.opts.connectWith)
-    }
-  }
-
-  Draggable.prototype.connectWith = function(connectWith) {
-    var self = this
-    $(connectWith).each(function() {
-      var el = $(this)
-      if (el[0] === self.el[0]) return
-      var instance = el.data('sortable') || el.data('droppable')
-      if (instance) instance.connectedWith.push(self.id)
-      else {
-        el.one('sortable:create droppable:create', function(e, instance) {
-          instance.connectedWith.push(self.id)
-        })
-      }
-    })
   }
 
   Draggable.prototype.create = function() {
@@ -506,7 +486,6 @@
     this.el            = $(element)
     this.opts          = opts
     this.accept        = false
-    this.connectedWith = []
   }
 
   Droppable.prototype.create = function() {
@@ -546,7 +525,8 @@
   }
 
   Droppable.prototype.activate = function(e) {
-    this.accept = this.connectedWith.indexOf(dragging.parent.id) !== -1
+    this.accept = dragging.parent.opts.connectWith && matches(this.el, dragging.parent.opts.connectWith)
+
     if (!this.accept) {
       var accept = this.opts.accept === '*'
                 || (typeof this.opts.accept === 'function' ? this.opts.accept.call(this.el[0], dragging.el)
@@ -632,13 +612,7 @@
     this.placeholder = $('<' + tag + ' class="' + this.opts.placeholder + '" />')
 
     this.accept = this.index = this.direction = null
-    this.connectedWith = []
-    if (this.opts.connectWith) {
-      this.connectWith(this.opts.connectWith)
-    }
   }
-
-  Sortable.prototype.connectWith = Draggable.prototype.connectWith
 
   Sortable.prototype.create = function() {
     this.el
@@ -701,9 +675,13 @@
   }
 
   Sortable.prototype.activate = function(e) {
-    this.accept  = dragging.parent.id === this.id
-                   || !!~this.connectedWith.indexOf(dragging.parent.id)
     this.isEmpty = this.el.find(this.opts.items).length === 0
+
+    this.accept = dragging.parent.id === this.id
+
+    if (!this.accept && dragging.parent.opts.connectWith) {
+      this.accept = matches(this.el[0], dragging.parent.opts.connectWith)
+    }
 
     if (!this.accept) return
 
