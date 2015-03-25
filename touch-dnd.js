@@ -606,10 +606,11 @@
 
     if (!dragging.el) return
 
+    // zepto <> jquery compatibility
+    var el = dragging.el
     var drop = trigger(this.el, 'droppable:drop', e, { item: el })
+
     if (!drop.isDefaultPrevented()) {
-      // zepto <> jquery compatibility
-      var el = dragging.el
       $(this.el).append(el)
     }
   }
