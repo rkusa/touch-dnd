@@ -843,19 +843,31 @@
       newIndex--
     }
 
-    if (typeof this.opts.updatePosition === 'function') {
-      this.opts.updatePosition.call(this, { item: dragging.el, index: newIndex })
+    var handler
+
+    // dropped element belongs to another list
+    if (this.index === null) {
+      handler = this.opts.receiveHandler
+    }
+    // dopped element belongs to the same list
+    else {
+      // updatePosition cause backwards-compatibility
+      handler = this.opts.updateHandler || this.opts.updatePosition
+    }
+
+    if (typeof handler === 'function') {
+      handler.call(this, { item: dragging.el, index: newIndex })
     } else {
       dragging.el.insertBefore(this.placeholder)
     }
 
     // if the dropped element belongs to another list, trigger the receive event
-    if (this.index === null) { // dropped element belongs to another list
+    if (this.index === null) {
       trigger(this.el, 'sortable:receive', e, { item: dragging.el })
-      this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
+
     // if the index changed, trigger the update event
-    else if (newIndex !== this.index) {
+    if (newIndex !== this.index) {
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
 
@@ -959,6 +971,7 @@
     items: 'li, div',
     placeholder: 'placeholder',
     placeholderTag: null,
-    updatePosition: null
+    updateHandler: null,
+    receiveHandler: null
   })
 })(window.Zepto || window.jQuery);
