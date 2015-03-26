@@ -43,8 +43,6 @@
     'which'
   ]
   function trigger(el, name, originalEvent, arg) {
-    if (!el[0]) return
-
     originalEvent = originalEvent.originalEvent || originalEvent
     var props = {}
     eventProperties.forEach(function(prop) {
@@ -52,10 +50,8 @@
     })
     props.currentTarget = props.target = el[0]
 
-    var win = (el[0].ownerDocument.defaultView || el[0].ownerDocument.parentWindow)
-
-    var e = win.$.Event(name, props)
-    win.$(el[0]).trigger(e, arg)
+    var e = $.Event(name, props)
+    el.trigger(e, arg)
     return e
   }
 
@@ -67,7 +63,6 @@
     this.lastEntered = this.currentTarget = null
     this.lastX = this.lastY = this.lastDirection = null
     this.originalCss = {}
-    this.windows = [window]
 
     var placeholder
     Object.defineProperty(this, 'placeholder', {
@@ -109,10 +104,8 @@
     // setting the css property `pointer-events` to `none` will let
     // the pointer events fire on the elements underneath the helper
     el[0].style.pointerEvents = 'none'
-    this.windows.forEach(function(win) {
-      $(win).on(MOVE_EVENT, $.proxy(this.move, this))
-      $(win).on(END_EVENT, $.proxy(this.stop, this))
-    }, this)
+    $(document).on(MOVE_EVENT, $.proxy(this.move, this))
+    $(document).on(END_EVENT, $.proxy(this.stop, this))
     transition(el[0], '')
     trigger(this.eventHandler, 'dragging:start', e)
     return this.el
@@ -160,33 +153,22 @@
       el.css('pointer-events', '').css('-ms-touch-action', '').css('touch-action', '')
     }).bind(null, el, this.origin))
 
-    this.windows.forEach(function(win) {
-      $(win).off(MOVE_EVENT, this.move)
-      $(win).off(END_EVENT, this.stop)
-    }, this)
+    $(document).off(MOVE_EVENT, this.move)
+    $(document).off(END_EVENT, this.stop)
     this.parent = this.el = this.handle = null
   }
 
   Dragging.prototype.move = function(e) {
     if (!this.el) return
 
-    var doc = this.el[0].ownerDocument
-    var win = doc.defaultView || doc.parentWindow
-
     if (e.type !== 'scroll') {
       var pageX = getTouchPageX(e)
-      var pageY = getTouchPageY(e)
-
-      if (e.view !== win && e.view.frameElement) {
-        pageX += e.view.frameElement.offsetLeft
-        pageY += e.view.frameElement.offsetTop
-      }
+        , pageY = getTouchPageY(e)
 
       var clientX = e.clientX || window.event && window.event.touches && window.event.touches[0].clientX || 0
         , clientY = e.clientY || window.event && window.event.touches && window.event.touches[0].clientY || 0
 
-      var doc = this.el[0].ownerDocument
-      var over = e.view.document.elementFromPoint(clientX, clientY)
+      var over = document.elementFromPoint(clientX, clientY)
 
       var deltaX = this.lastX - pageX
         , deltaY = this.lastY - pageY
@@ -221,19 +203,16 @@
         , pageY = this.lastY + ((window.scrollY || window.pageYOffset) - this.origin.scrollY)
     }
 
-    // border scrolling only for root window
-    if (e.view !== win && e.view && e.view.frameElement) {
-      var bottom = (pageY - (window.scrollY || window.pageYOffset) - window.innerHeight) * -1
-      var bottomReached = document.documentElement.offsetHeight < (window.scrollY || window.pageYOffset) + window.innerHeight
-      if (bottom <= 10 && !bottomReached) {
-        setTimeout(function() { window.scrollBy(0, 5) }, 50)
-      }
+    var bottom = (pageY - (window.scrollY || window.pageYOffset) - window.innerHeight) * -1
+    var bottomReached = document.documentElement.offsetHeight < (window.scrollY || window.pageYOffset) + window.innerHeight
+    if (bottom <= 10 && !bottomReached) {
+      setTimeout(function() { window.scrollBy(0, 5) }, 50)
+    }
 
-      var top = (pageY - (window.scrollY || window.pageYOffset))
-      var topReached = (window.scrollY || window.pageYOffset) <= 0
-      if (top <= 10 && !topReached) {
-        setTimeout(function() { window.scrollBy(0, -5) }, 50)
-      }
+    var top = (pageY - (window.scrollY || window.pageYOffset))
+    var topReached = (window.scrollY || window.pageYOffset) <= 0
+    if (top <= 10 && !topReached) {
+      setTimeout(function() { window.scrollBy(0, -5) }, 50)
     }
 
     var deltaX = pageX - this.origin.x
@@ -264,13 +243,7 @@
     translate(this.el[0], deltaX, deltaY)
   }
 
-  var dragging
-  if (parent.$ && parent.$.dragging) {
-    dragging = parent.$.dragging
-    dragging.windows.push(window)
-  }
-
-  dragging = $.dragging = dragging || new Dragging()
+  var dragging = $.dragging = parent.$.dragging || new Dragging()
 
   // from https://github.com/rkusa/selector-observer
   var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver
@@ -437,31 +410,6 @@
     this.el     = $(element)
     this.opts   = opts
     this.cancel = opts.handle !== false
-
-    this.connectedWith = []
-    if (this.opts.connectWith) {
-      this.connectWith(this.opts.connectWith)
-    }
-  }
-
-  Draggable.prototype.connectWith = function(connectWith) {
-    var self = this
-    var target = $(connectWith)
-    var context = window
-    if (target[0].ownerDocument !== document) {
-      context = target[0].ownerDocument.defaultView
-    }
-    context.$(connectWith).each(function() {
-      var el = context.$(this)
-      if (el[0] === self.el[0]) return
-      var instance = el.data('sortable') || el.data('droppable')
-      if (instance) instance.connectedWith.push(self.id)
-      else {
-        el.one('sortable:create droppable:create', function(e, instance) {
-          instance.connectedWith.push(self.id)
-        })
-      }
-    })
   }
 
   Draggable.prototype.create = function() {
@@ -538,7 +486,6 @@
     this.el            = $(element)
     this.opts          = opts
     this.accept        = false
-    this.connectedWith = []
   }
 
   Droppable.prototype.create = function() {
@@ -578,7 +525,8 @@
   }
 
   Droppable.prototype.activate = function(e) {
-    this.accept = this.connectedWith.indexOf(dragging.parent.id) !== -1
+    this.accept = dragging.parent.opts.connectWith && matches(this.el, dragging.parent.opts.connectWith)
+
     if (!this.accept) {
       var accept = this.opts.accept === '*'
                 || (typeof this.opts.accept === 'function' ? this.opts.accept.call(this.el[0], dragging.el)
@@ -638,13 +586,13 @@
 
     if (!dragging.el) return
 
-    e.preventDefault() // accept drop
-
     // zepto <> jquery compatibility
     var el = dragging.el
-    $(this.el).append(el)
+    var drop = trigger(this.el, 'droppable:drop', e, { item: el })
 
-    trigger(this.el, 'droppable:drop', e, { item: el })
+    if (!drop.isDefaultPrevented()) {
+      $(this.el).append(el)
+    }
   }
 
   var Sortable = function(element, opts) {
@@ -664,13 +612,7 @@
     this.placeholder = $('<' + tag + ' class="' + this.opts.placeholder + '" />')
 
     this.accept = this.index = this.direction = null
-    this.connectedWith = []
-    if (this.opts.connectWith) {
-      this.connectWith(this.opts.connectWith)
-    }
   }
-
-  Sortable.prototype.connectWith = Draggable.prototype.connectWith
 
   Sortable.prototype.create = function() {
     this.el
@@ -733,9 +675,13 @@
   }
 
   Sortable.prototype.activate = function(e) {
-    this.accept  = dragging.parent.id === this.id
-                   || !!~this.connectedWith.indexOf(dragging.parent.id)
     this.isEmpty = this.el.find(this.opts.items).length === 0
+
+    this.accept = dragging.parent.id === this.id
+
+    if (!this.accept && dragging.parent.opts.connectWith) {
+      this.accept = matches(this.el[0], dragging.parent.opts.connectWith)
+    }
 
     if (!this.accept) return
 
@@ -897,19 +843,31 @@
       newIndex--
     }
 
-    if (typeof this.opts.updatePosition === 'function') {
-      this.opts.updatePosition.call(this, { item: dragging.el, index: newIndex })
+    var handler
+
+    // dropped element belongs to another list
+    if (this.index === null) {
+      handler = this.opts.receiveHandler
+    }
+    // dopped element belongs to the same list
+    else {
+      // updatePosition cause backwards-compatibility
+      handler = this.opts.updateHandler || this.opts.updatePosition
+    }
+
+    if (typeof handler === 'function') {
+      handler.call(this, { item: dragging.el, index: newIndex })
     } else {
       dragging.el.insertBefore(this.placeholder)
     }
 
     // if the dropped element belongs to another list, trigger the receive event
-    if (this.index === null) { // dropped element belongs to another list
+    if (this.index === null) {
       trigger(this.el, 'sortable:receive', e, { item: dragging.el })
-      this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
+
     // if the index changed, trigger the update event
-    else if (newIndex !== this.index) {
+    if (newIndex !== this.index) {
       this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
     }
 
@@ -1013,6 +971,7 @@
     items: 'li, div',
     placeholder: 'placeholder',
     placeholderTag: null,
-    updatePosition: null
+    updateHandler: null,
+    receiveHandler: null
   })
 })(window.Zepto || window.jQuery);
