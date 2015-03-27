@@ -12,10 +12,12 @@
   }
 
   function getTouchPageX(e) {
+    e = e.originalEvent || e
     return window.event && window.event.changedTouches && event.changedTouches[0].pageX || e.pageX
   }
 
   function getTouchPageY(e) {
+    e = e.originalEvent || e
     return window.event && window.event.changedTouches && event.changedTouches[0].pageY || e.pageY
   }
 
@@ -90,7 +92,6 @@
     this.el = el
     this.handle = handle
     var el = this.handle || this.el
-    el.css('-ms-touch-action', 'none').css('touch-action', 'none')
     this.origin.x = getTouchPageX(e)
     this.origin.y = getTouchPageY(e)
     this.origin.transform  = vendorify('transform', this.el[0])
@@ -103,7 +104,7 @@
     // the draged element is going to stick right under the cursor
     // setting the css property `pointer-events` to `none` will let
     // the pointer events fire on the elements underneath the helper
-    el[0].style.pointerEvents = 'none'
+    this.css('pointerEvents', 'none')
     $(document).on(MOVE_EVENT, $.proxy(this.move, this))
     $(document).on(END_EVENT, $.proxy(this.stop, this))
     transition(el[0], '')
@@ -150,7 +151,6 @@
       transition(el[0], 'all 0.25s ease-in-out 0s')
       vendorify('transform', el[0], origin.transform || '')
       setTimeout(transition.bind(null, el[0], origin.transition || ''), 250)
-      el.css('pointer-events', '').css('-ms-touch-action', '').css('touch-action', '')
     }).bind(null, el, this.origin))
 
     $(document).off(MOVE_EVENT, this.move)
@@ -218,6 +218,7 @@
     var deltaX = pageX - this.origin.x
       , deltaY = pageY - this.origin.y
     var el = this.handle || this.el
+
     translate(el[0], deltaX, deltaY)
   }
 
@@ -415,6 +416,8 @@
   Draggable.prototype.create = function() {
     this.el
     .on(START_EVENT, $.proxy(this.start, this))
+    .css('touch-action', 'double-tap-zoom')
+    .css('-ms-touch-action', 'double-tap-zoom')
 
     var self = this
     setTimeout(function() {
@@ -621,6 +624,10 @@
     .on('dragging:diverted', this.opts.items, $.proxy(this.diverted, this))
     .on('dragging:drop',     this.opts.items, $.proxy(this.drop, this))
 
+    $(this.el).find(this.opts.items)
+    .css('touch-action', 'double-tap-zoom')
+    .css('-ms-touch-action', 'double-tap-zoom')
+
     this.el
     .on('dragging:enter',    $.proxy(this.enter, this))
     .on('dragging:diverted', $.proxy(this.diverted, this))
@@ -641,6 +648,8 @@
         return
       }
       var item = $(this)
+      item.css('touch-action', 'double-tap-zoom')
+          .css('-ms-touch-action', 'double-tap-zoom')
       self.el.trigger('sortable:change', { item: item })
       self.el.trigger('sortable:update', { item: item, index: -1 })
     })
