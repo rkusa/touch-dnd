@@ -104,7 +104,7 @@
     // the draged element is going to stick right under the cursor
     // setting the css property `pointer-events` to `none` will let
     // the pointer events fire on the elements underneath the helper
-    this.css('pointerEvents', 'none')
+    this.css('pointer-events', 'none')
     $(document).on(MOVE_EVENT, $.proxy(this.move, this))
     $(document).on(END_EVENT, $.proxy(this.stop, this))
     transition(el[0], '')
@@ -228,7 +228,7 @@
 
   Dragging.prototype.css = function(prop, val) {
     if (!this.el) return
-    this.originalCss[prop] = this.el[0].style[prop] ? this.el.css(prop) : ''
+    this.originalCss[prop] = this.el.css(prop)
     this.el.css(prop, val)
   }
 
