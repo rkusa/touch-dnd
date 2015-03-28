@@ -245,7 +245,7 @@
     translate(this.el[0], deltaX, deltaY)
   }
 
-  var dragging = $.dragging = parent.$.dragging || new Dragging()
+  var dragging = $.dragging = new Dragging()
 
   // from https://github.com/rkusa/selector-observer
   var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver
