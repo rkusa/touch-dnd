@@ -4,7 +4,7 @@
     "name": "Markus Ast",
     "email": "npm.m@rkusa.st"
   },
-  "version": "0.5.1",
+  "version": "1.0.0",
   "description": "Advanced touch-compatible Drag'n'Drop library providing Draggable, Droppable and Sortable for Zepto.js and jQuery.",
   "keywords": ["touch", "dnd", "draggable", "droppable", "sortable", "Zepto.js", "jQuery"],
   "homepage": "http://ma.rkusa.st/touch-dnd/",
