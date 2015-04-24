@@ -506,6 +506,9 @@
       handle.css('position', 'absolute')
             .css('left', position.left).css('top', position.top)
             .width(this.el.width()).height(this.el.height())
+      if (this.opts.cloneClass) {
+        handle.addClass(this.opts.cloneClass)
+      }
       handle.insertAfter(this.el)
     }
 
@@ -984,21 +987,22 @@
     handle: false,
     initialized: false,
     clone: false,
+    cloneClass: '',
     scope: 'default'
   })
 
   $.fn.droppable = generic(Droppable, 'droppable', {
     accept: '*',
-    activeClass: false,
+    activeClass: '',
     disabled: false,
-    hoverClass: false,
+    hoverClass: '',
     initialized: false,
     scope: 'default'
   })
 
   $.fn.sortable = generic(Sortable, 'sortable', {
     accept: '*',
-    activeClass: false,
+    activeClass: '',
     cancel: 'input, textarea, button, select, option',
     connectWith: false,
     disabled: false,
