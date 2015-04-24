@@ -146,12 +146,7 @@
 
     var el = this.el
     if (this.handle) {
-      if (revert) {
-        el = this.handle
-        setTimeout(this.handle.remove.bind(this.handle), 250)
-      } else {
-        this.handle.remove()
-      }
+      this.handle.remove()
     }
 
     setTimeout((function(el, origin) {
