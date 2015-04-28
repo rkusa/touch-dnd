@@ -278,6 +278,9 @@ footer {
   padding: 5px 2px;
 }
 
+.draggable.clone {
+  background-color: #abe2a5;
+}
 
 .droppable.big {
   height: 60px;
