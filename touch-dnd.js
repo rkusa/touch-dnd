@@ -897,7 +897,7 @@
 
     var el = dragging.el
     if (typeof handler === 'function') {
-      handler.call(this, { item: dragging.el, index: newIndex })
+      handler.call(this.el, { item: dragging.el, index: newIndex })
     } else {
       if (dragging.handle) {
         el = dragging.el.clone()
