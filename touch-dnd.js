@@ -622,10 +622,15 @@
     var drop = trigger(this.el, 'droppable:drop', e, { item: el })
 
     if (!drop.isDefaultPrevented()) {
-      if (dragging.handle) {
-        el = dragging.el.clone()
+      var handler = this.opts.receiveHandler
+      if (typeof handler === 'function') {
+        handler.call(this.el, { item: el, helper: dragging.handle })
+      } else {
+        if (dragging.handle) {
+          el = dragging.el.clone()
+        }
+        $(this.el).append(el)
       }
-      $(this.el).append(el)
     }
   }
 
@@ -1003,7 +1008,8 @@
     disabled: false,
     hoverClass: '',
     initialized: false,
-    scope: 'default'
+    scope: 'default',
+    receiveHandler: null
   })
 
   $.fn.sortable = generic(Sortable, 'sortable', {
