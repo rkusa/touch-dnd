@@ -110,6 +110,34 @@ return el.hasClass('b')
   })
 </script>
 
+<h2>receiveHandler</h2>
+<dl>
+  <dt>Type</dt>
+  <dd>Function</dd>
+  <dt>Default</dt>
+  <dd>null</dd>
+</dl>
+<p>This function can be used to override the default receive behavior.</p>
+<h4>Example</h4>
+{% highlight js %}$('#example-receiveHandler').droppable({
+  receiveHandler: function(ui) {
+    $(this).text(ui.item.text())
+    ui.item.remove()
+  }
+}){% endhighlight %}
+<div class="draggable">T</div>
+<div class="droppable" id="example-receiveHandler"></div>
+<script type="text/javascript">
+  $(function() {
+    $('#example-receiveHandler').droppable({
+      receiveHandler: function(ui) {
+        $(this).text(ui.item.text())
+        ui.item.remove()
+      }
+    })
+  })
+</script>
+
 <h2>scope</h2>
 <dl>
   <dt>Type</dt>

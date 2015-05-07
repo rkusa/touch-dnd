@@ -219,3 +219,17 @@ $('#example-destroy').draggable('destroy'){% endhighlight %}
 
 <h2>draggable:create(event)</h2>
 <p>Triggered when the droppable is created.</p>
+
+<h2>draggable:start(event, ui)</h2>
+<p>This event is triggered when dragging starts.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being dragged</dd>
+</dl>
+
+<h2>draggable:stop(event, ui)</h2>
+<p>This event is triggered when dragging has stopped.</p>
+<dl class="inline">
+  <dt>ui.item</dt>
+  <dd>the element being dragged</dd>
+</dl>
