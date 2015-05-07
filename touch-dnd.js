@@ -445,6 +445,8 @@
     .css('touch-action', 'double-tap-zoom')
     .css('-ms-touch-action', 'double-tap-zoom')
 
+    dragging.on('dragging:stop', $.proxy(this.reset, this))
+
     var self = this
     setTimeout(function() {
       self.el.trigger('draggable:create', self)
@@ -453,6 +455,10 @@
 
   Draggable.prototype.destroy = function() {
     this.el.off(START_EVENT, this.start)
+
+
+    // Todo: Fix Zepto Bug
+    dragging.off('dragging:stop', this.reset)
   }
 
   Draggable.prototype.enable = function() {
@@ -510,6 +516,12 @@
     }
 
     dragging.start(this, this.el, e, handle)
+
+    trigger(this.el, 'draggable:start', e, { item: dragging.el })
+  }
+
+  Draggable.prototype.reset = function(e) {
+    trigger(this.el, 'draggable:stop', e, { item: dragging.el })
   }
 
   var Droppable = function(element, opts) {
