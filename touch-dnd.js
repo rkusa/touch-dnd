@@ -250,15 +250,16 @@
   }
 
   Dragging.prototype.adjustPlacement = function(e) {
-    translate(this.el[0], 0, 0)
-    var rect = this.el[0].getBoundingClientRect()
+    var el = this.handle && this.handle[0] || this.el[0]
+    translate(el, 0, 0)
+    var rect = el.getBoundingClientRect()
     this.origin.x = rect.left + (window.scrollX || window.pageXOffset) - this.origin.offset.x
     this.origin.y = rect.top + (window.scrollY || window.pageYOffset) - this.origin.offset.y
     var pageX  = getTouchPageX(e)
       , pageY  = getTouchPageY(e)
       , deltaX = pageX - this.origin.x
       , deltaY = pageY - this.origin.y
-    translate(this.el[0], deltaX, deltaY)
+    translate(el, deltaX, deltaY)
   }
 
   var dragging
@@ -497,7 +498,6 @@
 
     var el = this.el, handle
     if (this.opts.clone) {
-      el = this.el.clone()
       handle = this.el.clone()
       var position = this.el.position()
       handle.css('position', 'absolute')
@@ -509,7 +509,7 @@
       handle.insertAfter(this.el)
     }
 
-    dragging.start(this, el, e, handle)
+    dragging.start(this, this.el, e, handle)
   }
 
   var Droppable = function(element, opts) {
@@ -622,6 +622,9 @@
     var drop = trigger(this.el, 'droppable:drop', e, { item: el })
 
     if (!drop.isDefaultPrevented()) {
+      if (dragging.handle) {
+        el = dragging.el.clone()
+      }
       $(this.el).append(el)
     }
   }
@@ -892,25 +895,31 @@
       handler = this.opts.updateHandler || this.opts.updatePosition
     }
 
+    var el = dragging.el
     if (typeof handler === 'function') {
       handler.call(this, { item: dragging.el, index: newIndex })
     } else {
-      dragging.el.insertBefore(this.placeholder)
+      if (dragging.handle) {
+        el = dragging.el.clone()
+      }
+      el.insertBefore(this.placeholder)
     }
 
     // if the dropped element belongs to another list, trigger the receive event
     if (this.index === null) {
-      trigger(this.el, 'sortable:receive', e, { item: dragging.el })
+      trigger(this.el, 'sortable:receive', e, { item: el })
     }
 
     // if the index changed, trigger the update event
     if (newIndex !== this.index) {
-      this.el.trigger('sortable:update', { item: dragging.el, index: newIndex })
+      this.el.trigger('sortable:update', { item: el, index: newIndex })
     }
 
-    trigger(this.el, 'sortable:stop', e, { item: dragging.el })
+    trigger(this.el, 'sortable:stop', e, { item: el })
     this.index = null
     this.observer.observe()
+
+    dragging.stop(e)
   }
 
   Sortable.prototype.toArray = function(opts) {
