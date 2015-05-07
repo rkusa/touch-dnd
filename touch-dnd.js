@@ -262,10 +262,12 @@
   }
 
   var dragging
-  if (parent.$ && parent.$.dragging) {
-    dragging = parent.$.dragging
-    dragging.windows.push(window)
-  }
+  try {
+    if (parent.$ && parent.$.dragging) {
+      dragging = parent.$.dragging
+      dragging.windows.push(window)
+    }
+  } catch (e) {}
 
   dragging = $.dragging = dragging || new Dragging()
 
