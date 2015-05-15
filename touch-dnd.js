@@ -502,20 +502,24 @@
       if (!isHandle) return false
     }
 
-    var el = this.el, handle
+    var el = this.el, helper
     if (this.opts.clone) {
-      handle = this.el.clone()
+      if (typeof this.opts.clone === 'function') {
+        helper = this.opts.clone.call(this.el)
+      } else {
+        helper = this.el.clone()
+        if (this.opts.cloneClass) {
+          helper.addClass(this.opts.cloneClass)
+        }
+      }
       var position = this.el.position()
-      handle.css('position', 'absolute')
+      helper.css('position', 'absolute')
             .css('left', position.left).css('top', position.top)
             .width(this.el.width()).height(this.el.height())
-      if (this.opts.cloneClass) {
-        handle.addClass(this.opts.cloneClass)
-      }
-      handle.insertAfter(this.el)
+      helper.insertAfter(this.el)
     }
 
-    dragging.start(this, this.el, e, handle)
+    dragging.start(this, this.el, e, helper)
 
     trigger(this.el, 'draggable:start', e, { item: dragging.el })
   }
