@@ -32,7 +32,13 @@ layout: layout
   <dt>Default</dt>
   <dd>false</dd>
 </dl>
-<p>Specifies whether the draggable should be cloned or not.</p>
+<h4>Multiple types supported:</h4>
+<dl class="inline">
+  <dt>Bool</dt>
+  <dd>Specifies whether the draggable should be cloned or not.</dd>
+  <dt>Function</dt>
+  <dd>A function that will be called and must return the element that will be used as dragging clone/helper.</dd>
+</dl>
 <h4>Example</h4>
 {% highlight js %}$('.draggable-clone').draggable({ clone: true }){% endhighlight %}
 <div class="draggable draggable-clone"></div>
@@ -42,6 +48,19 @@ layout: layout
   $(function() {
     $('.draggable-clone').draggable({ clone: true })
     $('#droppable-clone').droppable()
+  })
+</script>
+<h4>Function Example</h4>
+{% highlight js %}$('.draggable-cloneFn').draggable({
+  clone: function() { return this.clone() }
+}){% endhighlight %}
+<div class="draggable draggable-cloneFn"></div>
+<div class="draggable draggable-cloneFn"></div>
+<div class="droppable" id="droppable-cloneFn" style="float:right"></div>
+<script type="text/javascript">
+  $(function() {
+    $('.draggable-cloneFn').draggable({ clone: function() { return this.clone() } })
+    $('#droppable-cloneFn').droppable()
   })
 </script>
 
