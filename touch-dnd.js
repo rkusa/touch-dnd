@@ -480,12 +480,11 @@
     }
 
     e = e.originalEvent || e // zepto <> jquery compatibility
-    e.preventDefault() // prevent text selection
 
     if (this.opts.cancel) {
       var target = $(e.target)
       while (target[0] !== this.el[0]) {
-        if (target.is(this.opts.cancel)) return false
+        if (target.is(this.opts.cancel)) return
         target = target.parent()
       }
     }
@@ -499,8 +498,11 @@
         }
         target = target.parent()
       }
-      if (!isHandle) return false
+      if (!isHandle) return
     }
+
+    // prevent text selection
+    e.preventDefault()
 
     var el = this.el, helper
     if (this.opts.clone) {
