@@ -666,7 +666,7 @@
       }
     }
 
-    this.placeholder = $('<' + tag + ' class="' + this.opts.placeholder + '" />')
+    this.placeholder = $('<' + tag + ' id="__ph' + this.id + '" class="' + this.opts.placeholder + '" />')
 
     this.accept = this.index = this.direction = null
   }
@@ -778,7 +778,7 @@
   }
 
   Sortable.prototype.indexOf = function(el) {
-    return this.el.find(this.opts.items).index(el)
+    return this.el.find(this.opts.items + ', #' + this.placeholder.attr('id')).index(el)
   }
 
   Sortable.prototype.start = function(e) {
