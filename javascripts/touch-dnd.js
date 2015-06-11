@@ -255,8 +255,8 @@
     var rect = el.getBoundingClientRect()
     this.origin.x = rect.left + (window.scrollX || window.pageXOffset) - this.origin.offset.x
     this.origin.y = rect.top + (window.scrollY || window.pageYOffset) - this.origin.offset.y
-    var pageX  = getTouchPageX(e)
-      , pageY  = getTouchPageY(e)
+    var pageX  = getTouchPageX(e) || this.lastX
+      , pageY  = getTouchPageY(e) || this.lastY
       , deltaX = pageX - this.origin.x
       , deltaY = pageY - this.origin.y
     translate(el, deltaX, deltaY)
@@ -666,7 +666,7 @@
       }
     }
 
-    this.placeholder = $('<' + tag + ' class="' + this.opts.placeholder + '" />')
+    this.placeholder = $('<' + tag + ' id="__ph' + this.id + '" class="' + this.opts.placeholder + '" />')
 
     this.accept = this.index = this.direction = null
   }
@@ -778,7 +778,7 @@
   }
 
   Sortable.prototype.indexOf = function(el) {
-    return this.el.find(this.opts.items).index(el)
+    return this.el.find(this.opts.items + ', #' + this.placeholder.attr('id')).index(el)
   }
 
   Sortable.prototype.start = function(e) {
