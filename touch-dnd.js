@@ -255,8 +255,8 @@
     var rect = el.getBoundingClientRect()
     this.origin.x = rect.left + (window.scrollX || window.pageXOffset) - this.origin.offset.x
     this.origin.y = rect.top + (window.scrollY || window.pageYOffset) - this.origin.offset.y
-    var pageX  = getTouchPageX(e)
-      , pageY  = getTouchPageY(e)
+    var pageX  = getTouchPageX(e) || this.lastX
+      , pageY  = getTouchPageY(e) || this.lastY
       , deltaX = pageX - this.origin.x
       , deltaY = pageY - this.origin.y
     translate(el, deltaX, deltaY)
