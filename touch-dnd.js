@@ -178,11 +178,17 @@
         pageY += e.view.frameElement.offsetTop
       }
 
-      var clientX = e.clientX || window.event && window.event.touches && window.event.touches[0].clientX || 0
-        , clientY = e.clientY || window.event && window.event.touches && window.event.touches[0].clientY || 0
+      var clientX = e.clientX || (e.originalEvent && e.originalEvent.clientX) || window.event && window.event.touches && window.event.touches[0].clientX || 0
+        , clientY = e.clientY || (e.originalEvent && e.originalEvent.clientY) || window.event && window.event.touches && window.event.touches[0].clientY || 0
 
       var doc = this.el[0].ownerDocument
-      var over = e.view.document.elementFromPoint(clientX, clientY)
+      var over
+      if (!isOldIE) {
+        over = e.view.document.elementFromPoint(clientX, clientY)
+      } else {
+        over = e.view.document.msElementsFromPoint(clientX, clientY)
+        over = over[0] === this.el[0] ? over[1] : over[0]
+      }
 
       var deltaX = this.lastX - pageX
       var deltaY = this.lastY - pageY
