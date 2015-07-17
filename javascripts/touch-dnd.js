@@ -178,19 +178,23 @@
         pageY += e.view.frameElement.offsetTop
       }
 
-      var clientX = e.clientX || window.event && window.event.touches && window.event.touches[0].clientX || 0
-        , clientY = e.clientY || window.event && window.event.touches && window.event.touches[0].clientY || 0
+      var clientX = e.clientX || (e.originalEvent && e.originalEvent.clientX) || window.event && window.event.touches && window.event.touches[0].clientX || 0
+        , clientY = e.clientY || (e.originalEvent && e.originalEvent.clientY) || window.event && window.event.touches && window.event.touches[0].clientY || 0
 
       var doc = this.el[0].ownerDocument
-      var over = e.view.document.elementFromPoint(clientX, clientY)
+      var over
+      if (!isOldIE) {
+        over = e.view.document.elementFromPoint(clientX, clientY)
+      } else {
+        over = e.view.document.msElementsFromPoint(clientX, clientY)
+        over = over[0] === this.el[0] ? over[1] : over[0]
+      }
 
       var deltaX = this.lastX - pageX
-        , deltaY = this.lastY - pageY
-        , direction = Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0 && 'left'
-                   || Math.abs(deltaX) > Math.abs(deltaY) && deltaX < 0 && 'right'
-                   || Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0 && 'up'
-                   || 'down'
-
+      var deltaY = this.lastY - pageY
+      var direction = deltaY > 0 && 'up' || deltaY < 0 && 'down'
+                   || deltaX > 0 && 'up'|| deltaX < 0 && 'down'
+                   || this.lastDirection
       if (!dragging.currentTarget) {
         this.setCurrent(over)
       }
@@ -852,8 +856,9 @@
     child = $(child)
 
     // the container fallback is only necessary for empty sortables
-    if (isContainer && !this.isEmpty && this.placeholder.parent().length)
+    if (isContainer && !this.isEmpty && this.placeholder.parent().length) {
       return
+    }
 
     dragging.placeholder = this.placeholder
 
@@ -863,15 +868,11 @@
     }
 
     if (!isContainer) {
-      // insert the placeholder according to the dragging direction
-      this.direction = this.indexOf(this.placeholder.show()) < this.indexOf(child) ? 'down' : 'up'
-      child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
-      dragging.adjustPlacement(e)
+      this.diverted(e)
     } else {
       this.el.append(this.placeholder)
+      this.el.trigger('sortable:change', { item: dragging.el })
     }
-
-    this.el.trigger('sortable:change', { item: dragging.el })
   }
 
   Sortable.prototype.diverted = function(e) {
@@ -886,6 +887,8 @@
     this.direction = this.indexOf(this.placeholder.show()) < this.indexOf(child) ? 'down' : 'up'
     child[this.direction === 'down' ? 'after' : 'before'](this.placeholder)
     dragging.adjustPlacement(e)
+
+    this.el.trigger('sortable:change', { item: dragging.el })
   }
 
   Sortable.prototype.drop = function(e) {
