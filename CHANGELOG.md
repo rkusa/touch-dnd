@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.1.0
+
+- add `cloneClass` option for draggable #30
+- fix cloned draggables to not revert to their start position
+- mute exceptions when trying to access a parent window that is done for cross-iframe usage
+- fix callback context for sortable receive and update handler
+- add `receiveHandler` for droppable
+- add `droppable:start` and `droppable:stop` events #30
+- allows functions for draggable `clone` options #34
+- fix draggable start to not break links #36
+- fix sorting index (and therefore direction) calculation #38
+- fix mobile chrome drop animation #40
+- improve sortable direction determination #41
+- fix element from point picking for IE < 11 #42
+- ignore margin-bottom when collapsing dragged el
+
 ## 1.0.0
 
 We are `1.0.0` now, because there are no reasons to hang out a at `0.x` versioning anymore. There are no breaking API changes - only some behavior changed slightly.
