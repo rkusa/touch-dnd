@@ -201,8 +201,8 @@
 
       if (this.currentTarget) {
         if (over !== this.last && this.lastEntered !== this.currentTarget) {
-          trigger($(this.currentTarget), 'dragging:enter', e)
           trigger($(this.lastEntered), 'dragging:leave', e)
+          trigger($(this.currentTarget), 'dragging:enter', e)
           this.lastEntered = this.currentTarget
         } else if (direction !== this.lastDirection) {
           trigger($(this.currentTarget), 'dragging:diverted', e)
