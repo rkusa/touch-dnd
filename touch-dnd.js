@@ -460,7 +460,6 @@
   Draggable.prototype.destroy = function() {
     this.el.off(START_EVENT, this.start)
 
-
     // Todo: Fix Zepto Bug
     dragging.off('dragging:stop', this.reset)
   }
@@ -639,19 +638,24 @@
 
     if (!dragging.el) return
 
-    // zepto <> jquery compatibility
     var el = dragging.el
-    var drop = trigger(this.el, 'droppable:drop', e, { item: el })
+    var handler = typeof handler === 'function' && this.opts.receiveHandler
+    var evtObj = { item: el }
+    var clone = null
+    if (dragging.handle) {
+      evtObj.helper = dragging.handle
+      if (!handler) {
+        clone = evtObj.clone = dragging.el.clone()
+      }
+    }
+
+    var drop = trigger(this.el, 'droppable:drop', e, evtObj)
 
     if (!drop.isDefaultPrevented()) {
-      var handler = this.opts.receiveHandler
-      if (typeof handler === 'function') {
-        handler.call(this.el, { item: el, helper: dragging.handle })
+      if (handler) {
+        handler.call(this.el, evtObj)
       } else {
-        if (dragging.handle) {
-          el = dragging.el.clone()
-        }
-        $(this.el).append(el)
+        $(this.el).append(clone || dragging.el)
       }
     }
   }
