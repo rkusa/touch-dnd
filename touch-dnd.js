@@ -138,7 +138,7 @@
       delete this.originalCss[prop]
     }
 
-    trigger(this.eventHandler, 'dragging:stop', e)
+    trigger(this.eventHandler, 'dragging:stop', e, this.el)
     this.placeholder = null
     if (!this.handle) {
       this.adjustPlacement(e)
@@ -529,8 +529,10 @@
     trigger(this.el, 'draggable:start', e, { item: dragging.el })
   }
 
-  Draggable.prototype.reset = function(e) {
-    trigger(this.el, 'draggable:stop', e, { item: dragging.el })
+  Draggable.prototype.reset = function(e, last) {
+    if (last === this.el[0]) {
+      trigger(this.el, 'draggable:stop', e, { item: dragging.el })
+    }
   }
 
   var Droppable = function(element, opts) {
