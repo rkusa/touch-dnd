@@ -138,7 +138,7 @@
       delete this.originalCss[prop]
     }
 
-    trigger(this.eventHandler, 'dragging:stop', e)
+    trigger(this.eventHandler, 'dragging:stop', e, this.el)
     this.placeholder = null
     if (!this.handle) {
       this.adjustPlacement(e)
@@ -201,8 +201,8 @@
 
       if (this.currentTarget) {
         if (over !== this.last && this.lastEntered !== this.currentTarget) {
-          trigger($(this.currentTarget), 'dragging:enter', e)
           trigger($(this.lastEntered), 'dragging:leave', e)
+          trigger($(this.currentTarget), 'dragging:enter', e)
           this.lastEntered = this.currentTarget
         } else if (direction !== this.lastDirection) {
           trigger($(this.currentTarget), 'dragging:diverted', e)
@@ -460,7 +460,6 @@
   Draggable.prototype.destroy = function() {
     this.el.off(START_EVENT, this.start)
 
-
     // Todo: Fix Zepto Bug
     dragging.off('dragging:stop', this.reset)
   }
@@ -530,8 +529,10 @@
     trigger(this.el, 'draggable:start', e, { item: dragging.el })
   }
 
-  Draggable.prototype.reset = function(e) {
-    trigger(this.el, 'draggable:stop', e, { item: dragging.el })
+  Draggable.prototype.reset = function(e, last) {
+    if (last === this.el[0]) {
+      trigger(this.el, 'draggable:stop', e, { item: dragging.el })
+    }
   }
 
   var Droppable = function(element, opts) {
@@ -639,19 +640,24 @@
 
     if (!dragging.el) return
 
-    // zepto <> jquery compatibility
     var el = dragging.el
-    var drop = trigger(this.el, 'droppable:drop', e, { item: el })
+    var handler = typeof handler === 'function' && this.opts.receiveHandler
+    var evtObj = { item: el }
+    var clone = null
+    if (dragging.handle) {
+      evtObj.helper = dragging.handle
+      if (!handler) {
+        clone = evtObj.clone = dragging.el.clone()
+      }
+    }
+
+    var drop = trigger(this.el, 'droppable:drop', e, evtObj)
 
     if (!drop.isDefaultPrevented()) {
-      var handler = this.opts.receiveHandler
-      if (typeof handler === 'function') {
-        handler.call(this.el, { item: el, helper: dragging.handle })
+      if (handler) {
+        handler.call(this.el, evtObj)
       } else {
-        if (dragging.handle) {
-          el = dragging.el.clone()
-        }
-        $(this.el).append(el)
+        $(this.el).append(clone || dragging.el)
       }
     }
   }
@@ -831,8 +837,7 @@
     if (this.index !== null) {
       // zepto <> jquery compatibility
       var height = dragging.el.outerHeight ? dragging.el.outerHeight() : dragging.el.height()
-      var marginBottom = parseInt(dragging.el.css('margin-bottom'), 10)
-      dragging.css('margin-bottom', (height + Math.max(0, marginBottom)) * -1)
+      dragging.css('margin-bottom', -height)
     }
 
     if (this.opts.forcePlaceholderSize) {
