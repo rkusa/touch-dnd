@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1
+
+- trigger `draggable:stop` event for affected element only #47
+- fix droppable hover effect when hovering child elements #49
+- add `clone` property to `droppable:drop` event data for cloned draggables only #48
+
 ## 1.1.0
 
 - add `cloneClass` option for draggable #30
@@ -69,7 +75,7 @@ We are `1.0.0` now, because there are no reasons to hang out a at `0.x` versioni
 
 ### Bugfixes
 
-- fix `forcePlaceholderSize` for `box-sizing: border-box` #16 
+- fix `forcePlaceholderSize` for `box-sizing: border-box` #16
 
 ## 0.4.2
 
