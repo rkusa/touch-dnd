@@ -641,7 +641,7 @@
     if (!dragging.el) return
 
     var el = dragging.el
-    var handler = typeof handler === 'function' && this.opts.receiveHandler
+    var handler = typeof this.opts.receiveHandler === 'function' && this.opts.receiveHandler
     var evtObj = { item: el }
     var clone = null
     if (dragging.handle) {
