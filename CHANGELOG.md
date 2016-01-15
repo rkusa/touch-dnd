@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2
+
+- fix droppable `receiveHandler` #55
+
 ## 1.1.1
 
 - trigger `draggable:stop` event for affected element only #47
