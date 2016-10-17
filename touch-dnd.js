@@ -55,9 +55,10 @@
     props.currentTarget = props.target = el[0]
 
     var win = (el[0].ownerDocument.defaultView || el[0].ownerDocument.parentWindow)
+    var $ = win.Zepto || win.jQuery
 
-    var e = win.$.Event(name, props)
-    win.$(el[0]).trigger(e, arg)
+    var e = $.Event(name, props)
+    $(el[0]).trigger(e, arg)
     return e
   }
 
