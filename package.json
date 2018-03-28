@@ -6,15 +6,23 @@
   },
   "version": "1.1.3",
   "description": "Advanced touch-compatible Drag'n'Drop library providing Draggable, Droppable and Sortable for Zepto.js and jQuery.",
-  "keywords": ["touch", "dnd", "draggable", "droppable", "sortable", "Zepto.js", "jQuery"],
+  "keywords": [
+    "touch",
+    "dnd",
+    "draggable",
+    "droppable",
+    "sortable",
+    "Zepto.js",
+    "jQuery"
+  ],
   "homepage": "http://ma.rkusa.st/touch-dnd/",
   "devDependencies": {
-    "uglify-js": "2.x.x"
+    "uglify-js": "^2.8.29"
   },
   "bugs": "https://github.com/rkusa/touch-dnd/issues",
-  "repository" : {
-    "type" : "git",
-    "url" : "git://github.com/rkusa/touch-dnd.git"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/rkusa/touch-dnd.git"
   },
   "scripts": {
     "prepublish": "uglifyjs --source-map touch-dnd.min.map -o touch-dnd.min.js touch-dnd.js"
