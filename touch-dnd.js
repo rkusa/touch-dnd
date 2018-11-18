@@ -1,7 +1,40 @@
-(function($) {
+/**
+ * @version: 1.2.0
+ * @author: Markus Ast
+ * @copyright: Copyright (c) 2013-2018 Markus Ast. All rights reserved.
+ * @license: Licensed under the MIT license. See http://www.opensource.org/licenses/mit-license.php
+ * @website: http://ma.rkusa.st/touch-dnd/
+ */
+// Following the UMD template: https://github.com/umdjs/umd/blob/master/templates/jqueryPlugin.js
+(function(factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define(['jquery'], factory)
+  } else if (typeof module === 'object' && module.exports) {
+    // Node/CommonJS
+    module.exports = function(root, jQuery) {
+      if (jQuery === undefined) {
+        // require('jQuery') returns a factory that requires window to
+        // build a jQuery instance, we normalize how we use modules
+        // that require this pattern but the window provided is a noop
+        // if it's defined (how jquery works)
+        if (typeof window !== 'undefined') {
+          jQuery = require('jquery')
+        } else {
+          jQuery = require('jquery')(root)
+        }
+      }
+      factory(jQuery)
+      return jQuery
+    }
+  } else {
+    // Browser globals (works either with Zepto or jQuery)
+    factory(window.Zepto || window.jQuery)
+  }
+})(function($) {
   var START_EVENT = 'mousedown touchstart MSPointerDown pointerdown'
-    , END_EVENT   = 'mouseup touchend MSPointerUp pointerup'
-    , MOVE_EVENT  = 'mousemove touchmove MSPointerMove pointermove scroll'
+  var END_EVENT   = 'mouseup touchend MSPointerUp pointerup'
+  var MOVE_EVENT  = 'mousemove touchmove MSPointerMove pointermove scroll'
 
   function translate(el, x, y) {
     vendorify('transform', el, 'translate(' + x + 'px, ' + y + 'px)')
@@ -55,10 +88,10 @@
     props.currentTarget = props.target = el[0]
 
     var win = (el[0].ownerDocument.defaultView || el[0].ownerDocument.parentWindow)
-    var $ = win.Zepto || win.jQuery
+    var wrapper = win.Zepto || $
 
-    var e = $.Event(name, props)
-    $(el[0]).trigger(e, arg)
+    var e = wrapper.Event(name, props)
+    wrapper(el[0]).trigger(e, arg)
     return e
   }
 
@@ -1054,4 +1087,4 @@
     updateHandler: null,
     receiveHandler: null
   })
-})(window.Zepto || window.jQuery);
+})
