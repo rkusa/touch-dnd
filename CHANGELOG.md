@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+- introduce support for module loaders like require.js
+- add type definition file for TypeScript
+
 ## 1.1.2
 
 - fix droppable `receiveHandler` #55
@@ -85,13 +90,13 @@ We are `1.0.0` now, because there are no reasons to hang out a at `0.x` versioni
 
 ### Bugfixes
 
-* fix z-index
+- fix z-index
 
 ## 0.4.1
 
 ### Bugfixes
 
-* restore IE touch compatibility
+- restore IE touch compatibility
 
 ## 0.4.0
 
