@@ -4,7 +4,7 @@
     "name": "Markus Ast",
     "email": "npm.m@rkusa.st"
   },
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Advanced touch-compatible Drag'n'Drop library providing Draggable, Droppable and Sortable for Zepto.js and jQuery.",
   "keywords": [
     "touch",
@@ -17,7 +17,7 @@
   ],
   "homepage": "http://ma.rkusa.st/touch-dnd/",
   "devDependencies": {
-    "uglify-js": "^2.8.29"
+    "uglify-js": "^3.4.9"
   },
   "bugs": "https://github.com/rkusa/touch-dnd/issues",
   "repository": {
@@ -25,6 +25,6 @@
     "url": "git://github.com/rkusa/touch-dnd.git"
   },
   "scripts": {
-    "prepublish": "uglifyjs --source-map touch-dnd.min.map -o touch-dnd.min.js touch-dnd.js"
+    "prepublishOnly": "uglifyjs --source-map 'filename=touch-dnd.min.js.map' -o touch-dnd.min.js touch-dnd.js"
   }
 }
