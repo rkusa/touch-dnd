@@ -6,7 +6,7 @@ Advanced touch-compatible Drag'n'Drop library providing Draggable, Droppable and
 [![NPM](http://img.shields.io/npm/v/touch-dnd.svg?style=flat)](https://npmjs.org/package/touch-dnd)
 
 **Status:** Tested with current version of Chrome (Mac & Android), Safari (Mac & iOS), Opera Next, Firefox and IE  
-**Documentation:** [ma.rkusa.st/touch-dnd](http://ma.rkusa.st/touch-dnd)
+**Documentation:** [http://rkusa.github.io/touch-dnd/](http://rkusa.github.io/touch-dnd/)
 
 #### Why?
 
